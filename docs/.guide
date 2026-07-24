@@ -1,0 +1,43 @@
+# MAQAM Ecosystem — AI Coding Agent Master Guide (`guide.md`)
+
+This file serves as the **absolute, binding blueprint** for all code generation, UI components, architectural patterns, and business logic within the **MAQAM** project (`maqam-eg.com`). Any AI agent or developer contributing to this repository MUST strictly comply with the guidelines defined herein.
+
+---
+
+## 1. Brand Identity & Core Metadata
+* **Brand Name:** MAQAM (ΜΛΟΛΜ)
+* **Official Domain:** `maqam-eg.com`
+* **Support Email:** `support@maqam-eg.com`
+* **Tagline:** Prestige in Every Touch / الفخامة في كل لمسة
+* **Primary Typography:** `Alexandria` (Google Font) must be used across all web, mobile, and dashboard interfaces for both Arabic and English text.
+
+---
+
+## 2. Design System & Color Palette
+
+### A. Light Mode UI (Dashboard & Web Store Standard)
+Inspired by clean bento-grid layouts and professional enterprise interfaces, light mode must use the following exact surface and accent tokens:
+* **Background / Main Surface:** `#F7F6F2` (Soft Warm Ivory)
+* **Card / Container Background:** `#ECEAE4` (Pearl Gray / Soft Ivory Container)
+* **Primary Accent (Buttons, Active States, Key Metrics):** `#C5A059` (Deep Architectural Gold)
+* **Secondary Gold Tones (Gradients / Patterns):** `#dcb479` and `#a98e48`
+* **Primary Typography (Headings & Body):** `#0B0F19` (Deep Charcoal for maximum contrast)
+* **Secondary / Muted Text:** `#5F6368`
+
+### B. Dark Mode & Brand Core
+* **Core Dark Navy Background:** `#161b29`
+* **Gold Highlights:** `#dcb479` / `#a98e48`
+
+---
+
+## 3. UI / UX Layout & Architecture Guidelines
+
+### Dashboard Layout (`Admin Dashboard - Laravel / Tailwind`)
+* **Bento-Grid Structure:** Dashboard pages must use modular, rounded card containers (`#ECEAE4` on `#F7F6F2` in light mode) with clean padding, subtle shadows, and clear visual hierarchy.
+* **Sidebar Navigation:** Fixed left sidebar divided into clear logical sections (`MENU`, `GENERAL`) featuring intuitive icons, active pill indicators, and quick action widgets (e.g., Mobile App download prompt card).
+* **Data Visualization:** Use clean status pills, circular progress indicators, and minimalist bar/line analytics charts matching the architectural gold and dark charcoal color palette.
+* **Simplicity & Professionalism:** Avoid clutter. Maintain consistent spacing, high contrast, and a polished, enterprise-grade finish ("Simple and Professional").
+
+---
+ integration, QR scanning with offline SQLite caching, AI chatbot, and anti-fraud engines).
+2. **Localization:** Full dynamic support for Arabic (`ar`) and English (`en`) across all UI strings, notifications, and database records.
