@@ -28,7 +28,7 @@ class CategoryPrize extends Model
         return $this->hasMany(QrCode::class, 'category_id');
     }
 
-    public function getImageUrlAttribute(): string
+    public function getImageUrlAttribute(): ?string
     {
         $mediaService = app(\App\Services\MediaService::class);
 
@@ -36,15 +36,23 @@ class CategoryPrize extends Model
             return $mediaService->url($this->image_path);
         }
         
-        if (!empty($this->image_url)) {
+        if (!empty($this->image_url) && !str_contains($this->image_url, 'identity/MAQAM-24.jpg')) {
             return $mediaService->url($this->image_url);
         }
         
-        return asset('identity/MAQAM-24.jpg');
+        return null;
     }
 
     public function hasImage(): bool
     {
-        return !empty($this->image_path) || !empty($this->image_url);
+        if (!empty($this->image_path)) {
+            return true;
+        }
+
+        if (!empty($this->image_url) && !str_contains($this->image_url, 'identity/MAQAM-24.jpg')) {
+            return true;
+        }
+
+        return false;
     }
 }
