@@ -5,7 +5,7 @@ This file serves as the **absolute, binding blueprint** for all code generation,
 ---
 
 ## 1. Brand Identity & Core Metadata
-* **Brand Name:** MAQAM (ΜΛΟΛΜ)
+* **Brand Name:** MAQAM (always Latin — never translate to «مقام» in UI/chrome)
 * **Official Domain:** `maqam-eg.com`
 * **Support Email:** `support@maqam-eg.com`
 * **Tagline:** Prestige in Every Touch / الفخامة في كل لمسة
@@ -38,6 +38,15 @@ Inspired by clean bento-grid layouts and professional enterprise interfaces, lig
 * **Data Visualization:** Use clean status pills, circular progress indicators, and minimalist bar/line analytics charts matching the architectural gold and dark charcoal color palette.
 * **Simplicity & Professionalism:** Avoid clutter. Maintain consistent spacing, high contrast, and a polished, enterprise-grade finish ("Simple and Professional").
 
+### QR Print Spec (Prize Category Background)
+* Each `categories_prize` row MUST store a HEX `background_color`.
+* Generated QR PNGs for a batch MUST fill the full image canvas with that category color, then render the QR code centered on top (with a small white quiet zone behind the QR modules for scan reliability).
+* Example: Prize Category 1 → green `#22C55E` → every exported PNG for that category has a green background.
+* Batch export: up to 5,000 PNGs zipped for print vendors.
+
 ---
- integration, QR scanning with offline SQLite caching, AI chatbot, and anti-fraud engines).
+
+## 4. Product Scope Reminders
+1. **Core engines:** WhatsApp OTP auth, unified cart (Redis), Paymob + COD + wallet, QR scanning with offline SQLite caching, AI chatbot, and anti-fraud engines.
 2. **Localization:** Full dynamic support for Arabic (`ar`) and English (`en`) across all UI strings, notifications, and database records.
+3. **Admin Dashboard:** Full management of users, merchants, ranks, prize/store categories, products, orders, coupons, wheel, notifications, settings, and QR batch generation with colored PNG export.

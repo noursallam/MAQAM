@@ -164,12 +164,15 @@
 | `id`               | BIGINT                | PK                                                | معرف الفئة                                                         |
 | `name_en`          | VARCHAR(100)          | NOT NULL                                          | اسم الفئة بالإنجليزية                                              |
 | `name_ar`          | VARCHAR(100)          | NOT NULL                                          | اسم الفئة بالعربية                                                 |
-| `category_type`    | ENUM                  | NOT NULL, DEFAULT 'standard' (`standard`, `gift`) | **جديد:** نوع الفئة (عادية للمنتجات أم فئة هدايا خاصة بالنقاط)     |
-| `points_value`     | INTEGER               | DEFAULT 0                                         | **جديد:** عدد النقاط الثابتة للهدية (إذا كانت الفئة مخصصة للهدايا) |
+| `category_type`    | ENUM                  | NOT NULL, DEFAULT 'standard' (`standard`, `gift`) | نوع الفئة (عادية أم فئة هدايا خاصة بالنقاط)                        |
+| `points_value`     | INTEGER               | DEFAULT 0                                         | عدد النقاط الثابتة للهدية (إذا كانت الفئة مخصصة للهدايا)           |
+| `background_color` | VARCHAR(7)            | NOT NULL, DEFAULT '#C5A059'                       | **لون خلفية الطباعة** (HEX) يُطبَع خلف صورة QR PNG لهذه الفئة — مثال: أخضر `#22C55E` لفئة، ذهبي `#C5A059` لأخرى |
 | `icon`             | VARCHAR(255)          | NULL                                              | أيقونة الفئة                                                       |
 | `is_active`        | BOOLEAN               | DEFAULT TRUE                                      | هل الفئة مفعلة؟                                                    |
 | `created_at`       | TIMESTAMP             | -                                                 | تاريخ الإنشاء                                                      |
 | `updated_at`       | TIMESTAMP             | -                                                 | تاريخ التحديث                                                      |
+
+> **طباعة QR:** عند توليد دفعة أكواد لفئة هدايا، كل صورة PNG تُنشأ بخلفية = `categories_prize.background_color` + رمز QR في المنتصف، ثم تُضغط في ZIP للمطابع. اللون يميّز الفئة بصرياً على المنتج بعد الطباعة.
 
 #### 10. جدول `products`
 
@@ -287,24 +290,43 @@
 
 ### 🎰 المجموعة الخامسة: التلعيب والعجلة (Gamification)
 
-#### 17. جدول `wheel_spins`
+#### 17. جدول `wheel_prizes` (طبقة 2 — جوائز داخل العجلة)
+
+|**الحقل (Column)**|**النوع (Data Type)**|**القيد (Constraints)**|**الوصف (Description)**|
+|---|---|---|---|
+|`id`|BIGINT|PK|-|
+|`type`|VARCHAR|NOT NULL (`points`, `coupon`, `product`, `discount`)|نوع الجائزة|
+|`label_ar` / `label_en`|VARCHAR|NOT NULL|اسم الشريحة|
+|`weight`|INTEGER|NOT NULL|وزن نسبي بين الجوائز النشطة|
+|`points_amount`|INTEGER|NULL|لو type=points|
+|`coupon_id`|BIGINT|FK → coupons.id, NULL|لو type=coupon|
+|`product_id`|BIGINT|FK → products.id, NULL|لو type=product|
+|`discount_type`|VARCHAR|NULL (`percentage`, `fixed`)|لو type=discount|
+|`discount_value`|DECIMAL|NULL|قيمة الخصم|
+|`stock_limit`|INTEGER|NULL|حد مرات الظهور (NULL = بلا حد)|
+|`awarded_count`|INTEGER|DEFAULT 0|كم مرة اتوزعت|
+|`is_active`|BOOLEAN|DEFAULT TRUE|تفعيل الشريحة|
+|`sort_order`|INTEGER|DEFAULT 0|ترتيب العرض|
+
+#### 18. جدول `wheel_spins`
 
 |**الحقل (Column)**|**النوع (Data Type)**|**القيد (Constraints)**|**الوصف (Description)**|
 |---|---|---|---|
 |`id`|BIGINT|PK|-|
 |`customer_id`|BIGINT|FK → customers.id, NOT NULL|العميل الذي قام بالدوران|
 |`rank_id`|BIGINT|FK → ranks.id, NOT NULL|الرتبة التي كان عليها العميل وقت الدوران|
+|`wheel_prize_id`|BIGINT|FK → wheel_prizes.id, NULL|الجائزة المختارة عند الفوز|
 |`points_cost`|INTEGER|NOT NULL|عدد النقاط التي دفعها (حسب الرتبة)|
 |`points_won`|INTEGER|DEFAULT 0|عدد النقاط التي ربحها (0 إذا خسر)|
-|`prize_type`|ENUM|NOT NULL (`points`, `discount`, `coupon`, `none`)|نوع الجائزة|
+|`prize_type`|ENUM|NOT NULL (`points`, `discount`, `coupon`, `product`, `none`)|نوع الجائزة|
 |`prize_value`|VARCHAR(255)|NULL|قيمة الجائزة|
 |`is_win`|BOOLEAN|DEFAULT FALSE|هل فاز؟|
-|`probability_used`|FLOAT|NOT NULL|الاحتمالية الفعلية المستخدمة (حسب الرتبة)|
+|`probability_used`|FLOAT|NOT NULL|احتمالية طبقة 1 المستخدمة (حسب الرتبة)|
 |`spun_at`|TIMESTAMP|DEFAULT CURRENT_TIMESTAMP|وقت الدوران|
 |`created_at`|TIMESTAMP|-|-|
 |`updated_at`|TIMESTAMP|-|-|
 
-#### 18. جدول `coupons`
+#### 19. جدول `coupons`
 
 |**الحقل (Column)**|**النوع (Data Type)**|**القيد (Constraints)**|**الوصف (Description)**|
 |---|---|---|---|
@@ -327,7 +349,7 @@
 
 ### 🛠️ المجموعة السادسة: الإدارة والإشعارات (Admin & Notifications)
 
-#### 19. جدول `notifications`
+#### 20. جدول `notifications`
 
 | **الحقل (Column)** | **النوع (Data Type)** | **القيد (Constraints)**                                                     | **الوصف (Description)**              |
 | ------------------ | --------------------- | --------------------------------------------------------------------------- | ------------------------------------ |
@@ -343,7 +365,7 @@
 
 ### ⚙️ المجموعة السابعة: الإعدادات (Settings)
 
-#### 20. جدول `system_settings`
+#### 21. جدول `system_settings`
 
 |**الحقل (Column)**|**النوع (Data Type)**|**القيد (Constraints)**|**الوصف (Description)**|
 |---|---|---|---|
