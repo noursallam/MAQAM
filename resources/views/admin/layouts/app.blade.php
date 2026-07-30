@@ -26,7 +26,6 @@
             'label' => __('admin.nav.store_ops'),
             'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>',
             'items' => [
-                ['route' => 'admin.dashboard', 'label' => __('admin.nav.command_center'), 'match' => 'admin.dashboard', 'badge' => null],
                 ['route' => 'admin.orders.index', 'label' => __('admin.nav.orders_pipeline'), 'match' => 'admin.orders.*', 'badge' => $newOrders ?: null],
                 ['route' => 'admin.categories.index', 'label' => __('admin.nav.store_categories'), 'match' => 'admin.categories.*', 'badge' => null],
                 ['route' => 'admin.products.index', 'label' => __('admin.nav.products'), 'match' => 'admin.products.*', 'badge' => null],
@@ -88,6 +87,7 @@
             }
         }
     }
+    $autoExpandGroupKey = ($activeGroupKey !== '' && !request()->routeIs('admin.dashboard')) ? $activeGroupKey : '';
 @endphp
 <body class="min-h-screen bg-maqam-bg text-maqam-ink antialiased" style="font-family:'Alexandria',sans-serif">
 <div class="flex min-h-screen">
@@ -110,6 +110,15 @@
                     <span x-text="expanded.length > 0 ? '{{ $isRtl ? 'طي الكل' : 'Collapse All' }}' : '{{ $isRtl ? 'توسيع الكل' : 'Expand All' }}'"></span>
                 </button>
             </div>
+
+            @php $dashboardActive = request()->routeIs('admin.dashboard'); @endphp
+            <a href="{{ route('admin.dashboard') }}"
+               class="mb-2.5 flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-xs font-semibold transition-all {{ $dashboardActive ? 'border-maqam-gold bg-maqam-gold text-maqam-navy shadow-sm' : 'border-white/[0.06] bg-white/[0.03] text-white/80 hover:bg-white/10 hover:text-white' }}">
+                <svg class="h-4 w-4 {{ $dashboardActive ? 'text-maqam-navy' : 'text-maqam-gold-light' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z"/>
+                </svg>
+                <span>{{ __('admin.nav.command_center') }}</span>
+            </a>
 
             @foreach($navGroups as $groupKey => $group)
                 <div class="mb-2.5 rounded-xl bg-white/[0.03] p-1.5 border border-white/[0.06] transition-all">
@@ -227,20 +236,20 @@
         return {
             expanded: (function() {
                 try {
-                    const saved = localStorage.getItem('maqam_sidebar_expanded_v2');
+                    const saved = localStorage.getItem('maqam_sidebar_expanded_v3');
                     if (saved !== null) {
                         return JSON.parse(saved);
                     }
                 } catch(e) {}
-                return ['0', '1', '2', '3', '4'];
+                return [];
             })(),
             init() {
-                const activeGroup = '{{ $activeGroupKey }}';
+                const activeGroup = '{{ $autoExpandGroupKey }}';
                 if (activeGroup !== '' && !this.expanded.includes(activeGroup)) {
                     this.expanded.push(activeGroup);
                 }
                 this.$watch('expanded', val => {
-                    try { localStorage.setItem('maqam_sidebar_expanded_v2', JSON.stringify(val)); } catch(e) {}
+                    try { localStorage.setItem('maqam_sidebar_expanded_v3', JSON.stringify(val)); } catch(e) {}
                 });
             },
             isOpen(key) {

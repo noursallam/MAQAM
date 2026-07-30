@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'gemini' => [
+        // Supports both spellings; project .env currently uses GEMENI_API_KEY
+        'key' => env('GEMINI_API_KEY', env('GEMENI_API_KEY')),
+        'model' => env('GEMINI_MODEL', 'gemini-flash-lite-latest'),
+        'cache_minutes' => (int) env('GEMINI_CACHE_MINUTES', 1440),
+    ],
+
 ];

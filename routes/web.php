@@ -19,12 +19,27 @@ use App\Http\Controllers\Admin\RankController;
 use App\Http\Controllers\Admin\RiskController;
 use App\Http\Controllers\Admin\ScanController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Store\StorefrontController;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return redirect()->route('admin.login');
-});
+Route::get('/', [StorefrontController::class, 'home'])->name('store.home');
+Route::get('/shop', [StorefrontController::class, 'shop'])->name('store.shop');
+Route::get('/product/{product}', [StorefrontController::class, 'product'])->name('store.product');
+Route::get('/cart', [StorefrontController::class, 'cart'])->name('store.cart');
+Route::get('/checkout', [StorefrontController::class, 'checkout'])->name('store.checkout');
+Route::get('/about', [StorefrontController::class, 'about'])->name('store.about');
+Route::get('/contact', [StorefrontController::class, 'contact'])->name('store.contact');
+Route::get('/blog', [StorefrontController::class, 'blog'])->name('store.blog');
+Route::get('/login', [StorefrontController::class, 'login'])->name('store.login');
+Route::get('/register', [StorefrontController::class, 'register'])->name('store.register');
+Route::get('/profile', [StorefrontController::class, 'profile'])->name('store.profile');
+Route::get('/loyalty', [StorefrontController::class, 'loyalty'])->name('store.loyalty');
+Route::get('/faq', [StorefrontController::class, 'faq'])->name('store.faq');
+Route::get('/privacy', [StorefrontController::class, 'privacy'])->name('store.privacy');
+Route::get('/terms', [StorefrontController::class, 'terms'])->name('store.terms');
+Route::get('/shipping', [StorefrontController::class, 'shipping'])->name('store.shipping');
+Route::get('/returns', [StorefrontController::class, 'returns'])->name('store.returns');
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('guest')->group(function () {
