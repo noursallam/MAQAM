@@ -63,7 +63,7 @@ class ProductController extends Controller
             $thumbnailIndex = 0;
         }
 
-        DB::transaction(function () use ($data, $files, $thumbnailIndex) {
+        DB::transaction(function () use ($request, $data, $files, $thumbnailIndex) {
             $product = Product::create($data);
 
             foreach ($files as $i => $file) {
@@ -81,6 +81,8 @@ class ProductController extends Controller
                     $product->update(['image_path' => $path]);
                 }
             }
+
+            $this->syncColorsAndOptions($product, $request);
         });
 
         return redirect()->route('admin.products.index')->with('success', __('admin.commerce.product_saved'));
@@ -88,7 +90,7 @@ class ProductController extends Controller
 
     public function edit(Product $product): View
     {
-        $product->load('images');
+        $product->load(['images', 'colors', 'options']);
 
         return view('admin.products.form', [
             'product' => $product,
@@ -135,7 +137,7 @@ class ProductController extends Controller
         $thumbnailExistingId = $request->integer('thumbnail_existing_id') ?: null;
         $thumbnailNewIndex = (int) $request->input('thumbnail_index', 0);
 
-        DB::transaction(function () use ($product, $data, $newFiles, $removeIds, $thumbnailSource, $thumbnailExistingId, $thumbnailNewIndex) {
+        DB::transaction(function () use ($request, $product, $data, $newFiles, $removeIds, $thumbnailSource, $thumbnailExistingId, $thumbnailNewIndex) {
             $product->update($data);
 
             if ($removeIds) {
@@ -174,6 +176,8 @@ class ProductController extends Controller
                 $thumb->update(['is_thumbnail' => true]);
                 $product->update(['image_path' => $thumb->path]);
             }
+
+            $this->syncColorsAndOptions($product, $request);
         });
 
         return redirect()->route('admin.products.index')->with('success', __('admin.commerce.product_saved'));
@@ -216,11 +220,66 @@ class ProductController extends Controller
             'thumbnail_existing_id' => ['nullable', 'integer'],
             'remove_images' => ['nullable', 'array'],
             'remove_images.*' => ['integer'],
+            'colors' => ['nullable', 'array'],
+            'colors.*.name' => ['nullable', 'string', 'max:100'],
+            'colors.*.hex' => ['nullable', 'string', 'max:7'],
+            'options' => ['nullable', 'array'],
+            'options.*.name' => ['nullable', 'string', 'max:100'],
+            'options.*.value' => ['nullable', 'string', 'max:255'],
         ]);
 
         $data['is_active'] = $request->boolean('is_active', true);
-        unset($data['image'], $data['images'], $data['thumbnail_index'], $data['thumbnail_source'], $data['thumbnail_existing_id'], $data['remove_images']);
+        unset(
+            $data['image'],
+            $data['images'],
+            $data['thumbnail_index'],
+            $data['thumbnail_source'],
+            $data['thumbnail_existing_id'],
+            $data['remove_images'],
+            $data['colors'],
+            $data['options'],
+        );
 
         return $data;
+    }
+
+    protected function syncColorsAndOptions(Product $product, Request $request): void
+    {
+        $product->colors()->delete();
+        $product->options()->delete();
+
+        $colorSort = 0;
+        foreach ($request->input('colors', []) as $row) {
+            $name = trim((string) ($row['name'] ?? ''));
+            if ($name === '') {
+                continue;
+            }
+
+            $hex = trim((string) ($row['hex'] ?? ''));
+            if ($hex !== '' && ! str_starts_with($hex, '#')) {
+                $hex = '#'.$hex;
+            }
+
+            $product->colors()->create([
+                'name' => $name,
+                'hex' => $hex !== '' ? strtoupper($hex) : null,
+                'sort_order' => $colorSort++,
+            ]);
+        }
+
+        $optionSort = 0;
+        foreach ($request->input('options', []) as $row) {
+            $name = trim((string) ($row['name'] ?? ''));
+            $value = trim((string) ($row['value'] ?? ''));
+            if ($name === '' || $value === '') {
+                continue;
+            }
+
+            $product->options()->create([
+                'name' => $name,
+                'value' => $value,
+                'sort_order' => $optionSort++,
+            ]);
+        }
     }
 }

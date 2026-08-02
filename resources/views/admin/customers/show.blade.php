@@ -118,6 +118,36 @@
                 @endforelse
             </div>
             <div class="ui-card-static p-6">
+                <div class="mb-3 flex items-center justify-between">
+                    <h3 class="ui-section-title">{{ __('admin.customers.rewards_wallet') }}</h3>
+                    <a href="{{ route('admin.rewards.index', ['q' => $customer->user?->phone_number]) }}" class="text-xs font-semibold text-maqam-gold-dark">{{ __('admin.view_all') }}</a>
+                </div>
+                @forelse($rewards as $reward)
+                    <div class="ui-row mb-2 text-sm">
+                        <div class="min-w-0">
+                            <div class="font-medium">{{ __('admin.rewards.type_'.$reward->type) }}
+                                <code class="ms-1 text-xs" dir="ltr">{{ $reward->code }}</code>
+                            </div>
+                            <div class="ui-muted">
+                                @if($reward->type === 'product')
+                                    {{ $reward->product?->name_ar ?: $reward->product?->name_en }}
+                                @elseif($reward->amount_type === 'percentage')
+                                    {{ $reward->amount_value }}%
+                                @elseif($reward->amount_value !== null)
+                                    {{ number_format((float) $reward->amount_value, 2) }} ج.م
+                                @endif
+                                · {{ __('admin.rewards.source_'.$reward->source) }}
+                            </div>
+                        </div>
+                        <span class="ui-badge {{ $reward->status === 'available' ? 'ui-badge-ok' : 'ui-badge-muted' }}">
+                            {{ __('admin.rewards.status_'.$reward->status) }}
+                        </span>
+                    </div>
+                @empty
+                    <p class="ui-muted">—</p>
+                @endforelse
+            </div>
+            <div class="ui-card-static p-6 md:col-span-2">
                 <h3 class="ui-section-title mb-3">{{ __('admin.customers.orders') }} / {{ __('admin.customers.wheel_spins') }}</h3>
                 @foreach($orders as $order)
                     <a href="{{ route('admin.orders.show', $order) }}" class="ui-row mb-2 text-sm">
@@ -127,7 +157,12 @@
                 @endforeach
                 @foreach($spins as $spin)
                     <div class="ui-row mb-2 text-sm">
-                        <span>{{ $spin->is_win ? __('admin.wheel.is_win') : __('admin.wheel.is_loss') }}</span>
+                        <span>
+                            {{ $spin->is_win ? __('admin.wheel.is_win') : __('admin.wheel.is_loss') }}
+                            @if($spin->reward)
+                                · <code dir="ltr">{{ $spin->reward->code }}</code>
+                            @endif
+                        </span>
                         <span>{{ $spin->prize_type }}</span>
                     </div>
                 @endforeach

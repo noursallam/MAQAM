@@ -8,7 +8,7 @@
     <form action="{{ route('admin.qr-codes.restore') }}" method="POST" enctype="multipart/form-data" class="flex gap-2">
         @csrf
         <input type="file" name="json_file" accept=".json" class="ui-input max-w-xs" id="restore-file">
-        <button type="submit" class="ui-btn ui-btn-dark">{{ __('admin.restore') }}</button>
+        <button type="submit" class="ui-btn ui-btn-dark">{{ __('admin.qr.restore') }}</button>
     </form>
     <a href="{{ route('admin.qr-codes.create') }}" class="ui-btn ui-btn-primary">{{ __('admin.nav.generate_batch') }}</a>
 </div>
@@ -58,11 +58,18 @@
                     <div class="rounded-xl border border-[#D8D4CB] bg-[#F3F1EB] py-2"><div class="ui-muted">مستخدم</div><div class="font-semibold">{{ $batch->used_count }}</div></div>
                 </div>
                 <div class="mt-3 ui-muted">{{ __('admin.qr.created_at') }}: {{ \Illuminate\Support\Carbon::parse($batch->generated_at)->diffForHumans() }}</div>
-                <div class="mt-4 flex gap-2">
-                    <a href="{{ route('admin.qr-codes.download', $batch->batch_id) }}" class="ui-btn ui-btn-primary flex-1">{{ __('admin.download') }} ZIP</a>
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <a href="{{ route('admin.qr-codes.download', $batch->batch_id) }}" class="ui-btn ui-btn-primary flex-1 {{ is_file(storage_path('app/qr-batches/'.$batch->batch_id.'.zip')) ? '' : 'pointer-events-none opacity-40' }}" title="{{ is_file(storage_path('app/qr-batches/'.$batch->batch_id.'.zip')) ? '' : __('admin.qr.zip_missing') }}">{{ __('admin.download') }} ZIP</a>
                     <a href="{{ route('admin.qr-codes.download-json', $batch->batch_id) }}" class="ui-btn ui-btn-ghost flex-1">JSON</a>
                     <a href="{{ route('admin.qr-codes.index', ['batch_id' => $batch->batch_id]) }}" class="ui-btn ui-btn-ghost flex-1">{{ __('admin.qr.open_codes') }}</a>
                 </div>
+                <form method="POST" action="{{ route('admin.qr-codes.destroy-batch', $batch->batch_id) }}" class="mt-2"
+                      onsubmit="return confirmBatchDelete(this, {{ (int) $batch->used_count }})">
+                    @csrf
+                    @method('DELETE')
+                    <input type="hidden" name="force" value="0">
+                    <button type="submit" class="ui-btn ui-btn-ghost w-full text-xs text-red-700">{{ __('admin.qr.delete_batch') }}</button>
+                </form>
             </div>
         @endforeach
     </div>
@@ -106,3 +113,18 @@
     <div class="px-5 py-4">{{ $codes->links() }}</div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+function confirmBatchDelete(form, usedCount) {
+    const forceInput = form.querySelector('input[name="force"]');
+    if (usedCount > 0) {
+        const ok = confirm(@json(__('admin.qr.delete_batch_force_confirm')));
+        if (!ok) return false;
+        forceInput.value = '1';
+        return true;
+    }
+    return confirm(@json(__('admin.qr.delete_batch_confirm')));
+}
+</script>
+@endpush

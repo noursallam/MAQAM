@@ -1,56 +1,56 @@
 @extends('store.layouts.app')
 
-@section('title', 'نظام الولاء | مقام')
+@section('title', __('store.loyalty.title'))
 
 @section('content')
 <section class="mq-page">
     <div class="mq-container">
         <div class="mq-breadcrumb">
-            <a href="{{ route('store.home') }}">الرئيسية</a>
+            <a href="{{ route('store.home') }}">{{ __('store.common.home') }}</a>
             <span class="sep">/</span>
-            <span>نظام الولاء</span>
+            <span>{{ __('store.nav.loyalty') }}</span>
         </div>
-        <h1 class="mq-page-title">نظام الولاء والمكافآت</h1>
-        <p class="mq-page-lead">اشترِ من متجر مقام، امسح كود QR داخل المنتج عبر التطبيق، واجمع نقاطًا للترقية والجوائز.</p>
+        <h1 class="mq-page-title">{{ __('store.loyalty.heading') }}</h1>
+        <p class="mq-page-lead">{{ __('store.loyalty.lead') }}</p>
 
         <div class="mq-loyalty-steps">
             <div class="mq-panel">
-                <span class="mq-step-num">١</span>
-                <h3>اشتري منتجًا كهربائيًا</h3>
-                <p>فيش، برايز، مفاتيح، كابلات وأدوات — وكل منتج يحتوي كود QR مغطى بطبقة قشط.</p>
+                <span class="mq-step-num">1</span>
+                <h3>{{ __('store.loyalty.step1_title') }}</h3>
+                <p>{{ __('store.loyalty.step1_text') }}</p>
             </div>
             <div class="mq-panel">
-                <span class="mq-step-num">٢</span>
-                <h3>امسح الكود من التطبيق</h3>
-                <p>افتح تطبيق مقام، امسح الكود، وأدخل/اختر كود التاجر لإضافة النقاط فورًا أو لاحقًا دون إنترنت.</p>
+                <span class="mq-step-num">2</span>
+                <h3>{{ __('store.loyalty.step2_title') }}</h3>
+                <p>{{ __('store.loyalty.step2_text') }}</p>
             </div>
             <div class="mq-panel">
-                <span class="mq-step-num">٣</span>
-                <h3>ارتقِ واربح</h3>
-                <p>ترتقي بين الرتب فضي / ذهبي / بلاتينيوم، وتستخدم النقاط في عجلة الحظ والكوبونات والمزايا.</p>
+                <span class="mq-step-num">3</span>
+                <h3>{{ __('store.loyalty.step3_title') }}</h3>
+                <p>{{ __('store.loyalty.step3_text') }}</p>
             </div>
         </div>
 
         <div class="mq-about-grid" style="margin-top:1.25rem">
             <div class="mq-panel mq-prose">
-                <h3>الرتب</h3>
+                <h3>{{ __('store.loyalty.ranks') }}</h3>
                 <ul>
-                    <li><strong>فضي:</strong> البداية بعد أول عمليات مسح ناجحة.</li>
-                    <li><strong>ذهبي:</strong> مزايا أفضل في عجلة الحظ ونسب الفوز.</li>
-                    <li><strong>بلاتينيوم:</strong> أعلى مستوى ولاء مع أولوية في العروض.</li>
+                    <li><strong>{{ __('store.loyalty.silver') }}</strong> {{ __('store.loyalty.silver_text') }}</li>
+                    <li><strong>{{ __('store.loyalty.gold') }}</strong> {{ __('store.loyalty.gold_text') }}</li>
+                    <li><strong>{{ __('store.loyalty.platinum') }}</strong> {{ __('store.loyalty.platinum_text') }}</li>
                 </ul>
-                <h3>عجلة الحظ</h3>
-                <p>تُخصم نقاط حسب رتبتك مقابل كل محاولة، والجوائز قد تكون نقاطًا إضافية أو خصمًا أو كوبونًا.</p>
+                <h3>{{ __('store.loyalty.wheel') }}</h3>
+                <p>{{ __('store.loyalty.wheel_text') }}</p>
             </div>
             <div class="mq-panel mq-prose">
-                <h3>ملاحظات مهمة</h3>
+                <h3>{{ __('store.loyalty.notes') }}</h3>
                 <ul>
-                    <li>كل كود QR يُستخدم مرة واحدة فقط.</li>
-                    <li>النقاط تُحسب من فئة الهدايا المرتبطة بالكود، وليست من سعر المنتج مباشرة.</li>
-                    <li>المحفظة تظهر في التطبيق وفي صفحة حسابك على الموقع.</li>
-                    <li>الدفع عند الاستلام أو إلكترونيًا أو من المحفظة حسب المتاح عند الطلب.</li>
+                    <li>{{ __('store.loyalty.note_1') }}</li>
+                    <li>{{ __('store.loyalty.note_2') }}</li>
+                    <li>{{ __('store.loyalty.note_3') }}</li>
+                    <li>{{ __('store.loyalty.note_4') }}</li>
                 </ul>
-                <a href="{{ route('store.profile') }}" class="mq-btn mq-btn-primary">عرض محفظتي</a>
+                <a href="{{ route('store.profile') }}" class="mq-btn mq-btn-primary">{{ __('store.loyalty.my_wallet') }}</a>
             </div>
         </div>
     </div>

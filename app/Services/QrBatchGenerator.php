@@ -136,12 +136,14 @@ class QrBatchGenerator
         return $png ?: '';
     }
 
-    protected function uniqueSerial(): string
+    public function uniqueSerial(): string
     {
         do {
+            // Cryptographically random 16 digits — never sequential
+            $bytes = random_bytes(16);
             $serial = '';
             for ($i = 0; $i < 16; $i++) {
-                $serial .= (string) random_int(0, 9);
+                $serial .= (string) (ord($bytes[$i]) % 10);
             }
         } while (QrCode::where('serial_code', $serial)->exists());
 

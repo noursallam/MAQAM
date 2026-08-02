@@ -50,6 +50,7 @@
                 ['route' => 'admin.ranks.index', 'label' => __('admin.nav.ranks'), 'match' => 'admin.ranks.*', 'badge' => null],
                 ['route' => 'admin.loyalty.transactions', 'label' => __('admin.nav.points_ledger'), 'match' => 'admin.loyalty.transactions', 'badge' => null],
                 ['route' => 'admin.loyalty.spins', 'label' => __('admin.nav.lucky_wheel'), 'match' => 'admin.loyalty.spins', 'badge' => null],
+                ['route' => 'admin.rewards.index', 'label' => __('admin.nav.rewards'), 'match' => 'admin.rewards.*', 'badge' => null],
                 ['route' => 'admin.coupons.index', 'label' => __('admin.nav.coupons'), 'match' => 'admin.coupons.*', 'badge' => null],
                 ['route' => 'admin.prize-categories.index', 'label' => __('admin.nav.prize_categories'), 'match' => 'admin.prize-categories.*', 'badge' => null],
                 ['route' => 'admin.qr-codes.create', 'label' => __('admin.nav.generate_batch'), 'match' => 'admin.qr-codes.create', 'badge' => null],

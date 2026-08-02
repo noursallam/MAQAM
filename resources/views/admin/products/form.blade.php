@@ -78,6 +78,68 @@
             </div>
         </div>
 
+        {{-- Colors --}}
+        @php
+            $oldColors = old('colors');
+            if ($oldColors === null) {
+                $oldColors = $product->relationLoaded('colors')
+                    ? $product->colors->map(fn ($c) => ['name' => $c->name, 'hex' => $c->hex ?: '#C5A059'])->all()
+                    : [];
+            }
+            if ($oldColors === []) {
+                $oldColors = [['name' => '', 'hex' => '#C5A059']];
+            }
+        @endphp
+        <div class="rounded-xl border border-[#E4E0D7] p-4" x-data="productRows(@js($oldColors))">
+            <div class="mb-3 flex items-center justify-between gap-2">
+                <div>
+                    <h3 class="text-sm font-semibold">{{ __('admin.commerce.colors') }}</h3>
+                    <p class="ui-muted text-xs">{{ __('admin.commerce.colors_hint') }}</p>
+                </div>
+                <button type="button" class="ui-btn ui-btn-ghost text-xs" @click="add({name:'', hex:'#C5A059'})">+ {{ __('admin.commerce.add_color') }}</button>
+            </div>
+            <div class="space-y-2">
+                <template x-for="(row, index) in rows" :key="index">
+                    <div class="grid grid-cols-[1fr_auto_auto] items-center gap-2">
+                        <input type="text" :name="`colors[${index}][name]`" x-model="row.name" class="ui-input" placeholder="{{ __('admin.commerce.color_name') }}" dir="rtl">
+                        <input type="color" :name="`colors[${index}][hex]`" x-model="row.hex" class="h-10 w-12 cursor-pointer rounded border border-[#D8D4CB] bg-white p-1">
+                        <button type="button" class="ui-btn ui-btn-ghost text-xs text-red-700" @click="remove(index)" x-show="rows.length > 1">{{ __('admin.delete') }}</button>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        {{-- Options key/value --}}
+        @php
+            $oldOptions = old('options');
+            if ($oldOptions === null) {
+                $oldOptions = $product->relationLoaded('options')
+                    ? $product->options->map(fn ($o) => ['name' => $o->name, 'value' => $o->value])->all()
+                    : [];
+            }
+            if ($oldOptions === []) {
+                $oldOptions = [['name' => '', 'value' => '']];
+            }
+        @endphp
+        <div class="rounded-xl border border-[#E4E0D7] p-4" x-data="productRows(@js($oldOptions))">
+            <div class="mb-3 flex items-center justify-between gap-2">
+                <div>
+                    <h3 class="text-sm font-semibold">{{ __('admin.commerce.options') }}</h3>
+                    <p class="ui-muted text-xs">{{ __('admin.commerce.options_hint') }}</p>
+                </div>
+                <button type="button" class="ui-btn ui-btn-ghost text-xs" @click="add({name:'', value:''})">+ {{ __('admin.commerce.add_option') }}</button>
+            </div>
+            <div class="space-y-2">
+                <template x-for="(row, index) in rows" :key="index">
+                    <div class="grid grid-cols-[1fr_1fr_auto] items-center gap-2">
+                        <input type="text" :name="`options[${index}][name]`" x-model="row.name" class="ui-input" placeholder="{{ __('admin.commerce.option_key') }}" dir="rtl">
+                        <input type="text" :name="`options[${index}][value]`" x-model="row.value" class="ui-input" placeholder="{{ __('admin.commerce.option_value') }}" dir="rtl">
+                        <button type="button" class="ui-btn ui-btn-ghost text-xs text-red-700" @click="remove(index)" x-show="rows.length > 1">{{ __('admin.delete') }}</button>
+                    </div>
+                </template>
+            </div>
+        </div>
+
         <div>
             <label class="mb-1 block text-sm font-medium">الصورة الرئيسية</label>
             <input type="file" name="image" accept="image/*" class="ui-input">
@@ -155,6 +217,14 @@
 
 @push('scripts')
 <script>
+function productRows(initial) {
+    return {
+        rows: Array.isArray(initial) && initial.length ? initial : [{}],
+        add(row) { this.rows.push(row); },
+        remove(index) { if (this.rows.length > 1) this.rows.splice(index, 1); },
+    };
+}
+
 function setThumb(source, idOrIndex) {
     document.getElementById('thumbnail_source').value = source;
     if (source === 'existing') {

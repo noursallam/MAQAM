@@ -20,6 +20,7 @@ use App\Models\SystemSetting;
 use App\Models\User;
 use App\Models\WheelPrize;
 use App\Models\WheelSpin;
+use App\Services\QrBatchGenerator;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -161,9 +162,10 @@ class DatabaseSeeder extends Seeder
 
         $prize1 = CategoryPrize::where('background_color', '#22C55E')->first();
         $batchId = 'BATCH-DEMO-GREEN';
+        $qrGenerator = app(QrBatchGenerator::class);
         for ($i = 0; $i < 12; $i++) {
             QrCode::create([
-                'serial_code' => str_pad((string) (2200000000000000 + $i), 16, '0', STR_PAD_LEFT),
+                'serial_code' => $qrGenerator->uniqueSerial(),
                 'category_id' => $prize1->id,
                 'points_awarded' => 10,
                 'status' => $i < 4 ? 'used' : 'active',

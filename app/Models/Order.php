@@ -11,8 +11,8 @@ class Order extends Model
     protected $fillable = [
         'user_id', 'order_number', 'status', 'subtotal', 'tax', 'discount',
         'shipping_cost', 'total_amount', 'payment_method', 'payment_status',
-        'shipping_address_id', 'shipped_at', 'delivered_at', 'cancelled_at',
-        'cancellation_reason',
+        'shipping_address_id', 'coupon_id', 'customer_reward_id', 'coupon_code',
+        'shipped_at', 'delivered_at', 'cancelled_at', 'cancellation_reason',
     ];
 
     protected function casts(): array
@@ -37,6 +37,16 @@ class Order extends Model
     public function shippingAddress(): BelongsTo
     {
         return $this->belongsTo(ShippingAddress::class);
+    }
+
+    public function coupon(): BelongsTo
+    {
+        return $this->belongsTo(Coupon::class);
+    }
+
+    public function reward(): BelongsTo
+    {
+        return $this->belongsTo(CustomerReward::class, 'customer_reward_id');
     }
 
     public function items(): HasMany

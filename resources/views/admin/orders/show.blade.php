@@ -137,6 +137,17 @@
                 <div class="flex justify-between"><span>فرعي</span><span>{{ number_format($order->subtotal, 0) }} ج.م</span></div>
                 <div class="flex justify-between"><span>{{ __('admin.orders.shipping') }}</span><span>{{ number_format($order->shipping_cost, 0) }} ج.م</span></div>
                 <div class="flex justify-between"><span>خصم</span><span>{{ number_format($order->discount, 0) }} ج.م</span></div>
+                @if($order->coupon_code || $order->reward)
+                    <div class="flex justify-between text-sm">
+                        <span>{{ __('admin.rewards.code') }}</span>
+                        <span dir="ltr">
+                            <code>{{ $order->coupon_code ?? $order->reward?->code }}</code>
+                            @if($order->reward)
+                                <span class="ui-muted">({{ __('admin.rewards.type_'.$order->reward->type) }})</span>
+                            @endif
+                        </span>
+                    </div>
+                @endif
                 <div class="mt-2 flex justify-between text-lg font-semibold"><span>{{ __('admin.orders.total') }}</span><span>{{ number_format($order->total_amount, 0) }} ج.م</span></div>
             </div>
         </div>

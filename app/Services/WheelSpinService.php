@@ -3,12 +3,14 @@
 namespace App\Services;
 
 use App\Models\Customer;
+use App\Models\CustomerReward;
 use App\Models\PointsTransaction;
 use App\Models\Product;
 use App\Models\SystemSetting;
 use App\Models\WheelPrize;
 use App\Models\WheelSpin;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use RuntimeException;
 
 class WheelSpinService
@@ -53,13 +55,14 @@ class WheelSpinService
             $prizeType = 'none';
             $prizeValue = null;
             $pointsWon = 0;
+            $product = null;
 
             if ($isWin) {
                 $prize = $this->pickPrize();
                 if (! $prize) {
                     $isWin = false;
                 } else {
-                    [$prizeType, $prizeValue, $pointsWon] = $this->applyPrize($prize);
+                    [$prizeType, $prizeValue, $pointsWon, $product] = $this->applyPrize($prize);
                     $prize->increment('awarded_count');
                 }
             }
@@ -108,7 +111,20 @@ class WheelSpinService
                 'spun_at' => now(),
             ]);
 
-            return ['spin' => $spin->fresh(['prize', 'rank', 'customer.user']), 'prize' => $prize];
+            if ($isWin && $prize && in_array($prizeType, ['coupon', 'discount', 'product'], true)) {
+                $reward = $this->grantReward($customer, $prize, $spin, $product);
+                if ($reward) {
+                    $spin->update([
+                        'customer_reward_id' => $reward->id,
+                        'prize_value' => $reward->code ?? $spin->prize_value,
+                    ]);
+                }
+            }
+
+            return [
+                'spin' => $spin->fresh(['prize', 'rank', 'customer.user', 'reward']),
+                'prize' => $prize,
+            ];
         });
     }
 
@@ -138,7 +154,99 @@ class WheelSpinService
     }
 
     /**
-     * @return array{0: string, 1: ?string, 2: int}
+     * Turn a redeemable wheel prize into a customer-owned reward row.
+     */
+    public function grantReward(
+        Customer $customer,
+        WheelPrize $prize,
+        WheelSpin $spin,
+        ?Product $product = null,
+    ): ?CustomerReward {
+        $prize->loadMissing('coupon');
+
+        return match ($prize->type) {
+            'coupon' => $this->grantCouponReward($customer, $prize, $spin),
+            'discount' => $this->grantDiscountReward($customer, $prize, $spin),
+            'product' => $this->grantProductReward($customer, $prize, $spin, $product),
+            default => null,
+        };
+    }
+
+    protected function grantCouponReward(Customer $customer, WheelPrize $prize, WheelSpin $spin): ?CustomerReward
+    {
+        $coupon = $prize->coupon;
+        if (! $coupon) {
+            return null;
+        }
+
+        return CustomerReward::create([
+            'customer_id' => $customer->id,
+            'type' => CustomerReward::TYPE_COUPON,
+            'status' => CustomerReward::STATUS_AVAILABLE,
+            'source' => 'wheel',
+            'code' => $this->makeCode('MQ'),
+            'coupon_id' => $coupon->id,
+            'wheel_spin_id' => $spin->id,
+            'amount_type' => $coupon->type,
+            'amount_value' => $coupon->value,
+            'expires_at' => $coupon->valid_to,
+        ]);
+    }
+
+    protected function grantDiscountReward(Customer $customer, WheelPrize $prize, WheelSpin $spin): CustomerReward
+    {
+        $days = (int) (SystemSetting::where('key', 'wheel_discount_expiry_days')->value('value') ?? 30);
+
+        return CustomerReward::create([
+            'customer_id' => $customer->id,
+            'type' => CustomerReward::TYPE_DISCOUNT,
+            'status' => CustomerReward::STATUS_AVAILABLE,
+            'source' => 'wheel',
+            'code' => $this->makeCode('WD'),
+            'wheel_spin_id' => $spin->id,
+            'amount_type' => $prize->discount_type,
+            'amount_value' => $prize->discount_value,
+            'expires_at' => now()->addDays(max(1, $days)),
+        ]);
+    }
+
+    protected function grantProductReward(
+        Customer $customer,
+        WheelPrize $prize,
+        WheelSpin $spin,
+        ?Product $product,
+    ): ?CustomerReward {
+        $product ??= $prize->product_id
+            ? Product::query()->find($prize->product_id)
+            : null;
+
+        if (! $product) {
+            return null;
+        }
+
+        return CustomerReward::create([
+            'customer_id' => $customer->id,
+            'type' => CustomerReward::TYPE_PRODUCT,
+            'status' => CustomerReward::STATUS_AVAILABLE,
+            'source' => 'wheel',
+            'code' => $this->makeCode('GP'),
+            'product_id' => $product->id,
+            'wheel_spin_id' => $spin->id,
+            'expires_at' => null,
+        ]);
+    }
+
+    protected function makeCode(string $prefix): string
+    {
+        do {
+            $code = strtoupper($prefix).'-'.Str::upper(Str::random(8));
+        } while (CustomerReward::query()->where('code', $code)->exists());
+
+        return $code;
+    }
+
+    /**
+     * @return array{0: string, 1: ?string, 2: int, 3: ?Product}
      */
     protected function applyPrize(WheelPrize $prize): array
     {
@@ -147,11 +255,13 @@ class WheelSpinService
                 'points',
                 (string) $prize->points_amount,
                 (int) $prize->points_amount,
+                null,
             ],
             'coupon' => [
                 'coupon',
                 $prize->coupon?->code ?? (string) $prize->coupon_id,
                 0,
+                null,
             ],
             'product' => $this->applyProductPrize($prize),
             'discount' => [
@@ -161,13 +271,16 @@ class WheelSpinService
                     'value' => (float) $prize->discount_value,
                 ], JSON_UNESCAPED_UNICODE),
                 0,
+                null,
             ],
-            default => ['none', null, 0],
+            default => ['none', null, 0, null],
         };
     }
 
     /**
-     * @return array{0: string, 1: ?string, 2: int}
+     * Reserve stock on win; ownership lives on customer_rewards.
+     *
+     * @return array{0: string, 1: ?string, 2: int, 3: ?Product}
      */
     protected function applyProductPrize(WheelPrize $prize): array
     {
@@ -185,6 +298,7 @@ class WheelSpinService
                 ? ($product->sku ?: (string) $product->id)
                 : (string) $prize->product_id,
             0,
+            $product,
         ];
     }
 }

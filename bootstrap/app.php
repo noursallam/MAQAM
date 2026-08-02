@@ -15,7 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo('/admin/login');
         $middleware->redirectUsersTo('/admin');
         $middleware->web(append: [
-            \App\Http\Middleware\SetAdminLocale::class,
+            \App\Http\Middleware\SetWebLocale::class,
         ]);
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,

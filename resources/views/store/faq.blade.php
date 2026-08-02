@@ -1,30 +1,31 @@
 @extends('store.layouts.app')
 
-@section('title', 'الأسئلة الشائعة | مقام')
+@section('title', __('store.faq.title'))
 
 @section('content')
-<section class="mq-page">
-    <div class="mq-container">
+<section class="mq-page mq-home-faq">
+    <div class="mq-container mq-home-faq-inner">
         <div class="mq-breadcrumb">
-            <a href="{{ route('store.home') }}">الرئيسية</a>
+            <a href="{{ route('store.home') }}">{{ __('store.common.home') }}</a>
             <span class="sep">/</span>
-            <span>الأسئلة الشائعة</span>
+            <span>{{ __('store.faq.heading') }}</span>
         </div>
-        <h1 class="mq-page-title">الأسئلة الشائعة</h1>
-        <p class="mq-page-lead">إجابات سريعة عن المتجر، الشحن، ونظام الولاء.</p>
+        <div class="mq-section-head">
+            <span class="mq-eyebrow">{{ __('store.faq.heading') }}</span>
+            <h2>{{ __('store.faq.title_line') }} <em>{{ __('store.faq.title_em') }}</em></h2>
+            <p>{{ __('store.faq.lead') }}</p>
+        </div>
 
-        <div class="mq-faq-list">
-            @foreach ([
-                ['q' => 'ماذا يبيع متجر مقام؟', 'a' => 'متخصصون في الأدوات الكهربائية: فيش، برايز، مفاتيح، كابلات، إضاءة، قواطع ولوحات، ومستلزمات التركيب.'],
-                ['q' => 'كيف أكسب نقاط الولاء؟', 'a' => 'بعد شراء المنتج، اقشط طبقة الحماية وامسح كود QR من تطبيق مقام مع إدخال كود التاجر. النقاط تُضاف لمحفظتك فورًا أو بعد المزامنة إن كنت دون إنترنت.'],
-                ['q' => 'هل أحتاج حسابًا للتصفح؟', 'a' => 'لا. يمكنك تصفح المنتجات وإضافة السلة كزائر، ويُطلب تسجيل الدخول عبر واتساب OTP عند إتمام الدفع فقط.'],
-                ['q' => 'ما طرق الدفع المتاحة؟', 'a' => 'الدفع عند الاستلام (COD)، البطاقات والمحافظ عبر Paymob، والدفع من المحفظة الداخلية عند التوفر.'],
-                ['q' => 'كيف أتابع طلبي؟', 'a' => 'من صفحة حسابي تظهر حالة الطلب: جديد، جاري التجهيز، تم الشحن، تم التسليم، مع مسارات الإلغاء/الاسترداد عند الحاجة.'],
-                ['q' => 'ما الفرق بين فئات المنتجات وفئات الهدايا؟', 'a' => 'فئات المتجر للتنظيم والتصفح. فئات الهدايا تحدد قيمة النقاط الثابتة على كود QR داخل المنتج.'],
-            ] as $item)
+        <div class="mq-faq-list mq-faq-accordion">
+            @foreach (['q1', 'q2', 'q3', 'q7', 'q5', 'q6'] as $key)
                 <details class="mq-faq-item">
-                    <summary>{{ $item['q'] }}</summary>
-                    <p>{{ $item['a'] }}</p>
+                    <summary>
+                        <span>{{ __('store.faq.'.$key) }}</span>
+                        <i class="mq-faq-chevron" aria-hidden="true">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                        </i>
+                    </summary>
+                    <p>{{ __('store.faq.a'.substr($key, 1)) }}</p>
                 </details>
             @endforeach
         </div>

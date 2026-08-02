@@ -39,4 +39,14 @@ class Customer extends Model
     {
         return $this->hasMany(QrScan::class);
     }
+
+    public function rewards(): HasMany
+    {
+        return $this->hasMany(CustomerReward::class);
+    }
+
+    public function availableRewards(): HasMany
+    {
+        return $this->rewards()->available();
+    }
 }

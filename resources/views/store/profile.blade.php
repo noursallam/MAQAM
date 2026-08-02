@@ -1,119 +1,122 @@
 @extends('store.layouts.app')
 
-@section('title', 'حسابي | مقام')
+@section('title', __('store.profile.title'))
 
 @section('content')
+@php
+    $avatar = app()->getLocale() === 'ar' ? 'أ م' : 'AM';
+@endphp
 <section class="mq-page">
     <div class="mq-container">
         <div class="mq-breadcrumb">
-            <a href="{{ route('store.home') }}">الرئيسية</a>
+            <a href="{{ route('store.home') }}">{{ __('store.common.home') }}</a>
             <span class="sep">/</span>
-            <span>حسابي</span>
+            <span>{{ __('store.profile.heading') }}</span>
         </div>
-        <h1 class="mq-page-title">حسابي</h1>
-        <p class="mq-page-lead">إدارة الطلبات، محفظة النقاط، ومستوى الولاء.</p>
+        <h1 class="mq-page-title">{{ __('store.profile.heading') }}</h1>
+        <p class="mq-page-lead">{{ __('store.profile.lead') }}</p>
 
         <div class="mq-profile-layout">
             <aside class="mq-profile-side">
                 <div class="mq-panel mq-profile-card">
-                    <div class="mq-profile-avatar">أ م</div>
-                    <h2>أحمد محمد</h2>
-                    <p>٠١٠١٢٣٤٥٦٧٨</p>
-                    <span class="mq-rank-badge">رتبة ذهبية</span>
+                    <div class="mq-profile-avatar">{{ $avatar }}</div>
+                    <h2>{{ __('store.profile.demo_name') }}</h2>
+                    <p dir="ltr">01012345678</p>
+                    <span class="mq-rank-badge">{{ __('store.profile.rank_gold') }}</span>
                     <div class="mq-profile-nav">
-                        <a href="#wallet" class="is-active">المحفظة والرتبة</a>
-                        <a href="#orders">طلباتي</a>
-                        <a href="#tx">حركات النقاط</a>
-                        <a href="#settings">بيانات الحساب</a>
-                        <a href="{{ route('store.loyalty') }}">نظام الولاء</a>
+                        <a href="#wallet" class="is-active">{{ __('store.profile.wallet_nav') }}</a>
+                        <a href="#orders">{{ __('store.profile.orders_nav') }}</a>
+                        <a href="#tx">{{ __('store.profile.tx_nav') }}</a>
+                        <a href="#settings">{{ __('store.profile.settings_nav') }}</a>
+                        <a href="{{ route('store.loyalty') }}">{{ __('store.profile.loyalty_nav') }}</a>
                     </div>
                 </div>
             </aside>
 
             <div class="mq-profile-main">
                 <div class="mq-panel" id="wallet">
-                    <h3 class="mq-side-title">محفظة الولاء</h3>
+                    <h3 class="mq-side-title">{{ __('store.profile.wallet') }}</h3>
                     <div class="mq-wallet-grid">
                         <div class="mq-wallet-stat">
-                            <span>رصيد النقاط</span>
-                            <strong>٢٬٤٥٠</strong>
+                            <span>{{ __('store.profile.balance') }}</span>
+                            <strong>2,450</strong>
                         </div>
                         <div class="mq-wallet-stat">
-                            <span>الرتبة الحالية</span>
-                            <strong>ذهبي</strong>
+                            <span>{{ __('store.profile.current_rank') }}</span>
+                            <strong>{{ __('store.profile.gold') }}</strong>
                         </div>
                         <div class="mq-wallet-stat">
-                            <span>للوصول إلى بلاتينيوم</span>
-                            <strong>٥٥٠ نقطة</strong>
+                            <span>{{ __('store.profile.to_platinum') }}</span>
+                            <strong>{{ __('store.profile.points_left') }}</strong>
                         </div>
                     </div>
                     <div class="mq-progress">
                         <div class="mq-progress-bar" style="width:78%"></div>
                     </div>
-                    <p class="mq-muted-note">امسح كود QR داخل المنتج عبر تطبيق مقام لإضافة نقاط إلى محفظتك.</p>
-                    <a href="{{ route('store.loyalty') }}" class="mq-btn mq-btn-ghost">كيف يعمل نظام الولاء؟</a>
+                    <p class="mq-muted-note">{{ __('store.profile.wallet_hint') }}</p>
+                    <a href="{{ route('store.loyalty') }}" class="mq-btn mq-btn-ghost">{{ __('store.profile.how_loyalty') }}</a>
                 </div>
 
                 <div class="mq-panel" id="orders">
-                    <h3 class="mq-side-title">آخر الطلبات</h3>
+                    <h3 class="mq-side-title">{{ __('store.profile.recent_orders') }}</h3>
                     <div class="mq-order-list">
                         <div class="mq-order-row">
                             <div>
                                 <strong>#MQ-1042</strong>
-                                <span>بريزة جدارية + فيشة متعددة</span>
+                                <span>{{ __('store.products.wall_socket') }} + {{ __('store.products.multi_plug') }}</span>
                             </div>
-                            <em class="mq-status is-shipped">تم الشحن</em>
-                            <span>٣٢٥ ج.م</span>
+                            <em class="mq-status is-shipped">{{ __('store.profile.shipped') }}</em>
+                            <span>325 {{ __('store.common.egp') }}</span>
                         </div>
                         <div class="mq-order-row">
                             <div>
                                 <strong>#MQ-1031</strong>
-                                <span>قاطع كهرباء ٣٢ أمبير</span>
+                                <span>{{ __('store.products.breaker') }}</span>
                             </div>
-                            <em class="mq-status is-done">تم التسليم</em>
-                            <span>٩٥ ج.م</span>
+                            <em class="mq-status is-done">{{ __('store.profile.delivered') }}</em>
+                            <span>95 {{ __('store.common.egp') }}</span>
                         </div>
                         <div class="mq-order-row">
                             <div>
                                 <strong>#MQ-1018</strong>
-                                <span>سلك كهرباء ٣×٢٫٥ مم</span>
+                                <span>{{ __('store.products.cable') }}</span>
                             </div>
-                            <em class="mq-status is-prep">جاري التجهيز</em>
-                            <span>٢٢٠ ج.م</span>
+                            <em class="mq-status is-prep">{{ __('store.profile.preparing') }}</em>
+                            <span>220 {{ __('store.common.egp') }}</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="mq-panel" id="tx">
-                    <h3 class="mq-side-title">حركات النقاط</h3>
+                    <h3 class="mq-side-title">{{ __('store.profile.transactions') }}</h3>
                     <div class="mq-tx-list">
-                        <div class="mq-tx-row"><span>مسح كود QR — بريزة جدارية</span><strong class="up">+٥٠</strong></div>
-                        <div class="mq-tx-row"><span>مسح كود QR — سلك كهرباء</span><strong class="up">+١٢٠</strong></div>
-                        <div class="mq-tx-row"><span>محاولة عجلة الحظ</span><strong class="down">−٣٠</strong></div>
-                        <div class="mq-tx-row"><span>فوز بكوبون خصم ١٠٪</span><strong class="up">كوبون</strong></div>
+                        <div class="mq-tx-row"><span>{{ __('store.profile.tx_scan_socket') }}</span><strong class="up">+50</strong></div>
+                        <div class="mq-tx-row"><span>{{ __('store.profile.tx_scan_cable') }}</span><strong class="up">+120</strong></div>
+                        <div class="mq-tx-row"><span>{{ __('store.profile.tx_wheel') }}</span><strong class="down">−30</strong></div>
+                        <div class="mq-tx-row"><span>{{ __('store.profile.tx_coupon') }}</span><strong class="up">{{ __('store.profile.coupon') }}</strong></div>
                     </div>
                 </div>
 
                 <div class="mq-panel" id="settings">
-                    <h3 class="mq-side-title">بيانات الحساب</h3>
+                    <h3 class="mq-side-title">{{ __('store.profile.account_data') }}</h3>
                     <form class="mq-profile-form" onsubmit="return false;">
                         <div class="mq-field">
-                            <label>الاسم الكامل</label>
-                            <input type="text" value="أحمد محمد">
+                            <label>{{ __('store.profile.full_name') }}</label>
+                            <input type="text" value="{{ __('store.profile.demo_name') }}">
                         </div>
                         <div class="mq-field">
-                            <label>رقم الجوال</label>
+                            <label>{{ __('store.profile.phone') }}</label>
                             <input type="tel" value="01012345678" dir="ltr">
                         </div>
                         <div class="mq-field">
-                            <label>المدينة</label>
-                            <input type="text" value="القاهرة">
+                            <label>{{ __('store.profile.city') }}</label>
+                            <input type="text" value="{{ __('store.profile.demo_city') }}">
                         </div>
-                        <button type="submit" class="mq-btn mq-btn-primary">حفظ التعديلات</button>
+                        <button type="submit" class="mq-btn mq-btn-primary">{{ __('store.common.save') }}</button>
                     </form>
                     <div class="mq-merchant-cta">
-                        <strong>هل أنت تاجر؟</strong>
-                        <p>اطلب التحويل لحساب تاجر من التطبيق للحصول على كود تاجر ومتابعة مسح العملاء.</p>
+                        <strong>{{ __('store.profile.merchant_title') }}</strong>
+                        <p>{{ __('store.profile.merchant_text') }}</p>
                     </div>
                 </div>
             </div>

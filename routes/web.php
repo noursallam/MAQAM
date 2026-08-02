@@ -16,9 +16,11 @@ use App\Http\Controllers\Admin\PrizeCategoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\QrCodeController;
 use App\Http\Controllers\Admin\RankController;
+use App\Http\Controllers\Admin\RewardController;
 use App\Http\Controllers\Admin\RiskController;
 use App\Http\Controllers\Admin\ScanController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Store\LocaleController as StoreLocaleController;
 use App\Http\Controllers\Store\StorefrontController;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use Illuminate\Support\Facades\Route;
@@ -40,6 +42,7 @@ Route::get('/privacy', [StorefrontController::class, 'privacy'])->name('store.pr
 Route::get('/terms', [StorefrontController::class, 'terms'])->name('store.terms');
 Route::get('/shipping', [StorefrontController::class, 'shipping'])->name('store.shipping');
 Route::get('/returns', [StorefrontController::class, 'returns'])->name('store.returns');
+Route::post('/locale', [StoreLocaleController::class, 'switch'])->name('store.locale');
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('guest')->group(function () {
@@ -81,15 +84,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('qr-codes/download/{batchId}', [QrCodeController::class, 'download'])->name('qr-codes.download');
         Route::get('qr-codes/download-json/{batchId}', [QrCodeController::class, 'downloadJson'])->name('qr-codes.download-json');
         Route::post('qr-codes/restore', [QrCodeController::class, 'restore'])->name('qr-codes.restore');
+        Route::delete('qr-codes/batches/{batchId}', [QrCodeController::class, 'destroyBatch'])->name('qr-codes.destroy-batch');
         Route::delete('qr-codes/{qr_code}', [QrCodeController::class, 'destroy'])->name('qr-codes.destroy');
 
         Route::get('scans', [ScanController::class, 'index'])->name('scans.index');
+        Route::post('scans/simulate', [ScanController::class, 'simulate'])->name('scans.simulate');
 
         Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
 
         Route::resource('coupons', CouponController::class)->except(['show']);
+        Route::get('rewards', [RewardController::class, 'index'])->name('rewards.index');
+        Route::post('rewards/{reward}/revoke', [RewardController::class, 'revoke'])->name('rewards.revoke');
+
         Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
         Route::get('notifications/create', [NotificationController::class, 'create'])->name('notifications.create');
         Route::post('notifications', [NotificationController::class, 'store'])->name('notifications.store');

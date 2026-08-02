@@ -503,6 +503,7 @@
             <th>{{ __('admin.nav.ranks') }}</th>
             <th>{{ __('admin.status') }}</th>
             <th>{{ __('admin.wheel.prize') }}</th>
+            <th>{{ __('admin.rewards.code') }}</th>
             <th>وقت</th>
         </tr>
         </thead>
@@ -519,15 +520,25 @@
                 <td>
                     @if($spin->is_win && $spin->prize)
                         {{ $spin->prize->label_ar }}
-                        <span class="ui-muted">({{ $spin->prize_type }} {{ $spin->prize_value }})</span>
+                        <span class="ui-muted">({{ $spin->prize_type }})</span>
                     @else
                         {{ $spin->prize_type }} {{ $spin->prize_value }}
+                    @endif
+                </td>
+                <td>
+                    @if($spin->reward)
+                        <code dir="ltr">{{ $spin->reward->code }}</code>
+                        <span class="ui-badge {{ $spin->reward->status === 'available' ? 'ui-badge-ok' : 'ui-badge-muted' }} ms-1">
+                            {{ __('admin.rewards.status_'.$spin->reward->status) }}
+                        </span>
+                    @else
+                        <span class="ui-muted">—</span>
                     @endif
                 </td>
                 <td class="ui-muted">{{ $spin->spun_at?->diffForHumans() }}</td>
             </tr>
         @empty
-            <tr><td colspan="5" class="px-5 py-10 text-center ui-muted">{{ __('admin.empty_title') }}</td></tr>
+            <tr><td colspan="6" class="px-5 py-10 text-center ui-muted">{{ __('admin.empty_title') }}</td></tr>
         @endforelse
         </tbody>
     </table>

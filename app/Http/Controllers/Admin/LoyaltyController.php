@@ -34,7 +34,7 @@ class LoyaltyController extends Controller
 
     public function spins(Request $request): View
     {
-        $spins = WheelSpin::with(['customer.user', 'rank', 'prize'])
+        $spins = WheelSpin::with(['customer.user', 'rank', 'prize', 'reward'])
             ->latest('spun_at')
             ->paginate(25);
 
@@ -91,6 +91,9 @@ class LoyaltyController extends Controller
                     : null,
                 'type' => $spin->prize_type,
                 'value' => $spin->prize_value,
+                'reward_code' => $spin->reward?->code,
+                'reward_status' => $spin->reward?->status,
+                'reward_type' => $spin->reward?->type,
                 'cost' => $spin->points_cost,
                 'points_won' => $spin->points_won,
                 'balance' => $customer->points_balance,
@@ -98,7 +101,9 @@ class LoyaltyController extends Controller
                 'message' => $spin->is_win
                     ? __('admin.wheel.sim_win', [
                         'prize' => $prize?->label_ar ?? ($spin->prize_type.' '.$spin->prize_value),
-                    ])
+                    ]).($spin->reward?->code
+                        ? ' — '.__('admin.wheel.reward_code').': '.$spin->reward->code
+                        : '')
                     : __('admin.wheel.sim_loss'),
             ];
 

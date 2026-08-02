@@ -235,12 +235,13 @@
             <p class="ui-muted">{{ __('admin.home.loyalty_strip_hint') }}</p>
         </div>
         <div class="flex flex-wrap gap-2">
+            <a href="{{ route('admin.rewards.index') }}" class="ui-btn ui-btn-ghost text-xs">{{ __('admin.nav.rewards') }}</a>
             <a href="{{ route('admin.scans.index') }}" class="ui-btn ui-btn-ghost text-xs">{{ __('admin.nav.scan_monitor') }}</a>
             <a href="{{ route('admin.loyalty.transactions') }}" class="ui-btn ui-btn-ghost text-xs">{{ __('admin.nav.points_ledger') }}</a>
-            <a href="{{ route('admin.qr-codes.create') }}" class="ui-btn ui-btn-ghost text-xs">{{ __('admin.nav.generate_batch') }}</a>
+            <a href="{{ route('admin.loyalty.spins') }}" class="ui-btn ui-btn-ghost text-xs">{{ __('admin.nav.lucky_wheel') }}</a>
         </div>
     </div>
-    <div class="grid gap-3 sm:grid-cols-3">
+    <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <div class="rounded-lg bg-[#F9F8F5] px-4 py-3">
             <div class="ui-muted">{{ __('admin.home.scans_today') }}</div>
             <div class="mt-1 text-xl font-bold">{{ $stats['scans_today'] }}</div>
@@ -253,6 +254,18 @@
             <div class="ui-muted">{{ __('admin.home.active_qr') }}</div>
             <div class="mt-1 text-xl font-bold">{{ number_format($stats['qr_active']) }}</div>
         </div>
+        <a href="{{ route('admin.rewards.index', ['status' => 'available']) }}" class="rounded-lg bg-[#F9F8F5] px-4 py-3 transition hover:bg-[#F3F1EB]">
+            <div class="ui-muted">{{ __('admin.home.rewards_available') }}</div>
+            <div class="mt-1 text-xl font-bold">{{ number_format($stats['rewards_available']) }}</div>
+        </a>
+        <a href="{{ route('admin.rewards.index', ['status' => 'used']) }}" class="rounded-lg bg-[#F9F8F5] px-4 py-3 transition hover:bg-[#F3F1EB]">
+            <div class="ui-muted">{{ __('admin.home.rewards_used') }}</div>
+            <div class="mt-1 text-xl font-bold">{{ number_format($stats['rewards_used']) }}</div>
+        </a>
+        <a href="{{ route('admin.rewards.index') }}" class="rounded-lg bg-[#F9F8F5] px-4 py-3 transition hover:bg-[#F3F1EB]">
+            <div class="ui-muted">{{ __('admin.home.rewards_today') }}</div>
+            <div class="mt-1 text-xl font-bold">{{ number_format($stats['rewards_today']) }}</div>
+        </a>
     </div>
 </div>
 @endsection

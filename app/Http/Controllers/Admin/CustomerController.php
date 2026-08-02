@@ -54,7 +54,8 @@ class CustomerController extends Controller
             'scans' => $customer->qrScans()->with(['merchant', 'qrCode'])->latest('scanned_at')->take(15)->get(),
             'ledger' => $customer->pointsTransactions()->latest('transaction_date')->take(15)->get(),
             'orders' => Order::where('user_id', $customer->user_id)->latest()->take(10)->get(),
-            'spins' => WheelSpin::where('customer_id', $customer->id)->with('rank')->latest('spun_at')->take(10)->get(),
+            'spins' => WheelSpin::where('customer_id', $customer->id)->with(['rank', 'reward'])->latest('spun_at')->take(10)->get(),
+            'rewards' => $customer->rewards()->with(['coupon', 'product'])->latest()->take(15)->get(),
         ]);
     }
 

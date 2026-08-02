@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
+use App\Models\CustomerReward;
 use App\Models\Merchant;
 use App\Models\Order;
 use App\Models\PointsTransaction;
@@ -60,6 +61,9 @@ class DashboardController extends Controller
             'scans_today' => QrScan::whereDate('scanned_at', today())->count(),
             'points_today' => (int) PointsTransaction::where('type', 'earn')->whereDate('transaction_date', today())->sum('amount'),
             'qr_active' => QrCode::where('status', 'active')->count(),
+            'rewards_available' => CustomerReward::where('status', CustomerReward::STATUS_AVAILABLE)->count(),
+            'rewards_used' => CustomerReward::where('status', CustomerReward::STATUS_USED)->count(),
+            'rewards_today' => CustomerReward::whereDate('created_at', today())->count(),
         ];
 
         $weekStart = Carbon::today()->subDays(6)->startOfDay();

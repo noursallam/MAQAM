@@ -19,7 +19,10 @@ document.addEventListener('DOMContentLoaded', function () {
         try { localStorage.setItem(key, theme); } catch (e) {}
         document.querySelectorAll('[data-mq-theme-toggle]').forEach(function (btn) {
             btn.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
-            btn.title = theme === 'dark' ? 'الوضع النهاري' : 'الوضع الليلي';
+            var isAr = document.documentElement.lang === 'ar';
+            btn.title = theme === 'dark'
+                ? (isAr ? 'الوضع النهاري' : 'Light mode')
+                : (isAr ? 'الوضع الليلي' : 'Dark mode');
         });
     }
 
@@ -69,5 +72,35 @@ document.addEventListener('DOMContentLoaded', function () {
                 el.classList.toggle('is-active', el === chip);
             });
         });
+    });
+
+    var searchModal = document.getElementById('mqSearchModal');
+    var searchInput = document.getElementById('mqSearchInput');
+    var searchOpeners = document.querySelectorAll('[data-mq-search-open]');
+
+    function setSearchOpen(open) {
+        if (!searchModal) return;
+        searchModal.hidden = !open;
+        searchModal.classList.toggle('is-open', open);
+        document.body.classList.toggle('mq-search-open', open);
+        if (open && searchInput) {
+            setTimeout(function () { searchInput.focus(); }, 30);
+        }
+    }
+
+    searchOpeners.forEach(function (btn) {
+        btn.addEventListener('click', function () { setSearchOpen(true); });
+    });
+
+    document.querySelectorAll('[data-mq-search-close]').forEach(function (el) {
+        el.addEventListener('click', function () { setSearchOpen(false); });
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') setSearchOpen(false);
+        if ((e.key === 'k' || e.key === 'K') && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            setSearchOpen(true);
+        }
     });
 });

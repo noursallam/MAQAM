@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use ZipArchive;
 
 class QrCodeController extends Controller
 {
@@ -81,26 +82,74 @@ class QrCodeController extends Controller
         return response()->download($path, $batchId.'.zip');
     }
 
-    public function downloadJson(string $batchId): BinaryFileResponse
+    public function downloadJson(string $batchId): \Illuminate\Http\Response|\Symfony\Component\HttpFoundation\StreamedResponse
     {
-        $path = storage_path('app/qr-batches/'.$batchId.'.zip');
-        abort_unless(is_file($path), 404, 'Batch ZIP not found.');
+        $jsonContent = $this->jsonFromZip($batchId) ?? $this->jsonFromDatabase($batchId);
+        abort_unless($jsonContent !== null, 404, __('admin.qr.batch_json_missing'));
 
-        // Extract JSON from ZIP
-        $zip = new ZipArchive;
-        $zip->open($path);
-        $jsonFile = $batchId.'.json';
-        $jsonContent = $zip->getFromName($jsonFile);
-        $zip->close();
-
-        if ($jsonContent === false) {
-            abort(404, 'JSON backup not found in ZIP.');
-        }
-
-        return response()->make($jsonContent, 200, [
-            'Content-Type' => 'application/json',
+        return response($jsonContent, 200, [
+            'Content-Type' => 'application/json; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="'.$batchId.'.json"',
         ]);
+    }
+
+    protected function jsonFromZip(string $batchId): ?string
+    {
+        $path = storage_path('app/qr-batches/'.$batchId.'.zip');
+        if (! is_file($path)) {
+            return null;
+        }
+
+        $zip = new ZipArchive;
+        if ($zip->open($path) !== true) {
+            return null;
+        }
+
+        $jsonContent = $zip->getFromName($batchId.'.json');
+        $zip->close();
+
+        return $jsonContent === false ? null : $jsonContent;
+    }
+
+    protected function jsonFromDatabase(string $batchId): ?string
+    {
+        $codes = QrCode::query()
+            ->with('categoryPrize')
+            ->where('batch_id', $batchId)
+            ->orderBy('id')
+            ->get();
+
+        if ($codes->isEmpty()) {
+            return null;
+        }
+
+        $category = $codes->first()?->categoryPrize;
+
+        $firstGenerated = $codes->sortBy('generated_at')->first()?->generated_at;
+
+        $payload = [
+            'batch_id' => $batchId,
+            'generated_at' => $firstGenerated?->toIso8601String() ?? now()->toIso8601String(),
+            'exported_from' => 'database',
+            'category' => $category ? [
+                'id' => $category->id,
+                'name_ar' => $category->name_ar,
+                'name_en' => $category->name_en,
+                'points_value' => $category->points_value,
+                'background_color' => $category->background_color,
+            ] : null,
+            'quantity' => $codes->count(),
+            'codes' => $codes->map(fn (QrCode $code) => [
+                'serial_code' => $code->serial_code,
+                'category_id' => $code->category_id,
+                'points_awarded' => $code->points_awarded,
+                'status' => $code->status,
+                'generated_at' => $code->generated_at?->toDateTimeString() ?? $code->created_at?->toDateTimeString(),
+                'batch_id' => $code->batch_id,
+            ])->values()->all(),
+        ];
+
+        return json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
 
     public function restore(Request $request): RedirectResponse
@@ -145,11 +194,36 @@ class QrCodeController extends Controller
         return back()->with('success', "Restored {$restoredCount} codes from batch {$batchId}. Skipped {$skippedCount} existing codes.");
     }
 
+    public function destroyBatch(Request $request, string $batchId): RedirectResponse
+    {
+        $batchId = trim($batchId);
+        abort_if($batchId === '', 404);
+
+        $query = QrCode::query()->where('batch_id', $batchId);
+        $total = (clone $query)->count();
+        abort_if($total === 0, 404);
+
+        $usedCount = (clone $query)->where('status', 'used')->count();
+        if ($usedCount > 0 && ! $request->boolean('force')) {
+            return back()->with('error', __('admin.qr.batch_has_used', ['count' => $usedCount]));
+        }
+
+        $deleted = $query->delete();
+
+        $zipPath = storage_path('app/qr-batches/'.$batchId.'.zip');
+        if (is_file($zipPath)) {
+            @unlink($zipPath);
+        }
+
+        return redirect()
+            ->route('admin.qr-codes.index')
+            ->with('success', __('admin.qr.batch_deleted', ['count' => $deleted]));
+    }
+
     public function destroy(QrCode $qr_code): RedirectResponse
     {
-        abort_if($qr_code->status === 'used', 422, 'Cannot delete a used QR code.');
-        
-        // Warning: This will permanently delete the code
+        abort_if($qr_code->status === 'used', 422, __('admin.qr.cannot_delete_used'));
+
         $qr_code->delete();
 
         return back()->with('success', __('admin.success'));

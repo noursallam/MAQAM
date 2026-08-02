@@ -3,10 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Customer;
 use App\Models\Merchant;
+use App\Models\QrCode;
 use App\Models\QrScan;
+use App\Services\QrScanService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use RuntimeException;
 
 class ScanController extends Controller
 {
@@ -29,6 +34,46 @@ class ScanController extends Controller
         return view('admin.scans.index', [
             'scans' => $scans,
             'merchants' => Merchant::where('is_approved', true)->orderBy('business_name')->get(),
+            'customers' => Customer::with(['user', 'rank'])->orderByDesc('id')->limit(100)->get(),
+            'activeCodes' => QrCode::query()
+                ->where('status', 'active')
+                ->latest('id')
+                ->limit(50)
+                ->get(['id', 'serial_code', 'points_awarded', 'batch_id']),
         ]);
+    }
+
+    /**
+     * Preview-only simulation — does not consume the QR or award points.
+     */
+    public function simulate(Request $request, QrScanService $scanner): JsonResponse
+    {
+        $data = $request->validate([
+            'serial_code' => ['required', 'string', 'max:16'],
+            'customer_id' => ['required', 'exists:customers,id'],
+            'merchant_id' => ['nullable', 'exists:merchants,id'],
+            'is_offline' => ['nullable', 'boolean'],
+        ]);
+
+        $customer = Customer::with(['user', 'rank'])->findOrFail($data['customer_id']);
+        $merchant = ! empty($data['merchant_id'])
+            ? Merchant::find($data['merchant_id'])
+            : null;
+
+        try {
+            $preview = $scanner->preview(
+                $data['serial_code'],
+                $customer,
+                $merchant,
+                $request->boolean('is_offline'),
+            );
+
+            return response()->json($preview);
+        } catch (RuntimeException $e) {
+            return response()->json([
+                'ok' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
     }
 }

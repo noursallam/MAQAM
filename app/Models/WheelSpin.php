@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class WheelSpin extends Model
 {
     protected $fillable = [
-        'customer_id', 'rank_id', 'wheel_prize_id', 'points_cost', 'points_won', 'prize_type',
-        'prize_value', 'is_win', 'probability_used', 'spun_at',
+        'customer_id', 'rank_id', 'wheel_prize_id', 'customer_reward_id', 'points_cost',
+        'points_won', 'prize_type', 'prize_value', 'is_win', 'probability_used', 'spun_at',
     ];
 
     protected function casts(): array
@@ -34,5 +34,10 @@ class WheelSpin extends Model
     public function prize(): BelongsTo
     {
         return $this->belongsTo(WheelPrize::class, 'wheel_prize_id');
+    }
+
+    public function reward(): BelongsTo
+    {
+        return $this->belongsTo(CustomerReward::class, 'customer_reward_id');
     }
 }
