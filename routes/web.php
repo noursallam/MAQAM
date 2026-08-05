@@ -81,6 +81,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('qr-codes', [QrCodeController::class, 'index'])->name('qr-codes.index');
         Route::get('qr-codes/generate', [QrCodeController::class, 'create'])->name('qr-codes.create');
         Route::post('qr-codes/generate', [QrCodeController::class, 'store'])->name('qr-codes.store');
+        Route::get('qr-codes/status/{batchId}', [QrCodeController::class, 'status'])->name('qr-codes.status');
+        Route::post('qr-codes/rebuild/{batchId}', [QrCodeController::class, 'rebuild'])->name('qr-codes.rebuild');
         Route::get('qr-codes/download/{batchId}', [QrCodeController::class, 'download'])->name('qr-codes.download');
         Route::get('qr-codes/download-json/{batchId}', [QrCodeController::class, 'downloadJson'])->name('qr-codes.download-json');
         Route::post('qr-codes/restore', [QrCodeController::class, 'restore'])->name('qr-codes.restore');

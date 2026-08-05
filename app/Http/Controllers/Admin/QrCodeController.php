@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\CategoryPrize;
+use App\Models\QrBatch;
 use App\Models\QrCode;
 use App\Services\QrBatchGenerator;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -32,9 +34,18 @@ class QrCodeController extends Controller
             ->limit(50)
             ->get();
 
-        $batches = $batchesRaw->map(function ($batch) {
+        $meta = QrBatch::query()
+            ->whereIn('batch_id', $batchesRaw->pluck('batch_id'))
+            ->get()
+            ->keyBy('batch_id');
+
+        $batches = $batchesRaw->map(function ($batch) use ($meta) {
             $batch->active_count = QrCode::where('batch_id', $batch->batch_id)->where('status', 'active')->count();
             $batch->used_count = QrCode::where('batch_id', $batch->batch_id)->where('status', 'used')->count();
+            $batch->zip_exists = is_file(storage_path('app/qr-batches/'.$batch->batch_id.'.zip'));
+            $batch->meta = $meta->get($batch->batch_id);
+            $batch->build_status = $batch->meta?->status
+                ?? ($batch->zip_exists ? QrBatch::STATUS_READY : 'zip_missing');
 
             return $batch;
         });
@@ -66,12 +77,83 @@ class QrCodeController extends Controller
         ]);
 
         $category = CategoryPrize::findOrFail($data['category_id']);
-        $result = $generator->generate($category, (int) $data['quantity']);
+        $batch = $generator->queueGeneration(
+            $category,
+            (int) $data['quantity'],
+            $data['notes'] ?? null
+        );
+
+        $bgHex = $generator->normalizeHex($category->background_color ?: '#C5A059');
 
         return redirect()
-            ->route('admin.qr-codes.create', ['done' => 1, 'batch' => $result['batch_id'], 'count' => $result['count'], 'color' => $result['background_color']])
-            ->with('success', __('admin.qr.success_title'))
-            ->with('download_batch', $result['batch_id']);
+            ->route('admin.qr-codes.create', [
+                'processing' => 1,
+                'batch' => $batch->batch_id,
+                'count' => $batch->quantity,
+                'color' => $bgHex,
+            ])
+            ->with('success', __('admin.qr.queued_title'));
+    }
+
+    public function status(Request $request, string $batchId, QrBatchGenerator $generator): JsonResponse
+    {
+        $batch = QrBatch::query()->where('batch_id', $batchId)->first();
+        $zipExists = is_file(storage_path('app/qr-batches/'.$batchId.'.zip'));
+        $codeCount = QrCode::query()->where('batch_id', $batchId)->count();
+
+        if (! $batch && $codeCount === 0) {
+            return response()->json(['ok' => false, 'message' => 'Batch not found'], 404);
+        }
+
+        // App-driven build: each poll processes a small chunk (no cron / worker needed).
+        $shouldWork = $request->boolean('work', true);
+        $needsWork = ! $zipExists && ($batch?->isBuilding() || $batch?->status === QrBatch::STATUS_ZIP_MISSING || ! $batch);
+
+        if ($shouldWork && $needsWork) {
+            try {
+                if ($batch && $batch->status === QrBatch::STATUS_ZIP_MISSING) {
+                    $generator->resetForRebuild($batchId);
+                }
+                $batch = $generator->processChunk($batchId);
+                $zipExists = is_file(storage_path('app/qr-batches/'.$batchId.'.zip'));
+            } catch (\Throwable $e) {
+                $batch = QrBatch::query()->where('batch_id', $batchId)->first();
+            }
+        }
+
+        $status = $batch?->status
+            ?? ($zipExists ? QrBatch::STATUS_READY : QrBatch::STATUS_ZIP_MISSING);
+
+        return response()->json([
+            'ok' => true,
+            'batch_id' => $batchId,
+            'status' => $status,
+            'quantity' => $batch?->quantity ?? $codeCount,
+            'processed_count' => $batch?->processed_count ?? ($zipExists ? $codeCount : 0),
+            'progress' => $batch?->progressPercent() ?? ($zipExists ? 100 : 0),
+            'zip_ready' => $zipExists && $status === QrBatch::STATUS_READY,
+            'error_message' => $batch?->error_message,
+            'download_url' => ($zipExists && $status === QrBatch::STATUS_READY)
+                ? route('admin.qr-codes.download', $batchId)
+                : null,
+        ]);
+    }
+
+    public function rebuild(string $batchId, QrBatchGenerator $generator): RedirectResponse
+    {
+        $batchId = trim($batchId);
+        abort_if($batchId === '', 404);
+        abort_unless(QrCode::query()->where('batch_id', $batchId)->exists(), 404);
+
+        $batch = $generator->resetForRebuild($batchId);
+
+        return redirect()
+            ->route('admin.qr-codes.create', [
+                'processing' => 1,
+                'batch' => $batch->batch_id,
+                'count' => $batch->quantity,
+            ])
+            ->with('success', __('admin.qr.rebuild_queued'));
     }
 
     public function download(string $batchId): BinaryFileResponse
@@ -124,7 +206,6 @@ class QrCodeController extends Controller
         }
 
         $category = $codes->first()?->categoryPrize;
-
         $firstGenerated = $codes->sortBy('generated_at')->first()?->generated_at;
 
         $payload = [
@@ -161,24 +242,25 @@ class QrCodeController extends Controller
         $jsonContent = file_get_contents($request->file('json_file')->getPathname());
         $data = json_decode($jsonContent, true);
 
-        if (!isset($data['batch_id'], $data['codes']) || !is_array($data['codes'])) {
+        if (! isset($data['batch_id'], $data['codes']) || ! is_array($data['codes'])) {
             return back()->with('error', 'Invalid JSON backup file format.');
         }
 
         $batchId = $data['batch_id'];
         $restoredCount = 0;
         $skippedCount = 0;
+        $categoryId = null;
 
         foreach ($data['codes'] as $codeData) {
             $serial = $codeData['serial_code'] ?? null;
-            
-            // Check if code already exists
+
             if (QrCode::where('serial_code', $serial)->exists()) {
                 $skippedCount++;
                 continue;
             }
 
-            // Restore the code
+            $categoryId = $codeData['category_id'] ?? $categoryId;
+
             QrCode::create([
                 'serial_code' => $serial,
                 'category_id' => $codeData['category_id'] ?? null,
@@ -189,6 +271,19 @@ class QrCodeController extends Controller
             ]);
 
             $restoredCount++;
+        }
+
+        if ($restoredCount > 0 && $categoryId) {
+            QrBatch::query()->updateOrCreate(
+                ['batch_id' => $batchId],
+                [
+                    'category_id' => $categoryId,
+                    'quantity' => QrCode::query()->where('batch_id', $batchId)->count(),
+                    'status' => is_file(storage_path('app/qr-batches/'.$batchId.'.zip'))
+                        ? QrBatch::STATUS_READY
+                        : QrBatch::STATUS_ZIP_MISSING,
+                ]
+            );
         }
 
         return back()->with('success', "Restored {$restoredCount} codes from batch {$batchId}. Skipped {$skippedCount} existing codes.");
@@ -209,10 +304,16 @@ class QrCodeController extends Controller
         }
 
         $deleted = $query->delete();
+        QrBatch::query()->where('batch_id', $batchId)->delete();
 
         $zipPath = storage_path('app/qr-batches/'.$batchId.'.zip');
         if (is_file($zipPath)) {
             @unlink($zipPath);
+        }
+
+        $dir = storage_path('app/qr-batches/'.$batchId);
+        if (is_dir($dir)) {
+            \Illuminate\Support\Facades\File::deleteDirectory($dir);
         }
 
         return redirect()

@@ -57,9 +57,34 @@
                     <div class="rounded-xl border border-[#D8D4CB] bg-[#F3F1EB] py-2"><div class="ui-muted">{{ __('admin.active') }}</div><div class="font-semibold text-emerald-700">{{ $batch->active_count }}</div></div>
                     <div class="rounded-xl border border-[#D8D4CB] bg-[#F3F1EB] py-2"><div class="ui-muted">مستخدم</div><div class="font-semibold">{{ $batch->used_count }}</div></div>
                 </div>
-                <div class="mt-3 ui-muted">{{ __('admin.qr.created_at') }}: {{ \Illuminate\Support\Carbon::parse($batch->generated_at)->diffForHumans() }}</div>
+                <div class="mt-3 flex flex-wrap items-center gap-2 ui-muted">
+                    <span>{{ __('admin.qr.created_at') }}: {{ \Illuminate\Support\Carbon::parse($batch->generated_at)->diffForHumans() }}</span>
+                    @php
+                        $statusLabel = match($batch->build_status) {
+                            'queued', 'processing' => __('admin.qr.status_building'),
+                            'ready' => __('admin.qr.status_ready'),
+                            'failed' => __('admin.qr.status_failed'),
+                            default => __('admin.qr.zip_missing'),
+                        };
+                        $statusClass = match($batch->build_status) {
+                            'queued', 'processing' => 'ui-badge-warn',
+                            'ready' => 'ui-badge-ok',
+                            default => 'ui-badge-muted',
+                        };
+                    @endphp
+                    <span class="ui-badge {{ $statusClass }}">{{ $statusLabel }}</span>
+                </div>
                 <div class="mt-4 flex flex-wrap gap-2">
-                    <a href="{{ route('admin.qr-codes.download', $batch->batch_id) }}" class="ui-btn ui-btn-primary flex-1 {{ is_file(storage_path('app/qr-batches/'.$batch->batch_id.'.zip')) ? '' : 'pointer-events-none opacity-40' }}" title="{{ is_file(storage_path('app/qr-batches/'.$batch->batch_id.'.zip')) ? '' : __('admin.qr.zip_missing') }}">{{ __('admin.download') }} ZIP</a>
+                    @if($batch->zip_exists)
+                        <a href="{{ route('admin.qr-codes.download', $batch->batch_id) }}" class="ui-btn ui-btn-primary flex-1">{{ __('admin.download') }} ZIP</a>
+                    @else
+                        <form method="POST" action="{{ route('admin.qr-codes.rebuild', $batch->batch_id) }}" class="flex-1">
+                            @csrf
+                            <button type="submit" class="ui-btn ui-btn-primary w-full" @disabled(in_array($batch->build_status, ['queued','processing'], true))>
+                                {{ in_array($batch->build_status, ['queued','processing'], true) ? __('admin.qr.status_building') : __('admin.qr.rebuild_zip') }}
+                            </button>
+                        </form>
+                    @endif
                     <a href="{{ route('admin.qr-codes.download-json', $batch->batch_id) }}" class="ui-btn ui-btn-ghost flex-1">JSON</a>
                     <a href="{{ route('admin.qr-codes.index', ['batch_id' => $batch->batch_id]) }}" class="ui-btn ui-btn-ghost flex-1">{{ __('admin.qr.open_codes') }}</a>
                 </div>
