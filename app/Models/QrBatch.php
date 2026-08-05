@@ -23,6 +23,7 @@ class QrBatch extends Model
         'category_id',
         'quantity',
         'processed_count',
+        'claimed_count',
         'status',
         'notes',
         'error_message',
@@ -35,6 +36,7 @@ class QrBatch extends Model
             'zip_ready_at' => 'datetime',
             'quantity' => 'integer',
             'processed_count' => 'integer',
+            'claimed_count' => 'integer',
         ];
     }
 

@@ -208,6 +208,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const card = document.getElementById('batchProgressCard');
     if(!card) return;
     const url = card.dataset.statusUrl;
+    const workers = {{ \App\Services\QrBatchGenerator::HTTP_WORKERS }};
+    let finished = false;
     const titles = {
         queued: @json(__('admin.qr.queued_title')),
         processing: @json(__('admin.qr.processing_title')),
@@ -221,47 +223,54 @@ document.addEventListener('DOMContentLoaded', () => {
         failed: @json(__('admin.qr.failed_hint')),
     };
 
-    async function tick(){
-        try {
-            const res = await fetch(url + (url.includes('?') ? '&' : '?') + 'work=1', {
-                headers: {'Accept': 'application/json'},
-                credentials: 'same-origin',
-            });
-            if(!res.ok) throw new Error('status '+res.status);
-            const data = await res.json();
-            const pct = data.progress ?? 0;
-            document.getElementById('progressBar').style.width = pct + '%';
-            document.getElementById('progressLabel').textContent = pct + '%';
-            document.getElementById('progressDetail').textContent = (data.processed_count ?? 0) + ' / ' + (data.quantity ?? '—');
-            document.getElementById('progressCount').textContent = data.quantity ?? '—';
-            document.getElementById('progressTitle').textContent = titles[data.status] || titles.processing;
-            document.getElementById('progressHint').textContent = hints[data.status] || hints.processing;
+    function applyStatus(data){
+        const pct = data.progress ?? 0;
+        document.getElementById('progressBar').style.width = pct + '%';
+        document.getElementById('progressLabel').textContent = pct + '%';
+        document.getElementById('progressDetail').textContent = (data.processed_count ?? 0) + ' / ' + (data.quantity ?? '—');
+        document.getElementById('progressCount').textContent = data.quantity ?? '—';
+        document.getElementById('progressTitle').textContent = titles[data.status] || titles.processing;
+        document.getElementById('progressHint').textContent = hints[data.status] || hints.processing;
 
-            if(data.zip_ready || data.status === 'ready'){
-                document.getElementById('progressIcon').textContent = '✓';
-                document.getElementById('progressIcon').className = 'mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-2xl text-emerald-700';
-                const btn = document.getElementById('downloadBtn');
-                btn.classList.remove('pointer-events-none','opacity-40');
-                if(data.download_url) btn.href = data.download_url;
-                return;
+        if(data.zip_ready || data.status === 'ready'){
+            finished = true;
+            document.getElementById('progressIcon').textContent = '✓';
+            document.getElementById('progressIcon').className = 'mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-2xl text-emerald-700';
+            const btn = document.getElementById('downloadBtn');
+            btn.classList.remove('pointer-events-none','opacity-40');
+            if(data.download_url) btn.href = data.download_url;
+            return true;
+        }
+
+        if(data.status === 'failed'){
+            finished = true;
+            document.getElementById('progressIcon').textContent = '!';
+            document.getElementById('progressIcon').className = 'mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 text-2xl text-red-700';
+            const err = document.getElementById('progressError');
+            err.textContent = data.error_message || hints.failed;
+            err.classList.remove('hidden');
+            return true;
+        }
+        return false;
+    }
+
+    async function workerLoop(){
+        while(!finished){
+            try {
+                const res = await fetch(url + (url.includes('?') ? '&' : '?') + 'work=1', {
+                    headers: {'Accept': 'application/json'},
+                    credentials: 'same-origin',
+                });
+                if(!res.ok) throw new Error('status '+res.status);
+                const data = await res.json();
+                if(applyStatus(data)) return;
+            } catch (e) {
+                await new Promise(r => setTimeout(r, 800));
             }
-
-            if(data.status === 'failed'){
-                document.getElementById('progressIcon').textContent = '!';
-                document.getElementById('progressIcon').className = 'mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 text-2xl text-red-700';
-                const err = document.getElementById('progressError');
-                err.textContent = data.error_message || hints.failed;
-                err.classList.remove('hidden');
-                return;
-            }
-
-            // Continue immediately — each request builds ~40 codes in-app
-            setTimeout(tick, 250);
-        } catch (e) {
-            setTimeout(tick, 2000);
         }
     }
-    tick();
+
+    for (let i = 0; i < workers; i++) workerLoop();
 })();
 @endif
 </script>

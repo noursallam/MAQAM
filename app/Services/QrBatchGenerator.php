@@ -25,8 +25,10 @@ class QrBatchGenerator
 
     public const QR_SIZE = 420;
 
-    /** Small chunks so each HTTP request stays under shared-host timeouts. */
-    public const HTTP_CHUNK_SIZE = 40;
+    /** Chunk size tuned for ~5000 codes in under 2 minutes with parallel browser workers. */
+    public const HTTP_CHUNK_SIZE = 100;
+
+    public const HTTP_WORKERS = 5;
 
     /**
      * Create DB records quickly and return a batch ready for HTTP chunk building.
@@ -43,6 +45,7 @@ class QrBatchGenerator
                 'category_id' => $category->id,
                 'quantity' => $quantity,
                 'processed_count' => 0,
+                'claimed_count' => 0,
                 'status' => QrBatch::STATUS_QUEUED,
                 'notes' => $notes,
             ]);
@@ -98,6 +101,7 @@ class QrBatchGenerator
                 'category_id' => $categoryId,
                 'quantity' => $quantity,
                 'processed_count' => 0,
+                'claimed_count' => 0,
                 'status' => QrBatch::STATUS_QUEUED,
                 'error_message' => null,
                 'zip_ready_at' => null,
@@ -140,14 +144,13 @@ class QrBatchGenerator
     }
 
     /**
-     * Process a small chunk of PNGs into the ZIP. Safe for shared hosting HTTP requests.
-     * Keep calling until status is ready/failed.
+     * Process one claimed chunk of PNGs (file-based so concurrent HTTP workers are safe).
      */
     public function processChunk(string $batchId, int $chunkSize = self::HTTP_CHUNK_SIZE): ?QrBatch
     {
-        @set_time_limit(60);
+        @set_time_limit(90);
 
-        $claim = DB::transaction(function () use ($batchId) {
+        $claim = DB::transaction(function () use ($batchId, $chunkSize) {
             $batch = QrBatch::query()->where('batch_id', $batchId)->lockForUpdate()->first();
             $zipPath = storage_path('app/qr-batches/'.$batchId.'.zip');
 
@@ -185,100 +188,116 @@ class QrBatchGenerator
                     'category_id' => $category->id,
                     'quantity' => $totalCodes,
                     'processed_count' => 0,
+                    'claimed_count' => 0,
                     'status' => QrBatch::STATUS_QUEUED,
                 ]);
             } else {
                 $batch->update(['quantity' => $totalCodes]);
             }
 
-            if ($batch->processed_count <= 0 && is_file($zipPath)) {
-                @unlink($zipPath);
+            $batch->refresh();
+
+            if ((int) $batch->claimed_count >= $totalCodes) {
+                if ((int) $batch->processed_count >= $totalCodes) {
+                    return [
+                        'done' => false,
+                        'finalize' => true,
+                        'batch' => $batch,
+                        'category' => $category,
+                    ];
+                }
+
+                return ['done' => false, 'idle' => true, 'batch' => $batch, 'category' => $category];
             }
 
+            if ((int) $batch->claimed_count === 0) {
+                if (is_file($zipPath)) {
+                    @unlink($zipPath);
+                }
+                File::ensureDirectoryExists(storage_path('app/qr-batches/'.$batchId));
+            }
+
+            $offset = (int) $batch->claimed_count;
+            $take = min($chunkSize, $totalCodes - $offset);
             $batch->update([
+                'claimed_count' => $offset + $take,
                 'status' => QrBatch::STATUS_PROCESSING,
                 'error_message' => null,
             ]);
 
             return [
                 'done' => false,
+                'idle' => false,
+                'finalize' => false,
                 'batch' => $batch->fresh(),
                 'category' => $category,
-                'offset' => max(0, (int) $batch->fresh()->processed_count),
+                'offset' => $offset,
+                'take' => $take,
                 'total' => $totalCodes,
-                'zip_path' => $zipPath,
             ];
         });
 
-        if ($claim['done']) {
+        if (! empty($claim['done'])) {
             return $claim['batch'];
         }
 
-        return $this->renderClaimedChunk($claim, $chunkSize);
+        if (! empty($claim['finalize'])) {
+            return $this->tryFinalize($claim['batch'], $claim['category']);
+        }
+
+        if (! empty($claim['idle'])) {
+            return $claim['batch']->fresh();
+        }
+
+        return $this->renderClaimedChunk($claim);
     }
 
     /**
-     * @param  array{batch: QrBatch, category: CategoryPrize, offset: int, total: int, zip_path: string}  $claim
+     * @param  array{batch: QrBatch, category: CategoryPrize, offset: int, take: int, total: int}  $claim
      */
-    protected function renderClaimedChunk(array $claim, int $chunkSize): QrBatch
+    protected function renderClaimedChunk(array $claim): QrBatch
     {
-        /** @var QrBatch $batch */
         $batch = $claim['batch'];
         $batchId = $batch->batch_id;
         $offset = $claim['offset'];
+        $take = $claim['take'];
         $totalCodes = $claim['total'];
-        $zipPath = $claim['zip_path'];
         $category = $claim['category'];
+        $dir = storage_path('app/qr-batches/'.$batchId);
+        File::ensureDirectoryExists($dir);
 
         $codes = QrCode::query()
             ->where('batch_id', $batchId)
             ->orderBy('id')
             ->skip($offset)
-            ->take(max(1, $chunkSize))
-            ->get(['id', 'serial_code', 'category_id', 'points_awarded', 'status', 'generated_at', 'batch_id']);
-
-        if ($codes->isEmpty()) {
-            return $this->finalizeZip($batch, $category);
-        }
+            ->take($take)
+            ->get(['id', 'serial_code']);
 
         $bgHex = $this->normalizeHex($category->background_color ?: '#C5A059');
         $writer = new PngWriter;
 
         try {
-            $zip = new ZipArchive;
-            $flags = ($offset === 0 || ! is_file($zipPath))
-                ? (ZipArchive::CREATE | ZipArchive::OVERWRITE)
-                : 0;
-
-            if ($zip->open($zipPath, $flags) !== true) {
-                throw new RuntimeException('Unable to open ZIP archive.');
-            }
-
             foreach ($codes as $code) {
                 $png = $this->renderPngWithBackground($writer, $code->serial_code, $bgHex);
-                $name = $code->serial_code.'.png';
-                $zip->addFromString($name, $png);
-                if (method_exists($zip, 'setCompressionName')) {
-                    $zip->setCompressionName($name, ZipArchive::CM_STORE);
-                }
+                file_put_contents($dir.'/'.$code->serial_code.'.png', $png);
             }
 
-            $zip->close();
+            $shouldFinalize = false;
 
-            $processed = $offset + $codes->count();
-
-            DB::transaction(function () use ($batchId, $offset, $processed) {
+            DB::transaction(function () use ($batchId, $codes, $totalCodes, &$shouldFinalize) {
                 $locked = QrBatch::query()->where('batch_id', $batchId)->lockForUpdate()->first();
-                if (! $locked || (int) $locked->processed_count !== $offset) {
+                if (! $locked) {
                     return;
                 }
+                $processed = (int) $locked->processed_count + $codes->count();
                 $locked->update(['processed_count' => $processed]);
+                $shouldFinalize = $processed >= $totalCodes;
             });
 
             $batch = $batch->fresh();
 
-            if ($processed >= $totalCodes) {
-                return $this->finalizeZip($batch, $category);
+            if ($shouldFinalize) {
+                return $this->tryFinalize($batch, $category);
             }
 
             return $batch;
@@ -292,67 +311,129 @@ class QrBatchGenerator
         }
     }
 
+    protected function tryFinalize(QrBatch $batch, CategoryPrize $category): QrBatch
+    {
+        $decision = DB::transaction(function () use ($batch) {
+            $locked = QrBatch::query()->where('batch_id', $batch->batch_id)->lockForUpdate()->first();
+            if (! $locked) {
+                return 'skip';
+            }
+
+            if ($locked->status === QrBatch::STATUS_READY && is_file($locked->zipPath())) {
+                return 'ready';
+            }
+
+            if ((int) $locked->processed_count < (int) $locked->quantity) {
+                return 'skip';
+            }
+
+            // Prevent two workers from packing the ZIP at once.
+            if ($locked->status === QrBatch::STATUS_READY) {
+                return 'ready';
+            }
+
+            return 'finalize';
+        });
+
+        if ($decision === 'ready' || $decision === 'skip') {
+            return $batch->fresh() ?? $batch;
+        }
+
+        return $this->finalizeZip($batch->fresh() ?? $batch, $category);
+    }
+
     protected function finalizeZip(QrBatch $batch, CategoryPrize $category): QrBatch
     {
+        @set_time_limit(120);
+
         $batchId = $batch->batch_id;
         $zipPath = storage_path('app/qr-batches/'.$batchId.'.zip');
+        $lockPath = $zipPath.'.lock';
+        $dir = storage_path('app/qr-batches/'.$batchId);
         $bgHex = $this->normalizeHex($category->background_color ?: '#C5A059');
 
-        $codes = QrCode::query()
-            ->where('batch_id', $batchId)
-            ->orderBy('id')
-            ->get(['serial_code', 'category_id', 'points_awarded', 'status', 'generated_at', 'batch_id']);
+        File::ensureDirectoryExists(dirname($zipPath));
+        $lock = fopen($lockPath, 'c+');
+        if ($lock === false || ! flock($lock, LOCK_EX | LOCK_NB)) {
+            if (is_resource($lock)) {
+                fclose($lock);
+            }
 
-        $jsonBackup = [
-            'batch_id' => $batchId,
-            'generated_at' => $codes->sortBy('generated_at')->first()?->generated_at?->toIso8601String()
-                ?? now()->toIso8601String(),
-            'category' => [
-                'id' => $category->id,
-                'name_ar' => $category->name_ar,
-                'name_en' => $category->name_en,
-                'points_value' => $category->points_value,
-                'background_color' => $bgHex,
-            ],
-            'quantity' => $codes->count(),
-            'codes' => $codes->map(fn (QrCode $code) => [
-                'serial_code' => $code->serial_code,
-                'category_id' => $code->category_id,
-                'points_awarded' => $code->points_awarded,
-                'status' => $code->status,
-                'generated_at' => $code->generated_at?->toDateTimeString(),
-                'batch_id' => $code->batch_id,
-            ])->values()->all(),
-        ];
-
-        $zip = new ZipArchive;
-        if (! is_file($zipPath) || $zip->open($zipPath) !== true) {
-            throw new RuntimeException('ZIP archive missing while finalizing.');
+            return $batch->fresh() ?? $batch;
         }
 
-        $jsonName = $batchId.'.json';
-        $zip->addFromString(
-            $jsonName,
-            json_encode($jsonBackup, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) ?: '{}'
-        );
-        if (method_exists($zip, 'setCompressionName')) {
-            $zip->setCompressionName($jsonName, ZipArchive::CM_STORE);
-        }
-        $zip->close();
+        try {
+            $fresh = $batch->fresh();
+            if ($fresh && $fresh->status === QrBatch::STATUS_READY && is_file($zipPath)) {
+                return $fresh;
+            }
 
-        $dir = storage_path('app/qr-batches/'.$batchId);
-        if (is_dir($dir)) {
+            File::ensureDirectoryExists($dir);
+
+            $codes = QrCode::query()
+                ->where('batch_id', $batchId)
+                ->orderBy('id')
+                ->get(['serial_code', 'category_id', 'points_awarded', 'status', 'generated_at', 'batch_id']);
+
+            $jsonBackup = [
+                'batch_id' => $batchId,
+                'generated_at' => $codes->sortBy('generated_at')->first()?->generated_at?->toIso8601String()
+                    ?? now()->toIso8601String(),
+                'category' => [
+                    'id' => $category->id,
+                    'name_ar' => $category->name_ar,
+                    'name_en' => $category->name_en,
+                    'points_value' => $category->points_value,
+                    'background_color' => $bgHex,
+                ],
+                'quantity' => $codes->count(),
+                'codes' => $codes->map(fn (QrCode $code) => [
+                    'serial_code' => $code->serial_code,
+                    'category_id' => $code->category_id,
+                    'points_awarded' => $code->points_awarded,
+                    'status' => $code->status,
+                    'generated_at' => $code->generated_at?->toDateTimeString(),
+                    'batch_id' => $code->batch_id,
+                ])->values()->all(),
+            ];
+
+            $jsonPath = $dir.'/'.$batchId.'.json';
+            file_put_contents($jsonPath, json_encode($jsonBackup, JSON_UNESCAPED_UNICODE) ?: '{}');
+
+            if (is_file($zipPath)) {
+                @unlink($zipPath);
+            }
+
+            $zip = new ZipArchive;
+            if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+                throw new RuntimeException('Unable to create ZIP archive.');
+            }
+
+            foreach (File::files($dir) as $file) {
+                $name = $file->getFilename();
+                $zip->addFile($file->getPathname(), $name);
+                if (method_exists($zip, 'setCompressionName')) {
+                    $zip->setCompressionName($name, ZipArchive::CM_STORE);
+                }
+            }
+            $zip->close();
+
             File::deleteDirectory($dir);
+
+            $batch->update([
+                'status' => QrBatch::STATUS_READY,
+                'processed_count' => $codes->count(),
+                'claimed_count' => $codes->count(),
+                'zip_ready_at' => now(),
+                'error_message' => null,
+            ]);
+
+            return $batch->fresh();
+        } finally {
+            flock($lock, LOCK_UN);
+            fclose($lock);
+            @unlink($lockPath);
         }
-
-        $batch->update([
-            'status' => QrBatch::STATUS_READY,
-            'processed_count' => $codes->count(),
-            'zip_ready_at' => now(),
-            'error_message' => null,
-        ]);
-
-        return $batch->fresh();
     }
 
     public function renderPngWithBackground(PngWriter $writer, string $serial, string $bgHex): string
@@ -386,7 +467,8 @@ class QrBatchGenerator
         imagecopy($canvas, $qrImage, $offsetX, $offsetY, 0, 0, $qrW, $qrH);
 
         ob_start();
-        imagepng($canvas, null, 6);
+        // Level 1: much faster encode, print quality unchanged (pixels identical).
+        imagepng($canvas, null, 1);
         $png = ob_get_clean();
 
         imagedestroy($qrImage);
