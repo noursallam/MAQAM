@@ -74,7 +74,10 @@
             </div>
             <div>
                 <label class="mb-1 block text-sm font-medium">كود المنتج (SKU)</label>
-                <input name="sku" value="{{ old('sku', $product->sku) }}" required class="ui-input" dir="ltr">
+                <input name="sku" value="{{ old('sku', $product->sku) }}" class="ui-input" dir="ltr" placeholder="{{ $product->exists ? '' : '16 رقم باركود' }}" maxlength="16" inputmode="numeric" pattern="[0-9]{16}">
+                @unless($product->exists)
+                    <p class="ui-muted mt-1 text-xs">اتركه فارغًا ليُولَّد رقم باركود 16 خانة تلقائيًا</p>
+                @endunless
             </div>
         </div>
 

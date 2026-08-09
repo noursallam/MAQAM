@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Services\MediaService;
+use App\Services\ProductSkuGenerator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +18,8 @@ use Illuminate\View\View;
 class ProductController extends Controller
 {
     public function __construct(
-        private MediaService $mediaService
+        private MediaService $mediaService,
+        private ProductSkuGenerator $skuGenerator,
     ) {}
 
     public function index(Request $request): View
@@ -64,6 +66,19 @@ class ProductController extends Controller
         }
 
         DB::transaction(function () use ($request, $data, $files, $thumbnailIndex) {
+            if (empty($data['sku'])) {
+                $colorName = collect($request->input('colors', []))
+                    ->pluck('name')
+                    ->map(fn ($n) => trim((string) $n))
+                    ->first(fn ($n) => $n !== '');
+
+                $data['sku'] = $this->skuGenerator->makeFromProductData(
+                    $data['name_en'],
+                    $colorName,
+                    Category::find($data['category_id']),
+                );
+            }
+
             $product = Product::create($data);
 
             foreach ($files as $i => $file) {
