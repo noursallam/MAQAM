@@ -46,7 +46,7 @@
 @endphp
 
 <section class="mq-shop-hero" aria-label="{{ __('store.shop.heading') }}">
-    <div class="mq-shop-hero-bg" aria-hidden="true"></div>
+    <div class="mq-shop-hero-bg" aria-hidden="true" style="--mq-shop-hero-image: url('{{ asset('identity/56829c8b-2436-44e5-9110-95abb1027fea.png') }}')"></div>
     <div class="mq-container mq-shop-hero-inner">
         <div class="mq-breadcrumb mq-breadcrumb-on-dark">
             <a href="{{ route('store.home') }}">{{ __('store.common.home') }}</a>

@@ -45,14 +45,15 @@
     ];
 @endphp
 
-<section class="mq-hero" aria-label="{{ __('store.home.title') }}">
+<section class="mq-hero mq-hero-calm" aria-label="{{ __('store.home.title') }}">
     <div class="mq-hero-media">
-        <img src="{{ asset('store/img/hero-1.webp') }}" alt="{{ __('store.store_name') }}">
+        <img src="{{ asset('identity/7a2131bb-c88e-4ad4-9c9d-d0d836e01ea9.png') }}" alt="{{ __('store.brand') }}">
     </div>
     <div class="mq-hero-glow" aria-hidden="true"></div>
 
     <div class="mq-container mq-hero-content">
         <h1>{{ __('store.home.hero_title') }}</h1>
+        <p class="mq-hero-slogan-en">{{ __('store.home.hero_slogan_en') }}</p>
         <p>{{ __('store.home.hero_text') }}</p>
         <div class="mq-hero-actions">
             <a href="{{ route('store.shop') }}" class="mq-btn mq-btn-primary">{{ __('store.home.shop_now') }}</a>
@@ -61,53 +62,37 @@
     </div>
 </section>
 
-<section class="mq-features">
+<section class="mq-features mq-features-slim">
     <div class="mq-container mq-features-grid">
         <div class="mq-feature">
             <div class="mq-feature-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h11v10H3z"/><path d="M14 10h4l3 3v4h-7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h11v10H3z"/><path d="M14 10h4l3 3v4h-7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
             </div>
-            <div>
-                <strong>{{ __('store.home.feature_shipping') }}</strong>
-                <span>{{ __('store.home.feature_shipping_text') }}</span>
-            </div>
+            <strong>{{ __('store.home.feature_shipping') }}</strong>
         </div>
         <div class="mq-feature">
             <div class="mq-feature-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-3z"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-3z"/></svg>
             </div>
-            <div>
-                <strong>{{ __('store.home.feature_quality') }}</strong>
-                <span>{{ __('store.home.feature_quality_text') }}</span>
-            </div>
+            <strong>{{ __('store.home.feature_quality') }}</strong>
         </div>
         <div class="mq-feature">
             <div class="mq-feature-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2 4 14h7l-1 8 10-14h-7l0-6z"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2 4 14h7l-1 8 10-14h-7l0-6z"/></svg>
             </div>
-            <div>
-                <strong>{{ __('store.home.feature_points') }}</strong>
-                <span>{{ __('store.home.feature_points_text') }}</span>
-            </div>
+            <strong>{{ __('store.home.feature_points') }}</strong>
         </div>
         <div class="mq-feature">
             <div class="mq-feature-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 14v3a3 3 0 0 0 3 3h1"/><path d="M20 14v3a3 3 0 0 1-3 3h-1"/><path d="M8 21h8"/><path d="M7 4h10a2 2 0 0 1 2 2v5H5V6a2 2 0 0 1 2-2z"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 14v3a3 3 0 0 0 3 3h1"/><path d="M20 14v3a3 3 0 0 1-3 3h-1"/><path d="M8 21h8"/><path d="M7 4h10a2 2 0 0 1 2 2v5H5V6a2 2 0 0 1 2-2z"/></svg>
             </div>
-            <div>
-                <strong>{{ __('store.home.feature_support') }}</strong>
-                <span>{{ __('store.home.feature_support_text') }}</span>
-            </div>
+            <strong>{{ __('store.home.feature_support') }}</strong>
         </div>
     </div>
 </section>
 
 <section class="mq-shop-cats mq-home-cats" aria-label="{{ __('store.home.product_types') }}">
     <div class="mq-container">
-        <div class="mq-section-head" style="margin-bottom:1.35rem">
-            <span class="mq-eyebrow">{{ __('store.home.browse_by_type') }}</span>
-            <h2>{{ __('store.home.product_types') }}</h2>
-        </div>
         <div class="mq-cat-strip" role="list">
             @foreach ($categories as $i => $cat)
                 <a href="{{ route('store.shop') }}" class="mq-cat-item {{ $i === 0 ? 'is-active' : '' }}" role="listitem">
@@ -115,17 +100,15 @@
                         {!! $cat['icon'] !!}
                     </span>
                     <span class="mq-cat-label">{{ __('store.categories.'.$cat['key']) }}</span>
-                    <em class="mq-cat-count">{{ $cat['count'] }} {{ __('store.common.product') }}</em>
                 </a>
             @endforeach
         </div>
     </div>
 </section>
 
-<section class="mq-section">
+<section class="mq-section mq-section-airy">
     <div class="mq-container">
         <div class="mq-section-head">
-            <span class="mq-eyebrow">{{ __('store.home.best_sellers') }}</span>
             <h2>{{ __('store.home.selected_products') }}</h2>
             <p>{{ __('store.home.selected_lead') }}</p>
         </div>
@@ -143,71 +126,18 @@
     </div>
 </section>
 
-<section class="mq-section mq-home-faq">
-    <div class="mq-container mq-home-faq-inner">
-        <div class="mq-section-head">
-            <span class="mq-eyebrow">{{ __('store.home.faq_eyebrow') }}</span>
-            <h2>{{ __('store.home.faq_title') }} <em>{{ __('store.home.faq_title_em') }}</em></h2>
-        </div>
-
-        <div class="mq-faq-list mq-faq-accordion">
-            @foreach (['q1', 'q2', 'q3', 'q4', 'q5', 'q6'] as $key)
-                <details class="mq-faq-item">
-                    <summary>
-                        <span>{{ __('store.faq.'.$key) }}</span>
-                        <i class="mq-faq-chevron" aria-hidden="true">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-                        </i>
-                    </summary>
-                    <p>{{ __('store.faq.a'.substr($key, 1)) }}</p>
-                </details>
-            @endforeach
-        </div>
-    </div>
-</section>
-
-<section class="mq-section" style="padding-top:0">
+<section class="mq-section mq-section-airy" style="padding-top:0">
     <div class="mq-container">
         <div class="mq-panel mq-home-loyalty">
             <div>
                 <span class="mq-eyebrow">{{ __('store.home.loyalty_eyebrow') }}</span>
                 <h2 style="margin:.4rem 0 .55rem">{{ __('store.home.loyalty_title') }}</h2>
-                <p style="margin:0;color:var(--mq-muted);max-width:520px">{{ __('store.home.loyalty_text') }}</p>
+                <p style="margin:0;color:var(--mq-muted);max-width:480px">{{ __('store.home.loyalty_text') }}</p>
             </div>
             <div class="mq-hero-actions">
                 <a href="{{ route('store.loyalty') }}" class="mq-btn mq-btn-primary">{{ __('store.home.loyalty_details') }}</a>
-                <a href="{{ route('store.profile') }}" class="mq-btn mq-btn-ghost">{{ __('store.home.my_wallet') }}</a>
             </div>
         </div>
-    </div>
-</section>
-
-<section class="mq-section mq-feature-banner-wrap" style="padding-top:1.5rem">
-    <div class="mq-container">
-        <article class="mq-feature-banner">
-            <div class="mq-feature-banner-copy">
-                <span class="mq-feature-pill">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 4 14h7l-1 8 10-14h-7l0-6z"/></svg>
-                    {{ __('store.home.banner_pill') }}
-                </span>
-                <h2>{{ __('store.home.banner_title') }}</h2>
-                <p>{{ __('store.home.banner_text') }}</p>
-                <a href="{{ route('store.shop') }}" class="mq-btn mq-btn-primary">{{ __('store.home.banner_cta') }}</a>
-                <div class="mq-feature-trust">
-                    <span class="star" aria-hidden="true">★</span>
-                    <span>{{ __('store.home.banner_trust') }}</span>
-                </div>
-            </div>
-            <div class="mq-feature-banner-media">
-                <img
-                    src="{{ asset('store/img/feature-socket.webp') }}"
-                    alt="{{ __('store.categories.sockets') }}"
-                    width="1000"
-                    height="1600"
-                    loading="lazy"
-                >
-            </div>
-        </article>
     </div>
 </section>
 @endsection

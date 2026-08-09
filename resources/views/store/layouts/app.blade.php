@@ -29,11 +29,15 @@
     @stack('styles')
 </head>
 <body class="mq-store">
-    <div class="mq-announce">
-        <div class="mq-container mq-announce-inner">
-            <span>{{ __('store.announce.quality') }}</span>
-            <span>{{ __('store.announce.loyalty') }}</span>
-            <span>{{ __('store.announce.shipping') }}</span>
+    <div class="mq-announce" aria-label="{{ __('store.announce.quality') }}">
+        <div class="mq-announce-track">
+            @foreach ([false, true] as $duplicate)
+                <div class="mq-announce-group" @if ($duplicate) aria-hidden="true" @endif>
+                    <span>{{ __('store.announce.quality') }}</span>
+                    <span>{{ __('store.announce.loyalty') }}</span>
+                    <span>{{ __('store.announce.shipping') }}</span>
+                </div>
+            @endforeach
         </div>
     </div>
 
@@ -51,10 +55,13 @@
                 <a href="{{ route('store.faq') }}" class="{{ request()->routeIs('store.faq') ? 'is-active' : '' }}">{{ __('store.nav.faq') }}</a>
                 <a href="{{ route('store.contact') }}" class="{{ request()->routeIs('store.contact') ? 'is-active' : '' }}">{{ __('store.nav.contact') }}</a>
                 <div class="mq-nav-mobile-tools">
-                    <form method="POST" action="{{ route('store.locale') }}" class="mq-lang-switch">
+                    <form method="POST" action="{{ route('store.locale') }}" class="mq-lang-switch mq-lang-switch-compact">
                         @csrf
-                        <button type="submit" name="locale" value="ar" class="{{ $locale === 'ar' ? 'is-active' : '' }}" aria-label="العربية">ع</button>
-                        <button type="submit" name="locale" value="en" class="{{ $locale === 'en' ? 'is-active' : '' }}" aria-label="English">EN</button>
+                        @if ($locale === 'ar')
+                            <button type="submit" name="locale" value="en" aria-label="English">EN</button>
+                        @else
+                            <button type="submit" name="locale" value="ar" aria-label="العربية">ع</button>
+                        @endif
                     </form>
                     <button type="button" class="mq-icon-btn mq-theme-toggle" data-mq-theme-toggle aria-label="{{ __('store.nav.theme') }}">
                         <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
@@ -64,10 +71,13 @@
             </nav>
 
             <div class="mq-header-actions">
-                <form method="POST" action="{{ route('store.locale') }}" class="mq-lang-switch">
+                <form method="POST" action="{{ route('store.locale') }}" class="mq-lang-switch mq-lang-switch-compact">
                     @csrf
-                    <button type="submit" name="locale" value="ar" class="{{ $locale === 'ar' ? 'is-active' : '' }}" aria-label="العربية">ع</button>
-                    <button type="submit" name="locale" value="en" class="{{ $locale === 'en' ? 'is-active' : '' }}" aria-label="English">EN</button>
+                    @if ($locale === 'ar')
+                        <button type="submit" name="locale" value="en" aria-label="English">EN</button>
+                    @else
+                        <button type="submit" name="locale" value="ar" aria-label="العربية">ع</button>
+                    @endif
                 </form>
                 <button type="button" class="mq-icon-btn mq-theme-toggle" data-mq-theme-toggle aria-label="{{ __('store.nav.theme') }}">
                     <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
@@ -80,7 +90,9 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
                     <span class="mq-badge">2</span>
                 </a>
-                <a href="{{ route('store.profile') }}" class="mq-login-link">{{ __('store.nav.account') }}</a>
+                <a href="{{ route('store.profile') }}" class="mq-icon-btn mq-account-btn" aria-label="{{ __('store.nav.account') }}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="8" r="4"/></svg>
+                </a>
                 <button type="button" class="mq-icon-btn mq-menu-toggle" id="mqMenuToggle" aria-label="{{ __('store.nav.menu') }}" aria-expanded="false">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
                 </button>
@@ -92,16 +104,17 @@
         @yield('content')
     </main>
 
-    <footer class="mq-footer">
-        <div class="mq-container">
+    <footer class="mq-footer" style="--mq-footer-image: url('{{ asset('identity/3.png') }}')">
+        <div class="mq-footer-bg" aria-hidden="true"></div>
+        <div class="mq-container mq-footer-inner">
             <div class="mq-footer-grid">
-                <div>
+                <div class="mq-footer-brand">
                     <a class="mq-logo" href="{{ route('store.home') }}">
                         <img src="{{ asset('identity/MAQAM-logo-header.png') }}" alt="MAQAM">
                     </a>
-                    <p style="margin-top:1rem">{{ __('store.footer.tagline') }}</p>
+                    <p>{{ __('store.footer.tagline') }}</p>
                 </div>
-                <div>
+                <div class="mq-footer-col">
                     <h3>{{ __('store.footer.store') }}</h3>
                     <ul>
                         <li><a href="{{ route('store.shop') }}">{{ __('store.footer.all_products') }}</a></li>
@@ -110,7 +123,7 @@
                         <li><a href="{{ route('store.about') }}">{{ __('store.footer.about') }}</a></li>
                     </ul>
                 </div>
-                <div>
+                <div class="mq-footer-col">
                     <h3>{{ __('store.footer.account') }}</h3>
                     <ul>
                         <li><a href="{{ route('store.profile') }}">{{ __('store.footer.profile') }}</a></li>
@@ -119,7 +132,7 @@
                         <li><a href="{{ route('store.checkout') }}">{{ __('store.footer.checkout') }}</a></li>
                     </ul>
                 </div>
-                <div>
+                <div class="mq-footer-col">
                     <h3>{{ __('store.footer.policies') }}</h3>
                     <ul>
                         <li><a href="{{ route('store.privacy') }}">{{ __('store.footer.privacy') }}</a></li>

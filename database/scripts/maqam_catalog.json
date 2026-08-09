@@ -1,0 +1,322 @@
+{
+  "title": "MAQAM",
+  "products": [
+    {
+      "no": 1,
+      "product_name": "1gang 1way(1/3)",
+      "description_ar": "مفتاح 16 أمبير 24 مللي أحادي",
+      "variants": [
+        { "system_code": 5001, "production_code": "Q5001", "color_ar": "أبيض", "color_en": "WHITE", "note": "silver QR" },
+        { "system_code": 5002, "production_code": "Q5002", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5003, "production_code": "Q5003", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5004, "production_code": "Q5004", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 2,
+      "product_name": "1gang 2way (1/3)",
+      "description_ar": "مفتاح 16 أمبير 24 مللي ديفاتير",
+      "variants": [
+        { "system_code": 5005, "production_code": "Q5005", "color_ar": "ابيض", "color_en": "WHITE" },
+        { "system_code": 5006, "production_code": "Q5006", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5007, "production_code": "Q5007", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5008, "production_code": "Q5008", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 3,
+      "product_name": "2gang 1way(1/3)",
+      "description_ar": "مفتاح 16 أمبير مجوز 24 مللي",
+      "variants": [
+        { "system_code": 5009, "production_code": "Q5009", "color_ar": "ابيض", "color_en": "WHITE" },
+        { "system_code": 5010, "production_code": "Q5010", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5011, "production_code": "Q5011", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5012, "production_code": "Q5012", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 4,
+      "product_name": "1gang 3way (1/3) new",
+      "description_ar": "مفتاح 16 أمبير 24 مللي ديجاتوري",
+      "variants": [
+        { "system_code": 5013, "production_code": "Q5013", "color_ar": "ابيض", "color_en": "WHITE" },
+        { "system_code": 5014, "production_code": "Q5014", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5015, "production_code": "Q5015", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5016, "production_code": "Q5016", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 5,
+      "product_name": "20A switch(1/3)",
+      "description_ar": "مفتاح سخان 20 أمبير 24 مللي",
+      "variants": [
+        { "system_code": 5017, "production_code": "Q5017", "color_ar": "ابيض", "color_en": "WHITE" },
+        { "system_code": 5018, "production_code": "Q5018", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5019, "production_code": "Q5019", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5020, "production_code": "Q5020", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 6,
+      "product_name": "20A switch(L)",
+      "description_ar": "مفتاح سخان 20 أمبير 72 مللي",
+      "variants": [
+        { "system_code": 5021, "production_code": "Q5021", "color_ar": "ابيض", "color_en": "WHITE" },
+        { "system_code": 5022, "production_code": "Q5022", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5023, "production_code": "Q5023", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5024, "production_code": "Q5024", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 7,
+      "product_name": "45A switch(L)",
+      "description_ar": "مفتاح تكييف 45 أمبير 72 مللي",
+      "variants": [
+        { "system_code": 5025, "production_code": "Q5025", "color_ar": "ابيض", "color_en": "WHITE" },
+        { "system_code": 5026, "production_code": "Q5026", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5027, "production_code": "Q5027", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5028, "production_code": "Q5028", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 8,
+      "product_name": "1gang 1way(L)",
+      "description_ar": "مفتاح أحادي 16 أمبير 72 مللي",
+      "variants": [
+        { "system_code": 5029, "production_code": "Q5029", "color_ar": "ابيض", "color_en": "WHITE" },
+        { "system_code": 5030, "production_code": "Q5030", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5031, "production_code": "Q5031", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5032, "production_code": "Q5032", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 9,
+      "product_name": "Doorbell switch(1/3)",
+      "description_ar": "لقمه جرس بالرسمه 16 أمبير 24 مللي",
+      "variants": [
+        { "system_code": 5033, "production_code": "Q5033", "color_ar": "ابيض", "color_en": "WHITE" },
+        { "system_code": 5034, "production_code": "Q5034", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5035, "production_code": "Q5035", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5036, "production_code": "Q5036", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 10,
+      "product_name": "Doorbell switch(L)",
+      "description_ar": "لقمه جرس بالرسمه 16 أمبير 72 مللي",
+      "variants": [
+        { "system_code": 5037, "production_code": "Q5037", "color_ar": "ابيض", "color_en": "WHITE" },
+        { "system_code": 5038, "production_code": "Q5038", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5039, "production_code": "Q5039", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5040, "production_code": "Q5040", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 11,
+      "product_name": "2P Socket(1/3)",
+      "description_ar": "بريزة 16 أمبير 24 مللي أمريكي",
+      "variants": [
+        { "system_code": 5041, "production_code": "Q5041", "color_ar": "ابيض", "color_en": "WHITE", "note": "silver QR" },
+        { "system_code": 5042, "production_code": "Q5042", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5043, "production_code": "Q5043", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5044, "production_code": "Q5044", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 12,
+      "product_name": "MF Socket(2/3)",
+      "description_ar": "بريزة 16 أمبير MK 24 مللي",
+      "variants": [
+        { "system_code": 5045, "production_code": "Q5045", "color_ar": "ابيض", "color_en": "WHITE" },
+        { "system_code": 5046, "production_code": "Q5046", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5047, "production_code": "Q5047", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5048, "production_code": "Q5048", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 13,
+      "product_name": "European Socket 2/3",
+      "description_ar": "بريزة مجوفه 16 أمبير 48 مللي",
+      "variants": [
+        { "system_code": 5049, "production_code": "Q5049", "color_ar": "ابيض", "color_en": "WHITE" },
+        { "system_code": 5050, "production_code": "Q5050", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5051, "production_code": "Q5051", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5052, "production_code": "Q5052", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 14,
+      "product_name": "TEL(1/3)",
+      "description_ar": "بريزة تليفون 24 مللي",
+      "variants": [
+        { "system_code": 5053, "production_code": "Q5053", "color_ar": "ابيض", "color_en": "WHITE" },
+        { "system_code": 5054, "production_code": "Q5054", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5055, "production_code": "Q5055", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5056, "production_code": "Q5056", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 15,
+      "product_name": "Computer(1/3)",
+      "description_ar": "بريزة كمبيوتر 24 مللي",
+      "variants": [
+        { "system_code": 5057, "production_code": "Q5057", "color_ar": "ابيض", "color_en": "WHITE" },
+        { "system_code": 5058, "production_code": "Q5058", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5059, "production_code": "Q5059", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5060, "production_code": "Q5060", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 16,
+      "product_name": "Satellite Socket(1/3)",
+      "description_ar": "بريزة ستالايت 24 مللي",
+      "variants": [
+        { "system_code": 5061, "production_code": "Q5061", "color_ar": "ابيض", "color_en": "WHITE" },
+        { "system_code": 5062, "production_code": "Q5062", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5063, "production_code": "Q5063", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5064, "production_code": "Q5064", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 17,
+      "product_name": "Speed Dimmer(1/3)",
+      "description_ar": "ديمر سرعات 24 مللي",
+      "variants": [
+        { "system_code": 5065, "production_code": "Q5065", "color_ar": "ابيض", "color_en": "WHITE" },
+        { "system_code": 5066, "production_code": "Q5066", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5067, "production_code": "Q5067", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5068, "production_code": "Q5068", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 18,
+      "product_name": "LIGHT Dimmer(1/3)",
+      "description_ar": "ديمر ضوء 24 مللي",
+      "variants": [
+        { "system_code": 5069, "production_code": "Q5069", "color_ar": "ابيض", "color_en": "WHITE" },
+        { "system_code": 5070, "production_code": "Q5070", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5071, "production_code": "Q5071", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5072, "production_code": "Q5072", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 19,
+      "product_name": "VOICE Dimmer(1/3)",
+      "description_ar": "ديمر صوت 24 مللي",
+      "variants": [
+        { "system_code": 5073, "production_code": "Q5073", "color_ar": "ابيض", "color_en": "WHITE" },
+        { "system_code": 5074, "production_code": "Q5074", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5075, "production_code": "Q5075", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5076, "production_code": "Q5076", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 20,
+      "product_name": "USB +Type C Socket(1/3)",
+      "description_ar": "لقمه شاحن USB&TYPE-C",
+      "variants": [
+        { "system_code": 5077, "production_code": "Q5077", "color_ar": "ابيض", "color_en": "WHITE" },
+        { "system_code": 5078, "production_code": "Q5078", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5079, "production_code": "Q5079", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5080, "production_code": "Q5080", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 21,
+      "product_name": "Emergency switch(1/3)",
+      "description_ar": "لقمه كشاف طوارئ 24 مللي",
+      "variants": [
+        { "system_code": 5081, "production_code": "Q5081", "color_ar": "ابيض", "color_en": "WHITE" },
+        { "system_code": 5082, "production_code": "Q5082", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5083, "production_code": "Q5083", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5084, "production_code": "Q5084", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 22,
+      "product_name": "Emergency switch(3/3)",
+      "description_ar": "لقمه كشاف طوارئ 72 مللي",
+      "variants": [
+        { "system_code": 5085, "production_code": "Q5085", "color_ar": "ابيض", "color_en": "WHITE" },
+        { "system_code": 5086, "production_code": "Q5086", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5087, "production_code": "Q5087", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5088, "production_code": "Q5088", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 23,
+      "product_name": "Blank plate(1/3) Without small box",
+      "description_ar": "سدادة عريضه 24 مللي",
+      "variants": [
+        { "system_code": 5089, "production_code": "Q5089", "color_ar": "ابيض", "color_en": "WHITE", "note": "BRONZE QR" },
+        { "system_code": 5090, "production_code": "Q5090", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5091, "production_code": "Q5091", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5092, "production_code": "Q5092", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 24,
+      "product_name": "Blank plate(12mm) Without small box",
+      "description_ar": "نصف سدادة 12 مللي",
+      "variants": [
+        { "system_code": 5093, "production_code": "Q5093", "color_ar": "ابيض", "color_en": "WHITE" },
+        { "system_code": 5094, "production_code": "Q5094", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5095, "production_code": "Q5095", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5096, "production_code": "Q5096", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 25,
+      "product_name": "Big frame",
+      "description_ar": "شاسيه معدن ثلاثي بالفرام",
+      "variants": [
+        { "system_code": 5097, "production_code": "Q5097", "color_ar": "ابيض", "color_en": "WHITE", "note": "BRONZE QR" },
+        { "system_code": 5098, "production_code": "Q5098", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5099, "production_code": "Q5099", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5100, "production_code": "Q5100", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 26,
+      "product_name": "curtain switch(1/3)",
+      "description_ar": "مفتاح ستارة 24 مللي",
+      "variants": [
+        { "system_code": 5101, "production_code": "Q5101", "color_ar": "ابيض", "color_en": "WHITE" },
+        { "system_code": 5102, "production_code": "Q5102", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5103, "production_code": "Q5103", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5104, "production_code": "Q5104", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 27,
+      "product_name": "Bird invoice Bell (48mm)",
+      "description_ar": "لقمه جرس رنان 48 مللي",
+      "variants": [
+        { "system_code": 5105, "production_code": "Q5105", "color_ar": "ابيض", "color_en": "WHITE" },
+        { "system_code": 5106, "production_code": "Q5106", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5107, "production_code": "Q5107", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5108, "production_code": "Q5108", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 28,
+      "product_name": "Body Sensor light switch(48mm)",
+      "description_ar": "حساس حركه 48 مللي",
+      "variants": [
+        { "system_code": 5109, "production_code": "Q5109", "color_ar": "ابيض", "color_en": "WHITE" },
+        { "system_code": 5110, "production_code": "Q5110", "color_ar": "اسمر", "color_en": "BLACK" },
+        { "system_code": 5111, "production_code": "Q5111", "color_ar": "رصاصى", "color_en": "GREY" },
+        { "system_code": 5112, "production_code": "Q5112", "color_ar": "بيج", "color_en": "champagne" }
+      ]
+    },
+    {
+      "no": 29,
+      "product_name": "water proof",
+      "description_ar": "مانع نفاذية",
+      "variants": [
+        { "system_code": 5113, "production_code": "Q5113", "color_ar": "ابيض", "color_en": "WHITE" }
+      ]
+    }
+  ],
+  "total_items": 113
+}
