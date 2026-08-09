@@ -11,10 +11,45 @@
 @section('content')
 @php
     $done = request('done');
+    $processing = request('processing');
     $preselect = (int) request('category_id', old('category_id'));
+    $batchId = request('batch');
 @endphp
 
-@if($done)
+@if($processing && $batchId)
+    <div class="ui-card-static mx-auto max-w-xl p-8 text-center" id="batchProgressCard"
+         data-status-url="{{ route('admin.qr-codes.status', $batchId) }}"
+         data-download-url="{{ route('admin.qr-codes.download', $batchId) }}">
+        <div id="progressIcon" class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-2xl text-amber-700">⏳</div>
+        <h2 id="progressTitle" class="text-xl font-semibold">{{ __('admin.qr.queued_title') }}</h2>
+        <p id="progressHint" class="ui-muted mt-2">{{ __('admin.qr.queued_hint') }}</p>
+        <div class="mt-6 grid gap-3 text-sm">
+            <div class="ui-row"><span class="ui-muted">{{ __('admin.qr.batch_id') }}</span><code dir="ltr">{{ $batchId }}</code></div>
+            <div class="ui-row"><span class="ui-muted">{{ __('admin.qr.count') }}</span><strong id="progressCount">{{ request('count') }}</strong></div>
+            @if(request('color'))
+            <div class="ui-row">
+                <span class="ui-muted">{{ __('admin.qr.color_used') }}</span>
+                <span class="flex items-center gap-2"><span class="h-6 w-6 rounded border border-maqam-line" style="background:{{ request('color') }}"></span><code dir="ltr">{{ request('color') }}</code></span>
+            </div>
+            @endif
+        </div>
+        <div class="mt-6">
+            <div class="mb-2 flex justify-between text-xs ui-muted">
+                <span id="progressLabel">0%</span>
+                <span id="progressDetail">0 / {{ request('count') ?: '—' }}</span>
+            </div>
+            <div class="h-2 overflow-hidden rounded-full bg-[#E8E4DB]">
+                <div id="progressBar" class="h-full rounded-full bg-maqam-gold transition-all duration-500" style="width:0%"></div>
+            </div>
+        </div>
+        <p id="progressError" class="mt-4 hidden text-sm text-red-700"></p>
+        <div class="mt-8 flex flex-wrap justify-center gap-3">
+            <a id="downloadBtn" href="{{ route('admin.qr-codes.download', $batchId) }}" class="ui-btn ui-btn-primary pointer-events-none opacity-40">{{ __('admin.qr.download_zip') }}</a>
+            <a href="{{ route('admin.qr-codes.index', ['batch_id' => $batchId]) }}" class="ui-btn ui-btn-dark">{{ __('admin.qr.view_batch') }}</a>
+            <a href="{{ route('admin.qr-codes.create') }}" class="ui-btn ui-btn-ghost">{{ __('admin.qr.generate_another') }}</a>
+        </div>
+    </div>
+@elseif($done)
     <div class="ui-card-static mx-auto max-w-xl p-8 text-center">
         <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-2xl text-emerald-700">✓</div>
         <h2 class="text-xl font-semibold">{{ __('admin.qr.success_title') }}</h2>
@@ -118,6 +153,7 @@
                 <div class="ui-row"><span class="ui-muted">{{ __('admin.qr.points') }}</span><strong id="s3_pts">—</strong></div>
                 <div class="ui-row"><span class="ui-muted">{{ __('admin.qr.print_color') }}</span><span class="flex items-center gap-2"><span id="s3_swatch" class="h-6 w-6 rounded border border-maqam-line"></span><code id="s3_color" dir="ltr"></code></span></div>
                 <p class="ui-muted">{{ __('admin.qr.color_hint') }}</p>
+                <p class="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">{{ __('admin.qr.async_note') }}</p>
             </div>
         </div>
         <div class="mt-6 flex justify-between">
@@ -165,6 +201,77 @@ document.addEventListener('DOMContentLoaded', () => {
     const btn = document.querySelector('.cat-card[data-id="{{ $preselect }}"]');
     if(btn) btn.click();
 });
+@endif
+
+@if($processing && $batchId)
+(function pollBatch(){
+    const card = document.getElementById('batchProgressCard');
+    if(!card) return;
+    const url = card.dataset.statusUrl;
+    const workers = {{ \App\Services\QrBatchGenerator::HTTP_WORKERS }};
+    let finished = false;
+    const titles = {
+        queued: @json(__('admin.qr.queued_title')),
+        processing: @json(__('admin.qr.processing_title')),
+        ready: @json(__('admin.qr.success_title')),
+        failed: @json(__('admin.qr.failed_title')),
+    };
+    const hints = {
+        queued: @json(__('admin.qr.queued_hint')),
+        processing: @json(__('admin.qr.processing_hint')),
+        ready: @json(__('admin.qr.ready_hint')),
+        failed: @json(__('admin.qr.failed_hint')),
+    };
+
+    function applyStatus(data){
+        const pct = data.progress ?? 0;
+        document.getElementById('progressBar').style.width = pct + '%';
+        document.getElementById('progressLabel').textContent = pct + '%';
+        document.getElementById('progressDetail').textContent = (data.processed_count ?? 0) + ' / ' + (data.quantity ?? '—');
+        document.getElementById('progressCount').textContent = data.quantity ?? '—';
+        document.getElementById('progressTitle').textContent = titles[data.status] || titles.processing;
+        document.getElementById('progressHint').textContent = hints[data.status] || hints.processing;
+
+        if(data.zip_ready || data.status === 'ready'){
+            finished = true;
+            document.getElementById('progressIcon').textContent = '✓';
+            document.getElementById('progressIcon').className = 'mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-2xl text-emerald-700';
+            const btn = document.getElementById('downloadBtn');
+            btn.classList.remove('pointer-events-none','opacity-40');
+            if(data.download_url) btn.href = data.download_url;
+            return true;
+        }
+
+        if(data.status === 'failed'){
+            finished = true;
+            document.getElementById('progressIcon').textContent = '!';
+            document.getElementById('progressIcon').className = 'mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 text-2xl text-red-700';
+            const err = document.getElementById('progressError');
+            err.textContent = data.error_message || hints.failed;
+            err.classList.remove('hidden');
+            return true;
+        }
+        return false;
+    }
+
+    async function workerLoop(){
+        while(!finished){
+            try {
+                const res = await fetch(url + (url.includes('?') ? '&' : '?') + 'work=1', {
+                    headers: {'Accept': 'application/json'},
+                    credentials: 'same-origin',
+                });
+                if(!res.ok) throw new Error('status '+res.status);
+                const data = await res.json();
+                if(applyStatus(data)) return;
+            } catch (e) {
+                await new Promise(r => setTimeout(r, 800));
+            }
+        }
+    }
+
+    for (let i = 0; i < workers; i++) workerLoop();
+})();
 @endif
 </script>
 @endpush
