@@ -224,6 +224,9 @@ class ProductController extends Controller
             'price' => ['required', 'numeric', 'min:0'],
             'stock_quantity' => ['required', 'integer', 'min:0'],
             'sku' => ['nullable', 'string', 'max:100', Rule::unique('products', 'sku')->ignore($product?->id)],
+            'production_code' => ['nullable', 'string', 'max:50', Rule::unique('products', 'production_code')->ignore($product?->id)],
+            'system_code' => ['nullable', 'integer', 'min:0'],
+            'catalog_code' => ['nullable', 'string', 'max:100'],
             'weight' => ['nullable', 'numeric', 'min:0'],
             'dimensions' => ['nullable', 'string', 'max:100'],
             'image' => ['nullable', 'image', 'max:5120'], // 5MB max

@@ -73,11 +73,26 @@
                 <input type="number" name="stock_quantity" value="{{ old('stock_quantity', $product->stock_quantity ?? 0) }}" required class="ui-input">
             </div>
             <div>
-                <label class="mb-1 block text-sm font-medium">كود المنتج (SKU)</label>
+                <label class="mb-1 block text-sm font-medium">كود المنتج (SKU / باركود)</label>
                 <input name="sku" value="{{ old('sku', $product->sku) }}" class="ui-input" dir="ltr" placeholder="{{ $product->exists ? '' : '16 رقم باركود' }}" maxlength="16" inputmode="numeric" pattern="[0-9]{16}">
                 @unless($product->exists)
                     <p class="ui-muted mt-1 text-xs">اتركه فارغًا ليُولَّد رقم باركود 16 خانة تلقائيًا</p>
                 @endunless
+            </div>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-3">
+            <div>
+                <label class="mb-1 block text-sm font-medium">كود الإنتاج</label>
+                <input name="production_code" value="{{ old('production_code', $product->production_code) }}" class="ui-input" dir="ltr" placeholder="Q5001">
+            </div>
+            <div>
+                <label class="mb-1 block text-sm font-medium">كود النظام</label>
+                <input type="number" name="system_code" value="{{ old('system_code', $product->system_code) }}" class="ui-input" dir="ltr" placeholder="5001">
+            </div>
+            <div>
+                <label class="mb-1 block text-sm font-medium">كود الكتالوج</label>
+                <input name="catalog_code" value="{{ old('catalog_code', $product->catalog_code) }}" class="ui-input" dir="ltr" placeholder="MQM-SW-1G1W24-WHT">
             </div>
         </div>
 

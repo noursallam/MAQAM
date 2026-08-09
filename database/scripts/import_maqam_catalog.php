@@ -3,12 +3,14 @@
 /**
  * Reset store catalog to MAQAM switches/sockets only, then import.
  *
- * - Deletes ALL store categories + products (seed fragrances/gift-sets/etc.)
+ * - Deletes ALL store categories + products (seed leftovers too)
  * - Does NOT touch admins, users, QR, prizes, ranks, merchants, …
  * - sku = unique 16-digit barcode
- * - catalog_code / production_code / system_code stored as options
+ * - production_code / system_code / catalog_code → product columns (internal)
+ * - colors & options left EMPTY for customer-facing choices in admin
  *
  * Run:
+ *   php artisan migrate
  *   php artisan tinker --execute="require base_path('database/scripts/import_maqam_catalog.php');"
  */
 
@@ -20,13 +22,6 @@ use Illuminate\Support\Facades\Schema;
 
 $catalogPath = __DIR__.'/maqam_catalog.json';
 $catalog = json_decode(file_get_contents($catalogPath), true, 512, JSON_THROW_ON_ERROR);
-
-$colorHex = [
-    'WHITE' => '#FFFFFF',
-    'BLACK' => '#1A1A1A',
-    'GREY' => '#8A8A8A',
-    'CHAMPAGNE' => '#E8D5B7',
-];
 
 $defaultPrice = 0;
 $defaultStock = 0;
@@ -40,9 +35,14 @@ $variants = 0;
 $connection = config('database.default');
 $dbConfig = config("database.connections.{$connection}");
 
+if (! Schema::hasColumn('products', 'production_code')) {
+    throw new RuntimeException(
+        'Missing products.production_code column. Run: php artisan migrate'
+    );
+}
+
 DB::transaction(function () use (
     $catalog,
-    $colorHex,
     $defaultPrice,
     $defaultStock,
     $skuGenerator,
@@ -56,7 +56,6 @@ DB::transaction(function () use (
     $deletedProducts = Product::query()->count();
     $deletedCategories = Category::query()->count();
 
-    // Child rows cascade via FK; clear products first so category delete is clean.
     if (Schema::hasTable('product_options')) {
         DB::table('product_options')->delete();
     }
@@ -66,16 +65,12 @@ DB::transaction(function () use (
     if (Schema::hasTable('product_images')) {
         DB::table('product_images')->delete();
     }
-
-    // Order/cart lines that point at old demo products
     if (Schema::hasTable('order_items')) {
         DB::table('order_items')->delete();
     }
     if (Schema::hasTable('cart_items')) {
         DB::table('cart_items')->delete();
     }
-
-    // Nullable FKs → detach before product delete
     if (Schema::hasTable('coupons') && Schema::hasColumn('coupons', 'product_id')) {
         DB::table('coupons')->whereNotNull('product_id')->update(['product_id' => null]);
     }
@@ -89,7 +84,7 @@ DB::transaction(function () use (
     Product::query()->delete();
     Category::query()->delete();
 
-    // 2) Create the real category from this script
+    // 2) Real category
     $category = Category::create([
         'slug' => 'maqam-switches',
         'name_en' => 'Switches & Sockets',
@@ -97,7 +92,7 @@ DB::transaction(function () use (
         'is_active' => true,
     ]);
 
-    // 3) Import catalog variants as products
+    // 3) Import variants — no customer options/colors (admin fills those later)
     $allVariants = [];
     foreach ($catalog['products'] as $item) {
         foreach ($item['variants'] as $variant) {
@@ -115,42 +110,29 @@ DB::transaction(function () use (
         $productionCode = (string) $variant['production_code'];
         $colorEn = trim((string) $variant['color_en']);
         $colorAr = trim((string) $variant['color_ar']);
-        $hex = $colorHex[strtoupper($colorEn)] ?? null;
         $catalogCode = $skuGenerator->catalogCode($item['product_name'], $colorEn);
         $sku = $skuPool[$skuIndex++];
 
-        $product = Product::create([
+        $descriptionAr = $item['description_ar'];
+        if (! empty($variant['note'])) {
+            $descriptionAr .= ' — '.$variant['note'];
+        }
+
+        Product::create([
             'category_id' => $category->id,
             'name_en' => $item['product_name'].' - '.$colorEn,
             'name_ar' => $item['description_ar'].' - '.$colorAr,
             'description_en' => $item['product_name'],
-            'description_ar' => $item['description_ar'],
+            'description_ar' => $descriptionAr,
             'price' => $defaultPrice,
             'stock_quantity' => $defaultStock,
             'sku' => $sku,
+            'production_code' => $productionCode,
+            'system_code' => (int) $variant['system_code'],
+            'catalog_code' => $catalogCode,
             'is_active' => true,
         ]);
         $created++;
-
-        $product->colors()->create([
-            'name' => $colorEn,
-            'hex' => $hex,
-            'sort_order' => 0,
-        ]);
-
-        $options = [
-            ['name' => 'system_code', 'value' => (string) $variant['system_code'], 'sort_order' => 0],
-            ['name' => 'production_code', 'value' => $productionCode, 'sort_order' => 1],
-            ['name' => 'catalog_code', 'value' => $catalogCode, 'sort_order' => 2],
-            ['name' => 'product_no', 'value' => (string) $item['no'], 'sort_order' => 3],
-            ['name' => 'color_ar', 'value' => $colorAr, 'sort_order' => 4],
-        ];
-
-        if (! empty($variant['note'])) {
-            $options[] = ['name' => 'note', 'value' => (string) $variant['note'], 'sort_order' => 5];
-        }
-
-        $product->options()->createMany($options);
     }
 });
 
@@ -162,6 +144,7 @@ dump([
         'categories' => $deletedCategories,
     ],
     'kept' => 'admins / users / QR / prizes / ranks (untouched)',
+    'note' => 'colors & options left empty for customer choices',
     'category' => [
         'id' => $category->id,
         'slug' => $category->slug,
@@ -171,15 +154,9 @@ dump([
     'expected_total' => $catalog['total_items'] ?? null,
     'categories_now' => Category::count(),
     'products_now' => Product::count(),
-    'sample' => tap(
-        Product::query()
-            ->whereHas('options', fn ($q) => $q->where('name', 'production_code')->where('value', 'Q5001'))
-            ->with(['options' => fn ($q) => $q->whereIn('name', ['catalog_code', 'production_code'])])
-            ->first(['id', 'sku', 'name_ar', 'name_en']),
-        function ($product) {
-            if ($product) {
-                $product->setAttribute('options_map', $product->options->pluck('value', 'name'));
-            }
-        }
-    )?->only(['id', 'sku', 'name_ar', 'name_en', 'options_map']),
+    'options_rows' => DB::table('product_options')->count(),
+    'sample' => Product::query()
+        ->where('production_code', 'Q5001')
+        ->first(['id', 'sku', 'production_code', 'system_code', 'catalog_code', 'name_ar', 'name_en'])
+        ?->toArray(),
 ]);

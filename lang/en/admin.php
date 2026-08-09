@@ -461,7 +461,7 @@ return [
         'add_color' => 'Color',
         'color_name' => 'Color name (e.g. Black)',
         'options' => 'Specs & options',
-        'options_hint' => 'Key / value — e.g. Thickness → 1mm, Material → Plastic',
+        'options_hint' => 'Customer-selectable specs — e.g. Thickness → 1mm, Material → Plastic',
         'add_option' => 'Option',
         'option_key' => 'Key (e.g. Thickness)',
         'option_value' => 'Value (e.g. 1mm)',

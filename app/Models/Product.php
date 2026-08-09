@@ -12,7 +12,8 @@ class Product extends Model
 {
     protected $fillable = [
         'category_id', 'name_en', 'name_ar', 'description_en', 'description_ar',
-        'price', 'stock_quantity', 'sku', 'image_path', 'image_url', 'is_active', 'weight', 'dimensions',
+        'price', 'stock_quantity', 'sku', 'production_code', 'system_code', 'catalog_code',
+        'image_path', 'image_url', 'is_active', 'weight', 'dimensions',
     ];
 
     protected function casts(): array
