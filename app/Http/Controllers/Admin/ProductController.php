@@ -242,13 +242,15 @@ class ProductController extends Controller
         ]);
     }
 
-    public function barcode(Product $product): Response
+    public function barcode(Request $request, Product $product): Response
     {
         $png = $this->barcodeService->pngForProduct($product);
+        $filename = ($product->sku ?: 'barcode').'.png';
+        $disposition = $request->boolean('download') ? 'attachment' : 'inline';
 
         return response($png, 200, [
             'Content-Type' => 'image/png',
-            'Content-Disposition' => 'inline; filename="'.($product->sku ?: 'barcode').'.png"',
+            'Content-Disposition' => $disposition.'; filename="'.$filename.'"',
             'Cache-Control' => 'private, max-age=60',
         ]);
     }

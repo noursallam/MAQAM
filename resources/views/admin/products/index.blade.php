@@ -57,13 +57,6 @@
                         <span class="text-[#D8D4CB]">·</span>
                         <span dir="ltr" class="font-mono">{{ $product->sku }}</span>
                     </div>
-                    @if($product->sku)
-                        <div class="mt-3 rounded-lg border border-[#E4E0D7] bg-[#F7F5F0] p-2" onclick="event.preventDefault(); event.stopPropagation();">
-                            <a href="{{ route('admin.products.barcode', $product) }}" target="_blank" class="block">
-                                <img src="{{ route('admin.products.barcode', $product) }}" alt="{{ $product->sku }}" class="mx-auto max-h-16">
-                            </a>
-                        </div>
-                    @endif
                     <div class="mt-3 flex items-end justify-between">
                         <div class="text-lg font-bold text-maqam-ink">{{ number_format($product->price, 0) }} <span class="text-sm font-medium text-maqam-muted">ج.م</span></div>
                         <div class="text-sm font-medium {{ $qty <= 0 ? 'text-red-600' : ($qty < 50 ? 'text-amber-600' : 'text-emerald-600') }}">

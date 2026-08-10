@@ -63,7 +63,7 @@
             <textarea name="description_en" rows="2" class="ui-textarea" dir="ltr">{{ old('description_en', $product->description_en) }}</textarea>
         </div>
 
-        <div class="grid gap-4 sm:grid-cols-3">
+        <div class="grid gap-4 sm:grid-cols-2">
             <div>
                 <label class="mb-1 block text-sm font-medium">السعر (ج.م)</label>
                 <input type="number" step="0.01" name="price" value="{{ old('price', $product->price) }}" required class="ui-input">
@@ -72,23 +72,37 @@
                 <label class="mb-1 block text-sm font-medium">الكمية المتاحة</label>
                 <input type="number" name="stock_quantity" value="{{ old('stock_quantity', $product->stock_quantity ?? 0) }}" required class="ui-input">
             </div>
-            <div>
-                <label class="mb-1 block text-sm font-medium">{{ __('admin.commerce.sku') }}</label>
-                <div class="flex gap-2">
-                    <input id="skuInput" name="sku" value="{{ old('sku', $product->sku) }}" class="ui-input flex-1" dir="ltr"
-                           placeholder="MQM-SW-1G1W24-WHT" maxlength="100">
-                    <button type="button" id="skuGenerateBtn" class="ui-btn ui-btn-ghost whitespace-nowrap text-xs">
+        </div>
+
+        <div class="rounded-xl border border-[#E4E0D7] p-4">
+            <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <div>
+                    <h3 class="text-sm font-semibold">{{ __('admin.commerce.sku') }}</h3>
+                    <p class="ui-muted text-xs">{{ __('admin.commerce.sku_hint') }}</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" id="skuGenerateBtn" class="ui-btn ui-btn-ghost text-xs">
                         {{ __('admin.commerce.sku_generate') }}
                     </button>
+                    @if($product->exists && $product->sku)
+                        <a href="{{ route('admin.products.barcode', ['product' => $product, 'download' => 1]) }}"
+                           class="ui-btn ui-btn-primary text-xs">
+                            {{ __('admin.commerce.download_barcode') }}
+                        </a>
+                    @endif
                 </div>
-                <p class="ui-muted mt-1 text-xs">{{ __('admin.commerce.sku_hint') }}</p>
-                <div class="mt-3 rounded-xl border border-[#E4E0D7] bg-[#F7F5F0] p-3 text-center">
-                    <img id="skuBarcodePreview"
-                         src="{{ $product->exists && $product->sku ? route('admin.products.barcode', $product) : '' }}"
-                         alt="barcode"
-                         class="mx-auto max-h-28 {{ $product->exists && $product->sku ? '' : 'hidden' }}">
-                    <p id="skuBarcodeEmpty" class="ui-muted text-xs {{ $product->exists && $product->sku ? 'hidden' : '' }}">{{ __('admin.commerce.barcode_preview_hint') }}</p>
-                </div>
+            </div>
+            <input id="skuInput" name="sku" value="{{ old('sku', $product->sku) }}" class="ui-input" dir="ltr"
+                   placeholder="MQM-SW-1G1W24-WHT" maxlength="100">
+            <div class="mt-4 rounded-xl border border-[#E4E0D7] bg-white p-4 text-center">
+                <img id="skuBarcodePreview"
+                     src="{{ $product->exists && $product->sku ? route('admin.products.barcode', $product) : '' }}"
+                     alt="barcode"
+                     class="mx-auto max-h-28 {{ $product->exists && $product->sku ? '' : 'hidden' }}">
+                <p id="skuBarcodeEmpty" class="ui-muted text-xs {{ $product->exists && $product->sku ? 'hidden' : '' }}">{{ __('admin.commerce.barcode_preview_hint') }}</p>
+                @unless($product->exists)
+                    <p class="ui-muted mt-2 text-xs">{{ __('admin.commerce.barcode_download_after_save') }}</p>
+                @endunless
             </div>
         </div>
 

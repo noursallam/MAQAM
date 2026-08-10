@@ -459,6 +459,8 @@ return [
         'barcode_preview_hint' => 'Barcode preview appears after saving, or after generating for an existing product.',
         'barcode_after_save' => 'Save the product to view the barcode image, or open a saved product.',
         'export_barcodes' => 'Export all barcodes',
+        'download_barcode' => 'Download this product barcode',
+        'barcode_download_after_save' => 'After saving the product you can download its barcode image from this page.',
         'production_code' => 'Production code',
         'system_code' => 'System code',
         'catalog_code' => 'Catalog code',
