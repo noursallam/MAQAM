@@ -10,77 +10,45 @@ class ProductSkuGenerator
 {
     public const BRAND = 'MQM';
 
-    public const BARCODE_LENGTH = 16;
-
     /**
-     * Generate a unique 16-digit numeric SKU (barcode-ready).
+     * Manufacturer-style Code 128 SKU from product name + color.
+     * Example: MQM-SW-1G1W24-WHT
      */
-    public function next(?int $ignoreProductId = null): string
+    public function makeFromCatalog(string $productName, ?string $colorEn = null, ?int $ignoreProductId = null): string
     {
-        for ($attempt = 0; $attempt < 50; $attempt++) {
-            $sku = $this->randomDigits(self::BARCODE_LENGTH);
-
-            $exists = Product::query()
-                ->when($ignoreProductId, fn ($q) => $q->where('id', '!=', $ignoreProductId))
-                ->where('sku', $sku)
-                ->exists();
-
-            if (! $exists) {
-                return $sku;
-            }
-        }
-
-        throw new \RuntimeException('Unable to generate a unique 16-digit product SKU.');
+        return $this->ensureUnique(
+            $this->catalogCode($productName, $colorEn),
+            $ignoreProductId
+        );
     }
 
     /**
-     * @return list<string>
+     * Build SKU from admin product fields (auto or leave blank on form).
      */
-    public function nextMany(int $count): array
-    {
-        $count = max(0, $count);
-        $skus = [];
+    public function makeFromProductData(
+        string $nameEn,
+        ?string $colorEn = null,
+        ?Category $category = null,
+        ?int $ignoreProductId = null
+    ): string {
+        [$baseName, $inferredColor] = $this->splitNameAndColor($nameEn);
+        $color = $colorEn ?: $inferredColor;
 
-        while (count($skus) < $count) {
-            $sku = $this->randomDigits(self::BARCODE_LENGTH);
-            if (isset($skus[$sku])) {
-                continue;
-            }
-            if (Product::query()->where('sku', $sku)->exists()) {
-                continue;
-            }
-            $skus[$sku] = $sku;
-        }
-
-        return array_values($skus);
-    }
-
-    public function isBarcodeSku(?string $sku): bool
-    {
-        return is_string($sku) && preg_match('/^\d{'.self::BARCODE_LENGTH.'}$/', $sku) === 1;
-    }
-
-    /** @deprecated use isBarcodeSku */
-    public function isAppSku(?string $sku): bool
-    {
-        return $this->isBarcodeSku($sku);
-    }
-
-    /** @deprecated use isBarcodeSku */
-    public function isStructuredSku(?string $sku): bool
-    {
-        return $this->isBarcodeSku($sku);
+        return $this->makeFromCatalog($baseName, $color, $ignoreProductId);
     }
 
     /**
-     * Human-readable catalog code (not used as barcode SKU).
+     * Human-readable catalog / SKU stem.
      * Example: MQM-SW-1G1W24-WHT
      */
     public function catalogCode(string $productName, ?string $colorEn = null): string
     {
+        [$baseName, $inferredColor] = $this->splitNameAndColor($productName);
+        $colorEn = $colorEn ?: $inferredColor;
+
         $brand = self::BRAND;
-        $type = $this->typeFromProductName($productName);
-        $model = $this->modelFromProductName($productName);
+        $type = $this->typeFromProductName($baseName);
+        $model = $this->modelFromProductName($baseName);
         $color = $this->colorCode($colorEn);
 
         return $color
@@ -88,14 +56,55 @@ class ProductSkuGenerator
             : "{$brand}-{$type}-{$model}";
     }
 
-    public function makeFromCatalog(string $productName, string $colorEn, ?int $ignoreProductId = null): string
+    public function ensureUnique(string $base, ?int $ignoreProductId = null): string
     {
-        return $this->next($ignoreProductId);
+        $base = strtoupper(trim($base));
+        $candidate = $base;
+        $suffix = 2;
+
+        while ($this->skuExists($candidate, $ignoreProductId)) {
+            $candidate = $base.'-'.$suffix;
+            $suffix++;
+        }
+
+        return $candidate;
     }
 
-    public function makeFromProductData(string $nameEn, ?string $colorEn = null, ?Category $category = null, ?int $ignoreProductId = null): string
+    public function isStructuredSku(?string $sku): bool
     {
-        return $this->next($ignoreProductId);
+        return is_string($sku) && preg_match('/^MQM-[A-Z0-9]+-[A-Z0-9]+(-[A-Z0-9]+)?$/i', $sku) === 1;
+    }
+
+    /** @deprecated numeric barcodes replaced by Code128 catalog SKUs */
+    public function isBarcodeSku(?string $sku): bool
+    {
+        return is_string($sku) && $sku !== '';
+    }
+
+    /** @deprecated */
+    public function isAppSku(?string $sku): bool
+    {
+        return $this->isBarcodeSku($sku);
+    }
+
+    /** @deprecated random digits no longer used for product SKUs */
+    public function next(?int $ignoreProductId = null): string
+    {
+        return $this->makeFromCatalog('ITEM', null, $ignoreProductId);
+    }
+
+    /**
+     * @return list<string>
+     * @deprecated
+     */
+    public function nextMany(int $count): array
+    {
+        $out = [];
+        for ($i = 0; $i < $count; $i++) {
+            $out[] = $this->ensureUnique(self::BRAND.'-TMP-'.strtoupper(Str::random(6)));
+        }
+
+        return $out;
     }
 
     public function colorCode(?string $color): ?string
@@ -176,20 +185,25 @@ class ProductSkuGenerator
         return Str::substr($model, 0, 12);
     }
 
-    protected function randomDigits(int $length): string
+    /**
+     * @return array{0: string, 1: string|null}
+     */
+    protected function splitNameAndColor(string $nameEn): array
     {
-        $digits = '';
-        $bytes = random_bytes($length);
-
-        for ($i = 0; $i < $length; $i++) {
-            $digits .= (string) (ord($bytes[$i]) % 10);
+        if (! str_contains($nameEn, ' - ')) {
+            return [trim($nameEn), null];
         }
 
-        // Avoid leading zero (some barcode scanners / numeric casts break on it)
-        if ($digits[0] === '0') {
-            $digits[0] = (string) random_int(1, 9);
-        }
+        [$base, $color] = explode(' - ', $nameEn, 2);
 
-        return $digits;
+        return [trim($base), trim($color) !== '' ? trim($color) : null];
+    }
+
+    protected function skuExists(string $sku, ?int $ignoreProductId = null): bool
+    {
+        return Product::query()
+            ->when($ignoreProductId, fn ($q) => $q->where('id', '!=', $ignoreProductId))
+            ->where('sku', $sku)
+            ->exists();
     }
 }

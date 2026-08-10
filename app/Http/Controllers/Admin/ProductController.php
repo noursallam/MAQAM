@@ -7,19 +7,24 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Services\MediaService;
+use App\Services\ProductBarcodeService;
 use App\Services\ProductSkuGenerator;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ProductController extends Controller
 {
     public function __construct(
         private MediaService $mediaService,
         private ProductSkuGenerator $skuGenerator,
+        private ProductBarcodeService $barcodeService,
     ) {}
 
     public function index(Request $request): View
@@ -77,6 +82,10 @@ class ProductController extends Controller
                     $colorName,
                     Category::find($data['category_id']),
                 );
+            }
+
+            if (empty($data['catalog_code'])) {
+                $data['catalog_code'] = $data['sku'];
             }
 
             $product = Product::create($data);
@@ -196,6 +205,62 @@ class ProductController extends Controller
         });
 
         return redirect()->route('admin.products.index')->with('success', __('admin.commerce.product_saved'));
+    }
+
+    public function suggestSku(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'name_en' => ['required', 'string', 'max:255'],
+            'color' => ['nullable', 'string', 'max:100'],
+            'product_id' => ['nullable', 'integer', 'exists:products,id'],
+        ]);
+
+        $sku = $this->skuGenerator->makeFromProductData(
+            $data['name_en'],
+            $data['color'] ?? null,
+            null,
+            isset($data['product_id']) ? (int) $data['product_id'] : null,
+        );
+
+        return response()->json([
+            'sku' => $sku,
+            'catalog_code' => $sku,
+        ]);
+    }
+
+    public function barcodePreview(Request $request): Response
+    {
+        $data = $request->validate([
+            'code' => ['required', 'string', 'max:100'],
+        ]);
+
+        $png = $this->barcodeService->png($data['code']);
+
+        return response($png, 200, [
+            'Content-Type' => 'image/png',
+            'Cache-Control' => 'no-store',
+        ]);
+    }
+
+    public function barcode(Product $product): Response
+    {
+        $png = $this->barcodeService->pngForProduct($product);
+
+        return response($png, 200, [
+            'Content-Type' => 'image/png',
+            'Content-Disposition' => 'inline; filename="'.($product->sku ?: 'barcode').'.png"',
+            'Cache-Control' => 'private, max-age=60',
+        ]);
+    }
+
+    public function exportBarcodes(): BinaryFileResponse
+    {
+        $zipPath = $this->barcodeService->exportAllZip();
+
+        return response()->download(
+            $zipPath,
+            'maqam-product-barcodes-'.now()->format('Ymd').'.zip'
+        )->deleteFileAfterSend(true);
     }
 
     public function destroy(Product $product): RedirectResponse

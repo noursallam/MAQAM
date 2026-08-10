@@ -73,26 +73,37 @@
                 <input type="number" name="stock_quantity" value="{{ old('stock_quantity', $product->stock_quantity ?? 0) }}" required class="ui-input">
             </div>
             <div>
-                <label class="mb-1 block text-sm font-medium">كود المنتج (SKU / باركود)</label>
-                <input name="sku" value="{{ old('sku', $product->sku) }}" class="ui-input" dir="ltr" placeholder="{{ $product->exists ? '' : '16 رقم باركود' }}" maxlength="16" inputmode="numeric" pattern="[0-9]{16}">
-                @unless($product->exists)
-                    <p class="ui-muted mt-1 text-xs">اتركه فارغًا ليُولَّد رقم باركود 16 خانة تلقائيًا</p>
-                @endunless
+                <label class="mb-1 block text-sm font-medium">{{ __('admin.commerce.sku') }}</label>
+                <div class="flex gap-2">
+                    <input id="skuInput" name="sku" value="{{ old('sku', $product->sku) }}" class="ui-input flex-1" dir="ltr"
+                           placeholder="MQM-SW-1G1W24-WHT" maxlength="100">
+                    <button type="button" id="skuGenerateBtn" class="ui-btn ui-btn-ghost whitespace-nowrap text-xs">
+                        {{ __('admin.commerce.sku_generate') }}
+                    </button>
+                </div>
+                <p class="ui-muted mt-1 text-xs">{{ __('admin.commerce.sku_hint') }}</p>
+                <div class="mt-3 rounded-xl border border-[#E4E0D7] bg-[#F7F5F0] p-3 text-center">
+                    <img id="skuBarcodePreview"
+                         src="{{ $product->exists && $product->sku ? route('admin.products.barcode', $product) : '' }}"
+                         alt="barcode"
+                         class="mx-auto max-h-28 {{ $product->exists && $product->sku ? '' : 'hidden' }}">
+                    <p id="skuBarcodeEmpty" class="ui-muted text-xs {{ $product->exists && $product->sku ? 'hidden' : '' }}">{{ __('admin.commerce.barcode_preview_hint') }}</p>
+                </div>
             </div>
         </div>
 
         <div class="grid gap-4 sm:grid-cols-3">
             <div>
-                <label class="mb-1 block text-sm font-medium">كود الإنتاج</label>
+                <label class="mb-1 block text-sm font-medium">{{ __('admin.commerce.production_code') }}</label>
                 <input name="production_code" value="{{ old('production_code', $product->production_code) }}" class="ui-input" dir="ltr" placeholder="Q5001">
             </div>
             <div>
-                <label class="mb-1 block text-sm font-medium">كود النظام</label>
+                <label class="mb-1 block text-sm font-medium">{{ __('admin.commerce.system_code') }}</label>
                 <input type="number" name="system_code" value="{{ old('system_code', $product->system_code) }}" class="ui-input" dir="ltr" placeholder="5001">
             </div>
             <div>
-                <label class="mb-1 block text-sm font-medium">كود الكتالوج</label>
-                <input name="catalog_code" value="{{ old('catalog_code', $product->catalog_code) }}" class="ui-input" dir="ltr" placeholder="MQM-SW-1G1W24-WHT">
+                <label class="mb-1 block text-sm font-medium">{{ __('admin.commerce.catalog_code') }}</label>
+                <input id="catalogCodeInput" name="catalog_code" value="{{ old('catalog_code', $product->catalog_code) }}" class="ui-input" dir="ltr" placeholder="MQM-SW-1G1W24-WHT">
             </div>
         </div>
 
@@ -279,5 +290,72 @@ function previewNewImages(input) {
     });
     setThumb('new', 0);
 }
+
+(function skuTools(){
+    const btn = document.getElementById('skuGenerateBtn');
+    const skuInput = document.getElementById('skuInput');
+    const catalogInput = document.getElementById('catalogCodeInput');
+    const preview = document.getElementById('skuBarcodePreview');
+    const emptyHint = document.getElementById('skuBarcodeEmpty');
+    if (!btn || !skuInput) return;
+
+    const suggestUrl = @json(route('admin.products.sku-suggest'));
+    const previewUrl = @json(route('admin.products.barcode-preview'));
+    const productId = @json($product->exists ? $product->id : null);
+
+    function firstColorName(){
+        const el = document.querySelector('input[name^="colors"][name$="[name]"]');
+        return el ? el.value.trim() : '';
+    }
+
+    function refreshPreview(code){
+        code = (code || '').trim();
+        if (!code) {
+            if (preview) { preview.classList.add('hidden'); preview.removeAttribute('src'); }
+            if (emptyHint) emptyHint.classList.remove('hidden');
+            return;
+        }
+        if (preview) {
+            preview.src = previewUrl + '?code=' + encodeURIComponent(code) + '&t=' + Date.now();
+            preview.classList.remove('hidden');
+            if (emptyHint) emptyHint.classList.add('hidden');
+        }
+    }
+
+    btn.addEventListener('click', async () => {
+        const nameEn = document.querySelector('input[name="name_en"]')?.value?.trim();
+        if (!nameEn) {
+            alert(@json(__('admin.commerce.sku_need_name')));
+            return;
+        }
+        btn.disabled = true;
+        try {
+            const params = new URLSearchParams({ name_en: nameEn, color: firstColorName() });
+            if (productId) params.set('product_id', String(productId));
+            const res = await fetch(suggestUrl + '?' + params.toString(), {
+                headers: { 'Accept': 'application/json' },
+                credentials: 'same-origin',
+            });
+            if (!res.ok) throw new Error('failed');
+            const data = await res.json();
+            skuInput.value = data.sku || '';
+            if (catalogInput && (!catalogInput.value || catalogInput.dataset.autogen === '1')) {
+                catalogInput.value = data.catalog_code || data.sku || '';
+                catalogInput.dataset.autogen = '1';
+            }
+            refreshPreview(skuInput.value);
+        } catch (e) {
+            alert(@json(__('admin.commerce.sku_generate_failed')));
+        } finally {
+            btn.disabled = false;
+        }
+    });
+
+    skuInput.addEventListener('input', () => {
+        clearTimeout(skuInput._t);
+        skuInput._t = setTimeout(() => refreshPreview(skuInput.value), 400);
+    });
+    if (skuInput.value.trim()) refreshPreview(skuInput.value);
+})();
 </script>
 @endpush
