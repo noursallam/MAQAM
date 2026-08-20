@@ -5,9 +5,10 @@
  *
  * - Deletes ALL store categories + products (seed leftovers too)
  * - Does NOT touch admins, users, QR, prizes, ranks, merchants, …
- * - sku = unique 16-digit barcode
- * - production_code / system_code / catalog_code → product columns (internal)
- * - colors & options left EMPTY for customer-facing choices in admin
+ * - One Product row per color variant (113 total)
+ * - sku = manufacturer Code128 catalog code (MQM-SW-1G1W24-WHT) — auto from product+color
+ * - production_code / system_code / catalog_code kept in sync
+ * - colors & options left EMPTY (each color is already its own product)
  *
  * Run:
  *   php artisan migrate
@@ -52,7 +53,6 @@ DB::transaction(function () use (
     &$variants,
     &$category
 ) {
-    // 1) Wipe previous store catalog (seed + any old imports). Admin/users untouched.
     $deletedProducts = Product::query()->count();
     $deletedCategories = Category::query()->count();
 
@@ -84,7 +84,6 @@ DB::transaction(function () use (
     Product::query()->delete();
     Category::query()->delete();
 
-    // 2) Real category
     $category = Category::create([
         'slug' => 'maqam-switches',
         'name_en' => 'Switches & Sockets',
@@ -92,47 +91,36 @@ DB::transaction(function () use (
         'is_active' => true,
     ]);
 
-    // 3) Import variants — no customer options/colors (admin fills those later)
-    $allVariants = [];
     foreach ($catalog['products'] as $item) {
         foreach ($item['variants'] as $variant) {
-            $allVariants[] = ['item' => $item, 'variant' => $variant];
             $variants++;
+            $productionCode = (string) $variant['production_code'];
+            $colorEn = trim((string) $variant['color_en']);
+            $colorAr = trim((string) $variant['color_ar']);
+            $catalogCode = $skuGenerator->catalogCode($item['product_name'], $colorEn);
+            $sku = $skuGenerator->makeFromCatalog($item['product_name'], $colorEn);
+
+            $descriptionAr = $item['description_ar'];
+            if (! empty($variant['note'])) {
+                $descriptionAr .= ' — '.$variant['note'];
+            }
+
+            Product::create([
+                'category_id' => $category->id,
+                'name_en' => $item['product_name'].' - '.$colorEn,
+                'name_ar' => $item['description_ar'].' - '.$colorAr,
+                'description_en' => $item['product_name'],
+                'description_ar' => $descriptionAr,
+                'price' => $defaultPrice,
+                'stock_quantity' => $defaultStock,
+                'sku' => $sku,
+                'production_code' => $productionCode,
+                'system_code' => (int) $variant['system_code'],
+                'catalog_code' => $catalogCode,
+                'is_active' => true,
+            ]);
+            $created++;
         }
-    }
-
-    $skuPool = $skuGenerator->nextMany($variants);
-    $skuIndex = 0;
-
-    foreach ($allVariants as $row) {
-        $item = $row['item'];
-        $variant = $row['variant'];
-        $productionCode = (string) $variant['production_code'];
-        $colorEn = trim((string) $variant['color_en']);
-        $colorAr = trim((string) $variant['color_ar']);
-        $catalogCode = $skuGenerator->catalogCode($item['product_name'], $colorEn);
-        $sku = $skuPool[$skuIndex++];
-
-        $descriptionAr = $item['description_ar'];
-        if (! empty($variant['note'])) {
-            $descriptionAr .= ' — '.$variant['note'];
-        }
-
-        Product::create([
-            'category_id' => $category->id,
-            'name_en' => $item['product_name'].' - '.$colorEn,
-            'name_ar' => $item['description_ar'].' - '.$colorAr,
-            'description_en' => $item['product_name'],
-            'description_ar' => $descriptionAr,
-            'price' => $defaultPrice,
-            'stock_quantity' => $defaultStock,
-            'sku' => $sku,
-            'production_code' => $productionCode,
-            'system_code' => (int) $variant['system_code'],
-            'catalog_code' => $catalogCode,
-            'is_active' => true,
-        ]);
-        $created++;
     }
 });
 
@@ -144,7 +132,7 @@ dump([
         'categories' => $deletedCategories,
     ],
     'kept' => 'admins / users / QR / prizes / ranks (untouched)',
-    'note' => 'colors & options left empty for customer choices',
+    'note' => '1 product per color (= 113). SKU = Code128 catalog code from product+color.',
     'category' => [
         'id' => $category->id,
         'slug' => $category->slug,

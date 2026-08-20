@@ -79,6 +79,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('categories', CategoryController::class)->except(['show']);
         Route::post('categories/{category}/toggle', [CategoryController::class, 'toggle'])->name('categories.toggle');
         Route::resource('prize-categories', PrizeCategoryController::class)->except(['show']);
+        Route::get('products/sku-suggest', [ProductController::class, 'suggestSku'])->name('products.sku-suggest');
+        Route::get('products/barcode-preview', [ProductController::class, 'barcodePreview'])->name('products.barcode-preview');
+        Route::get('products/barcodes/export', [ProductController::class, 'exportBarcodes'])->name('products.barcodes.export');
+        Route::get('products/{product}/barcode', [ProductController::class, 'barcode'])->name('products.barcode');
         Route::resource('products', ProductController::class)->except(['show']);
         Route::get('products-import', [ProductImportController::class, 'create'])->name('products.import');
         Route::get('products-import/template', [ProductImportController::class, 'template'])->name('products.import.template');
