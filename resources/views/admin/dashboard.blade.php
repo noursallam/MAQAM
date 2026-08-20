@@ -4,7 +4,9 @@
 @section('subtitle', __('admin.home.subtitle'))
 
 @section('actions')
+@if(\App\Support\AdminAccess::can(auth()->user(), 'commerce'))
 <a href="{{ route('admin.products.create') }}" class="ui-btn ui-btn-primary">{{ __('admin.commerce.add_product') }}</a>
+@endif
 @endsection
 
 @section('content')
@@ -16,7 +18,71 @@
         'delivered' => __('admin.orders.delivered'),
     ];
     $aiBlocks = preg_split("/\n{2,}/", trim((string) $aiSummary)) ?: [];
+    $maxOrders = max(1, (int) $ordersPerDay->max('value'));
+    $maxRevenue = max(1, (float) $revenuePerDay->max('value'));
+    $maxScans = max(1, (int) $scansPerDay->max('value'));
+    $fraudHot = ($fraudAlerts['total'] ?? 0) > 0;
 @endphp
+
+@if(\App\Support\AdminAccess::can(auth()->user(), 'risk'))
+    <a href="{{ route('admin.risk.index') }}"
+       class="mb-5 block overflow-hidden rounded-2xl border {{ $fraudHot ? 'border-red-300 bg-red-50 shadow-[0_0_0_1px_rgba(220,38,38,0.08)]' : 'border-[#E4E0D7] bg-white' }} transition hover:opacity-95">
+        <div class="flex flex-wrap items-start justify-between gap-3 px-5 py-4 {{ $fraudHot ? 'bg-red-600 text-white' : 'bg-[#F9F8F5] text-maqam-ink' }}">
+            <div class="flex items-center gap-3">
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl {{ $fraudHot ? 'bg-white/15' : 'bg-white border border-[#E4E0D7]' }}">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="text-sm font-bold">{{ __('admin.home.fraud_widget_title') }}</div>
+                    <div class="text-xs {{ $fraudHot ? 'text-white/85' : 'text-maqam-muted' }}">
+                        {{ $fraudHot ? __('admin.home.fraud_widget_alert', ['count' => $fraudAlerts['total']]) : __('admin.home.fraud_widget_clear') }}
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-2 text-xs font-semibold">
+                <span class="rounded-full px-2.5 py-1 {{ $fraudHot ? 'bg-white/15' : 'bg-white border border-[#E4E0D7]' }}">{{ __('admin.home.high_risk') }}: {{ $fraudAlerts['frozen'] }}</span>
+                <span class="rounded-full px-2.5 py-1 {{ $fraudHot ? 'bg-white/15' : 'bg-white border border-[#E4E0D7]' }}">{{ __('admin.risk.geo_velocity') }}: {{ $fraudAlerts['geo'] }}</span>
+                <span class="rounded-full px-2.5 py-1 {{ $fraudHot ? 'bg-white/15' : 'bg-white border border-[#E4E0D7]' }}">{{ __('admin.home.failed_sync') }}: {{ $fraudAlerts['failed_sync'] }}</span>
+            </div>
+        </div>
+        @if($fraudHot && !empty($fraudAlerts['items']))
+            <div class="space-y-2 px-5 py-4">
+                @foreach($fraudAlerts['items'] as $item)
+                    <div class="flex items-start justify-between gap-3 rounded-xl border border-red-200 bg-white px-3 py-2.5 text-sm">
+                        <div class="min-w-0">
+                            <div class="font-medium text-red-900">{{ $item['title'] }}</div>
+                            <div class="mt-0.5 text-xs text-red-700/80">{{ $item['detail'] }}</div>
+                        </div>
+                        <span class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase {{ $item['severity'] === 'high' ? 'bg-red-600 text-white' : 'bg-amber-100 text-amber-800' }}">
+                            {{ __('admin.risk.'.$item['severity']) }}
+                        </span>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+    </a>
+@endif
+
+{{-- Period glance --}}
+<div class="mb-5 grid gap-3 sm:grid-cols-3">
+    <div class="rounded-xl border border-[#E4E0D7] bg-white px-4 py-3">
+        <div class="ui-muted text-xs">{{ __('admin.home.period_today') }}</div>
+        <div class="mt-1 text-xl font-bold">{{ number_format($stats['revenue_today'], 0) }} <span class="text-sm font-medium text-maqam-muted">ج.م</span></div>
+        <div class="mt-1 text-xs text-maqam-muted">{{ $stats['orders_today'] }} {{ __('admin.home.orders_today') }}</div>
+    </div>
+    <div class="rounded-xl border border-[#E4E0D7] bg-white px-4 py-3">
+        <div class="ui-muted text-xs">{{ __('admin.home.period_week') }}</div>
+        <div class="mt-1 text-xl font-bold">{{ number_format($stats['revenue_week'], 0) }} <span class="text-sm font-medium text-maqam-muted">ج.م</span></div>
+        <div class="mt-1 text-xs text-maqam-muted">{{ $stats['orders_week'] }} {{ __('admin.home.orders_7d') }}</div>
+    </div>
+    <div class="rounded-xl border border-[#E4E0D7] bg-white px-4 py-3">
+        <div class="ui-muted text-xs">{{ __('admin.home.period_month') }}</div>
+        <div class="mt-1 text-xl font-bold">{{ number_format($stats['revenue_month'], 0) }} <span class="text-sm font-medium text-maqam-muted">ج.م</span></div>
+        <div class="mt-1 text-xs text-maqam-muted">{{ $stats['orders_month'] }} {{ __('admin.home.orders_month') }}</div>
+    </div>
+</div>
 
 {{-- KPI row --}}
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -74,14 +140,110 @@
     </a>
 </div>
 
+{{-- 7-day charts --}}
+@php
+    $chartRows = $ordersPerDay->values()->map(function ($orderPoint, $i) use ($revenuePerDay, $scansPerDay) {
+        return [
+            'label' => $orderPoint['label'],
+            'orders' => (int) $orderPoint['value'],
+            'revenue' => (float) ($revenuePerDay->values()[$i]['value'] ?? 0),
+            'scans' => (int) ($scansPerDay->values()[$i]['value'] ?? 0),
+        ];
+    });
+    $chartHasData = $chartRows->sum(fn ($r) => $r['orders'] + $r['revenue'] + $r['scans']) > 0;
+    $chartH = 200;
+    $chartPadTop = 16;
+    $chartPadBottom = 36;
+    $plotH = $chartH - $chartPadTop - $chartPadBottom;
+    $dayCount = max(1, $chartRows->count());
+    $groupW = 100 / $dayCount;
+@endphp
+<div class="ui-panel mt-5">
+    <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div>
+            <h2 class="ui-section-title">{{ __('admin.home.chart_last_7_days') }}</h2>
+            <p class="ui-muted text-sm">{{ __('admin.home.chart_overview_hint') }}</p>
+        </div>
+        <div class="flex flex-wrap gap-4 text-xs font-medium">
+            <span class="inline-flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5 rounded-sm" style="background:#1B2A4A"></span>{{ __('admin.home.chart_legend_orders') }}</span>
+            <span class="inline-flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5 rounded-sm" style="background:#C4A574"></span>{{ __('admin.home.chart_legend_revenue') }}</span>
+            <span class="inline-flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5 rounded-sm" style="background:#059669"></span>{{ __('admin.home.chart_legend_scans') }}</span>
+        </div>
+    </div>
+
+    <div class="relative overflow-hidden rounded-xl border border-[#E8E4DA] bg-white p-3 sm:p-4">
+        @if(! $chartHasData)
+            <div class="flex min-h-[220px] flex-col items-center justify-center gap-2 py-10 text-center">
+                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-[#F3F1EB] text-maqam-muted">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3v18h18M7 16l4-5 3 3 5-7"/></svg>
+                </div>
+                <p class="font-medium text-maqam-ink">{{ __('admin.home.chart_no_data') }}</p>
+                <p class="max-w-sm text-sm text-maqam-muted">{{ __('admin.home.chart_no_data_hint') }}</p>
+            </div>
+        @else
+            <svg viewBox="0 0 700 {{ $chartH }}" class="h-auto w-full" style="min-height:220px" role="img" aria-label="{{ __('admin.home.chart_last_7_days') }}" preserveAspectRatio="xMidYMid meet">
+                {{-- grid --}}
+                @for($g = 0; $g <= 4; $g++)
+                    @php $gy = $chartPadTop + ($plotH * $g / 4); @endphp
+                    <line x1="0" y1="{{ $gy }}" x2="700" y2="{{ $gy }}" stroke="#EDEAE3" stroke-width="1"/>
+                @endfor
+                <line x1="0" y1="{{ $chartPadTop + $plotH }}" x2="700" y2="{{ $chartPadTop + $plotH }}" stroke="#D8D4CB" stroke-width="1.5"/>
+
+                @foreach($chartRows as $i => $row)
+                    @php
+                        $cx = (($i + 0.5) * $groupW / 100) * 700;
+                        $barW = 14;
+                        $gap = 4;
+                        $hO = $row['orders'] > 0 ? max(8, ($row['orders'] / $maxOrders) * $plotH) : 0;
+                        $hR = $row['revenue'] > 0 ? max(8, ($row['revenue'] / $maxRevenue) * $plotH) : 0;
+                        $hS = $row['scans'] > 0 ? max(8, ($row['scans'] / $maxScans) * $plotH) : 0;
+                        $base = $chartPadTop + $plotH;
+                        $x0 = $cx - ($barW * 1.5) - $gap;
+                    @endphp
+                    <rect x="{{ $x0 }}" y="{{ $base - $hO }}" width="{{ $barW }}" height="{{ $hO }}" rx="3" fill="#1B2A4A">
+                        <title>{{ $row['label'] }} — {{ __('admin.home.chart_legend_orders') }}: {{ $row['orders'] }}</title>
+                    </rect>
+                    <rect x="{{ $x0 + $barW + $gap }}" y="{{ $base - $hR }}" width="{{ $barW }}" height="{{ $hR }}" rx="3" fill="#C4A574">
+                        <title>{{ $row['label'] }} — {{ __('admin.home.chart_legend_revenue') }}: {{ number_format($row['revenue'], 0) }}</title>
+                    </rect>
+                    <rect x="{{ $x0 + ($barW + $gap) * 2 }}" y="{{ $base - $hS }}" width="{{ $barW }}" height="{{ $hS }}" rx="3" fill="#059669">
+                        <title>{{ $row['label'] }} — {{ __('admin.home.chart_legend_scans') }}: {{ $row['scans'] }}</title>
+                    </rect>
+                    <text x="{{ $cx }}" y="{{ $chartH - 12 }}" text-anchor="middle" fill="#7A756A" font-size="12" font-family="Alexandria, sans-serif">{{ $row['label'] }}</text>
+                @endforeach
+            </svg>
+        @endif
+    </div>
+
+    <div class="mt-4 grid gap-3 sm:grid-cols-3">
+        <div class="rounded-xl border border-[#E8E4DA] bg-[#F9F8F5] px-4 py-3 text-center sm:text-start">
+            <div class="text-xs text-maqam-muted">{{ __('admin.home.chart_legend_orders') }} · {{ __('admin.home.chart_last_7_days') }}</div>
+            <div class="mt-1 text-2xl font-bold tracking-tight">{{ (int) $ordersPerDay->sum('value') }}</div>
+        </div>
+        <div class="rounded-xl border border-[#E8E4DA] bg-[#F9F8F5] px-4 py-3 text-center sm:text-start">
+            <div class="text-xs text-maqam-muted">{{ __('admin.home.chart_legend_revenue') }} · {{ __('admin.home.chart_last_7_days') }}</div>
+            <div class="mt-1 text-2xl font-bold tracking-tight">{{ number_format($revenuePerDay->sum('value'), 0) }} <span class="text-sm font-medium text-maqam-muted">ج.م</span></div>
+        </div>
+        <div class="rounded-xl border border-[#E8E4DA] bg-[#F9F8F5] px-4 py-3 text-center sm:text-start">
+            <div class="text-xs text-maqam-muted">{{ __('admin.home.chart_legend_scans') }} · {{ __('admin.home.chart_last_7_days') }}</div>
+            <div class="mt-1 text-2xl font-bold tracking-tight">{{ (int) $scansPerDay->sum('value') }}</div>
+        </div>
+    </div>
+</div>
+
 {{-- Actions + order statuses in one calm panel --}}
 <div class="ui-panel mt-5 !py-4">
     <div class="flex flex-wrap items-center gap-2">
-        <a href="{{ route('admin.orders.index') }}" class="ui-btn ui-btn-dark">{{ __('admin.home.qa_orders') }}</a>
-        <a href="{{ route('admin.products.create') }}" class="ui-btn ui-btn-ghost">{{ __('admin.commerce.add_product') }}</a>
-        <a href="{{ route('admin.categories.create') }}" class="ui-btn ui-btn-ghost">{{ __('admin.commerce.add_category') }}</a>
-        <a href="{{ route('admin.inventory.index') }}" class="ui-btn ui-btn-ghost">{{ __('admin.nav.inventory') }}</a>
+        @if(\App\Support\AdminAccess::can(auth()->user(), 'orders'))
+            <a href="{{ route('admin.orders.index') }}" class="ui-btn ui-btn-dark">{{ __('admin.home.qa_orders') }}</a>
+        @endif
+        @if(\App\Support\AdminAccess::can(auth()->user(), 'commerce'))
+            <a href="{{ route('admin.products.create') }}" class="ui-btn ui-btn-ghost">{{ __('admin.commerce.add_product') }}</a>
+            <a href="{{ route('admin.categories.create') }}" class="ui-btn ui-btn-ghost">{{ __('admin.commerce.add_category') }}</a>
+            <a href="{{ route('admin.inventory.index') }}" class="ui-btn ui-btn-ghost">{{ __('admin.nav.inventory') }}</a>
+        @endif
     </div>
+    @if(\App\Support\AdminAccess::can(auth()->user(), 'orders'))
     <div class="mt-4 grid gap-3 border-t border-[#E4E0D7] pt-4 sm:grid-cols-4">
         @foreach($orderStatusCounts as $st => $count)
             <a href="{{ route('admin.orders.index', ['view' => 'table', 'status' => $st]) }}"
@@ -91,6 +253,7 @@
             </a>
         @endforeach
     </div>
+    @endif
 </div>
 
 {{-- Gemini summary: light card (no heavy navy strip) --}}
@@ -226,6 +389,82 @@
             @endforeach
         </div>
     @endif
+</div>
+
+{{-- Technicians & QR lifecycle --}}
+<div class="mt-5 grid gap-5 xl:grid-cols-2">
+    <div class="ui-panel">
+        <div class="mb-3 flex items-center justify-between gap-2">
+            <div>
+                <h3 class="ui-section-title">{{ __('admin.home.technicians_title') }}</h3>
+            </div>
+            <a href="{{ route('admin.customers.index') }}" class="ui-btn ui-btn-ghost text-xs">{{ __('admin.nav.customers') }}</a>
+        </div>
+        <div class="grid gap-3 sm:grid-cols-3">
+            <div class="rounded-lg bg-[#F9F8F5] px-3 py-3">
+                <div class="ui-muted text-xs">{{ __('admin.home.technicians_total') }}</div>
+                <div class="mt-1 text-xl font-bold">{{ number_format($stats['technicians_total']) }}</div>
+            </div>
+            <div class="rounded-lg bg-[#F9F8F5] px-3 py-3">
+                <div class="ui-muted text-xs">{{ __('admin.home.technicians_active') }}</div>
+                <div class="mt-1 text-xl font-bold">{{ number_format($stats['technicians_active']) }}</div>
+            </div>
+            <div class="rounded-lg bg-[#F9F8F5] px-3 py-3">
+                <div class="ui-muted text-xs">{{ __('admin.home.technicians_new_month') }}</div>
+                <div class="mt-1 text-xl font-bold">{{ number_format($stats['technicians_new_month']) }}</div>
+            </div>
+            <div class="rounded-lg bg-[#F9F8F5] px-3 py-3">
+                <div class="ui-muted text-xs">{{ __('admin.home.points_balance_total') }}</div>
+                <div class="mt-1 text-xl font-bold">{{ number_format($stats['points_balance_total']) }}</div>
+            </div>
+            <div class="rounded-lg bg-[#F9F8F5] px-3 py-3">
+                <div class="ui-muted text-xs">{{ __('admin.home.points_earned_month') }}</div>
+                <div class="mt-1 text-xl font-bold text-emerald-700">{{ number_format($stats['points_earned_month']) }}</div>
+            </div>
+            <div class="rounded-lg bg-[#F9F8F5] px-3 py-3">
+                <div class="ui-muted text-xs">{{ __('admin.home.points_spent_month') }}</div>
+                <div class="mt-1 text-xl font-bold text-amber-700">{{ number_format($stats['points_spent_month']) }}</div>
+            </div>
+        </div>
+        <div class="mt-4 border-t border-[#E4E0D7] pt-4">
+            <div class="mb-2 text-sm font-medium">{{ __('admin.home.top_technicians') }}</div>
+            <div class="space-y-2">
+                @forelse($topTechnicians as $tech)
+                    <a href="{{ route('admin.customers.show', $tech) }}" class="flex items-center justify-between rounded-lg bg-[#F9F8F5] px-3 py-2 text-sm transition hover:bg-[#F3F1EB]">
+                        <span class="font-medium">{{ $tech->user?->full_name ?: '—' }}</span>
+                        <span class="ui-muted">{{ $tech->scans_month }} {{ __('admin.home.scans_month') }} · {{ number_format($tech->points_balance) }} pts</span>
+                    </a>
+                @empty
+                    <div class="ui-muted text-sm">{{ __('admin.empty_title') }}</div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
+    <div class="ui-panel">
+        <div class="mb-3 flex items-center justify-between gap-2">
+            <h3 class="ui-section-title">{{ __('admin.home.qr_lifecycle') }}</h3>
+            <a href="{{ route('admin.qr-codes.tracker') }}" class="ui-btn ui-btn-ghost text-xs">{{ __('admin.nav.qr_tracker') }}</a>
+        </div>
+        <div class="grid gap-3 sm:grid-cols-2">
+            <div class="rounded-lg bg-[#F9F8F5] px-3 py-3">
+                <div class="ui-muted text-xs">{{ __('admin.qr.life_generated') }}</div>
+                <div class="mt-1 text-xl font-bold">{{ number_format($stats['qr_generated']) }}</div>
+            </div>
+            <div class="rounded-lg bg-[#F9F8F5] px-3 py-3">
+                <div class="ui-muted text-xs">{{ __('admin.qr.life_printed') }}</div>
+                <div class="mt-1 text-xl font-bold">{{ number_format($stats['qr_printed']) }}</div>
+            </div>
+            <div class="rounded-lg bg-[#F9F8F5] px-3 py-3">
+                <div class="ui-muted text-xs">{{ __('admin.qr.life_sold') }}</div>
+                <div class="mt-1 text-xl font-bold">{{ number_format($stats['qr_sold']) }}</div>
+            </div>
+            <div class="rounded-lg bg-[#F9F8F5] px-3 py-3">
+                <div class="ui-muted text-xs">{{ __('admin.qr.life_scanned') }}</div>
+                <div class="mt-1 text-xl font-bold">{{ number_format($stats['qr_scanned']) }}</div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="ui-panel mt-5">

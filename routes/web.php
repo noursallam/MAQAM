@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\CustomerController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PrizeCategoryController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ProductImportController;
 use App\Http\Controllers\Admin\QrCodeController;
 use App\Http\Controllers\Admin\RankController;
 use App\Http\Controllers\Admin\RewardController;
@@ -53,7 +55,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
     Route::post('locale', [LocaleController::class, 'switch'])->name('locale');
 
-    Route::middleware(['auth', EnsureUserIsAdmin::class])->group(function () {
+    Route::middleware(['auth', EnsureUserIsAdmin::class, 'admin.module'])->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('search', [DashboardController::class, 'search'])->name('search');
 
@@ -75,10 +77,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::resource('ranks', RankController::class)->except(['show']);
         Route::resource('categories', CategoryController::class)->except(['show']);
+        Route::post('categories/{category}/toggle', [CategoryController::class, 'toggle'])->name('categories.toggle');
         Route::resource('prize-categories', PrizeCategoryController::class)->except(['show']);
         Route::resource('products', ProductController::class)->except(['show']);
+        Route::get('products-import', [ProductImportController::class, 'create'])->name('products.import');
+        Route::get('products-import/template', [ProductImportController::class, 'template'])->name('products.import.template');
+        Route::post('products-import', [ProductImportController::class, 'store'])->name('products.import.store');
+
+        Route::get('banners', [BannerController::class, 'index'])->name('banners.index');
+        Route::post('banners', [BannerController::class, 'store'])->name('banners.store');
+        Route::post('banners/{banner}/toggle', [BannerController::class, 'toggle'])->name('banners.toggle');
+        Route::delete('banners/{banner}', [BannerController::class, 'destroy'])->name('banners.destroy');
 
         Route::get('qr-codes', [QrCodeController::class, 'index'])->name('qr-codes.index');
+        Route::get('qr-codes/tracker', [QrCodeController::class, 'tracker'])->name('qr-codes.tracker');
+        Route::post('qr-codes/mark-printed', [QrCodeController::class, 'markPrinted'])->name('qr-codes.mark-printed');
+        Route::post('qr-codes/mark-sold', [QrCodeController::class, 'markSold'])->name('qr-codes.mark-sold');
         Route::get('qr-codes/generate', [QrCodeController::class, 'create'])->name('qr-codes.create');
         Route::post('qr-codes/generate', [QrCodeController::class, 'store'])->name('qr-codes.store');
         Route::get('qr-codes/status/{batchId}', [QrCodeController::class, 'status'])->name('qr-codes.status');

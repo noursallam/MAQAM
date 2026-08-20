@@ -12,13 +12,14 @@ use App\Models\Product;
 use App\Models\QrCode;
 use App\Models\QrScan;
 use App\Services\GeminiPerformanceSummary;
+use App\Services\RiskAlertService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request, GeminiPerformanceSummary $gemini): View
+    public function index(Request $request, GeminiPerformanceSummary $gemini, RiskAlertService $riskAlerts): View
     {
         $days = collect(range(6, 0))->map(fn ($i) => Carbon::today()->subDays($i));
 
@@ -49,11 +50,25 @@ class DashboardController extends Controller
             'delivered' => Order::where('status', 'delivered')->count(),
         ];
 
+        $monthStart = now()->startOfMonth();
+        $weekStart = Carbon::today()->subDays(6)->startOfDay();
+
         $stats = [
             'revenue' => Order::whereIn('status', ['processing', 'shipped', 'delivered'])->sum('total_amount'),
+            'revenue_today' => (float) Order::whereDate('created_at', today())
+                ->whereIn('status', ['processing', 'shipped', 'delivered'])
+                ->sum('total_amount'),
+            'revenue_week' => (float) Order::where('created_at', '>=', $weekStart)
+                ->whereIn('status', ['processing', 'shipped', 'delivered'])
+                ->sum('total_amount'),
+            'revenue_month' => (float) Order::where('created_at', '>=', $monthStart)
+                ->whereIn('status', ['processing', 'shipped', 'delivered'])
+                ->sum('total_amount'),
             'orders_total' => Order::count(),
             'orders_new' => $orderStatusCounts['new'],
             'orders_today' => Order::whereDate('created_at', today())->count(),
+            'orders_week' => Order::where('created_at', '>=', $weekStart)->count(),
+            'orders_month' => Order::where('created_at', '>=', $monthStart)->count(),
             'products' => Product::count(),
             'low_stock' => Product::where('stock_quantity', '<', 50)->count(),
             'customers' => Customer::count(),
@@ -64,16 +79,32 @@ class DashboardController extends Controller
             'rewards_available' => CustomerReward::where('status', CustomerReward::STATUS_AVAILABLE)->count(),
             'rewards_used' => CustomerReward::where('status', CustomerReward::STATUS_USED)->count(),
             'rewards_today' => CustomerReward::whereDate('created_at', today())->count(),
+            'technicians_total' => Customer::count(),
+            'technicians_active' => Customer::whereHas('qrScans', fn ($q) => $q->where('scanned_at', '>=', now()->subDays(30)))->count(),
+            'technicians_new_month' => Customer::where('created_at', '>=', $monthStart)->count(),
+            'points_balance_total' => (int) Customer::sum('points_balance'),
+            'points_earned_total' => (int) Customer::sum('total_points_earned'),
+            'points_spent_total' => (int) Customer::sum('total_points_spent'),
+            'points_earned_month' => (int) PointsTransaction::where('type', 'earn')->where('transaction_date', '>=', $monthStart)->sum('amount'),
+            'points_spent_month' => (int) PointsTransaction::where('type', 'spend')->where('transaction_date', '>=', $monthStart)->sum('amount'),
+            'qr_generated' => QrCode::where('status', 'active')->whereNull('printed_at')->whereNull('sold_at')->whereNull('used_at')->count(),
+            'qr_printed' => QrCode::where('status', 'active')->whereNotNull('printed_at')->whereNull('sold_at')->whereNull('used_at')->count(),
+            'qr_sold' => QrCode::where('status', 'active')->whereNotNull('sold_at')->whereNull('used_at')->count(),
+            'qr_scanned' => QrCode::where(fn ($q) => $q->where('status', 'used')->orWhereNotNull('used_at'))->count(),
         ];
 
-        $weekStart = Carbon::today()->subDays(6)->startOfDay();
+        $topTechnicians = Customer::with('user')
+            ->withCount(['qrScans as scans_month' => fn ($q) => $q->where('scanned_at', '>=', $monthStart)])
+            ->orderByDesc('scans_month')
+            ->orderByDesc('total_points_earned')
+            ->take(6)
+            ->get();
+
         $metrics = [
             'generated_at' => now()->toDateTimeString(),
             'today' => [
                 'orders' => $stats['orders_today'],
-                'revenue' => (float) Order::whereDate('created_at', today())
-                    ->whereIn('status', ['processing', 'shipped', 'delivered'])
-                    ->sum('total_amount'),
+                'revenue' => $stats['revenue_today'],
                 'scans' => $stats['scans_today'],
                 'points_earned' => $stats['points_today'],
             ],
@@ -101,6 +132,14 @@ class DashboardController extends Controller
                 'active_qr' => $stats['qr_active'],
                 'lifetime_revenue' => (float) $stats['revenue'],
             ],
+            'technicians' => [
+                'total' => $stats['technicians_total'],
+                'active_30d' => $stats['technicians_active'],
+                'new_month' => $stats['technicians_new_month'],
+                'points_balance' => $stats['points_balance_total'],
+                'points_earned' => $stats['points_earned_total'],
+                'points_spent' => $stats['points_spent_total'],
+            ],
         ];
 
         $aiSummary = $gemini->generate(
@@ -115,8 +154,10 @@ class DashboardController extends Controller
             'ordersPerDay' => $ordersPerDay,
             'revenuePerDay' => $revenuePerDay,
             'scansPerDay' => $scansPerDay,
+            'fraudAlerts' => $riskAlerts->summary(5),
             'aiSummary' => $aiSummary['text'],
             'aiSummaryOk' => $aiSummary['ok'],
+            'topTechnicians' => $topTechnicians,
             'lowStock' => Product::with(['category', 'thumbnail'])->where('stock_quantity', '<', 50)->orderBy('stock_quantity')->take(6)->get(),
             'topProducts' => Product::with('thumbnail')->where('is_active', true)->orderByDesc('stock_quantity')->take(4)->get(),
             'pendingMerchants' => Merchant::with('user')->where('is_approved', false)->latest()->take(4)->get(),

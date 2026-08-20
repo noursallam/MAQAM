@@ -18,7 +18,13 @@
     $isRtl = $locale === 'ar';
     $pendingMerchants = \App\Models\Merchant::where('is_approved', false)->count();
     $newOrders = \App\Models\Order::where('status', 'new')->count();
-    $badgeTotal = $pendingMerchants + $newOrders;
+    $riskAlertCount = 0;
+    if (\App\Support\AdminAccess::can(auth()->user(), 'risk')) {
+        $riskAlertCount = (int) \App\Models\User::where('role', 'customer')->where('is_active', false)->count()
+            + (int) \App\Models\QrScan::where('sync_status', 'failed')->count();
+    }
+    $badgeTotal = $pendingMerchants + $newOrders + $riskAlertCount;
+    $can = fn (string $module) => \App\Support\AdminAccess::can(auth()->user(), $module);
 
     $navGroups = [
         [
@@ -26,10 +32,11 @@
             'label' => __('admin.nav.store_ops'),
             'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>',
             'items' => [
-                ['route' => 'admin.orders.index', 'label' => __('admin.nav.orders_pipeline'), 'match' => 'admin.orders.*', 'badge' => $newOrders ?: null],
-                ['route' => 'admin.categories.index', 'label' => __('admin.nav.store_categories'), 'match' => 'admin.categories.*', 'badge' => null],
-                ['route' => 'admin.products.index', 'label' => __('admin.nav.products'), 'match' => 'admin.products.*', 'badge' => null],
-                ['route' => 'admin.inventory.index', 'label' => __('admin.nav.inventory'), 'match' => 'admin.inventory.*', 'badge' => null],
+                ['module' => 'orders', 'route' => 'admin.orders.index', 'label' => __('admin.nav.orders_pipeline'), 'match' => 'admin.orders.*', 'badge' => $newOrders ?: null],
+                ['module' => 'commerce', 'route' => 'admin.categories.index', 'label' => __('admin.nav.store_categories'), 'match' => 'admin.categories.*', 'badge' => null],
+                ['module' => 'commerce', 'route' => 'admin.products.index', 'label' => __('admin.nav.products'), 'match' => 'admin.products.*', 'badge' => null],
+                ['module' => 'commerce', 'route' => 'admin.inventory.index', 'label' => __('admin.nav.inventory'), 'match' => 'admin.inventory.*', 'badge' => null],
+                ['module' => 'commerce', 'route' => 'admin.banners.index', 'label' => __('admin.nav.banners'), 'match' => 'admin.banners.*', 'badge' => null],
             ],
         ],
         [
@@ -37,9 +44,9 @@
             'label' => __('admin.nav.people'),
             'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>',
             'items' => [
-                ['route' => 'admin.customers.index', 'label' => __('admin.nav.customers'), 'match' => 'admin.customers.*', 'badge' => null],
-                ['route' => 'admin.merchants.index', 'label' => __('admin.nav.merchants'), 'match' => 'admin.merchants.index', 'badge' => null, 'also' => ['admin.merchants.create', 'admin.merchants.edit', 'admin.merchants.store', 'admin.merchants.update']],
-                ['route' => 'admin.merchants.inbox', 'label' => __('admin.nav.merchant_inbox'), 'match' => 'admin.merchants.inbox', 'badge' => $pendingMerchants ?: null],
+                ['module' => 'customers', 'route' => 'admin.customers.index', 'label' => __('admin.nav.customers'), 'match' => 'admin.customers.*', 'badge' => null],
+                ['module' => 'merchants', 'route' => 'admin.merchants.index', 'label' => __('admin.nav.merchants'), 'match' => 'admin.merchants.index', 'badge' => null, 'also' => ['admin.merchants.create', 'admin.merchants.edit', 'admin.merchants.store', 'admin.merchants.update']],
+                ['module' => 'merchants', 'route' => 'admin.merchants.inbox', 'label' => __('admin.nav.merchant_inbox'), 'match' => 'admin.merchants.inbox', 'badge' => $pendingMerchants ?: null],
             ],
         ],
         [
@@ -47,15 +54,16 @@
             'label' => __('admin.nav.loyalty'),
             'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V6a2 2 0 10-2 2h2zm0 13C10.832 21 4 17.5 4 11V7l8-3 8 3v4c0 6.5-6.832 10-8 10z"/></svg>',
             'items' => [
-                ['route' => 'admin.ranks.index', 'label' => __('admin.nav.ranks'), 'match' => 'admin.ranks.*', 'badge' => null],
-                ['route' => 'admin.loyalty.transactions', 'label' => __('admin.nav.points_ledger'), 'match' => 'admin.loyalty.transactions', 'badge' => null],
-                ['route' => 'admin.loyalty.spins', 'label' => __('admin.nav.lucky_wheel'), 'match' => 'admin.loyalty.spins', 'badge' => null],
-                ['route' => 'admin.rewards.index', 'label' => __('admin.nav.rewards'), 'match' => 'admin.rewards.*', 'badge' => null],
-                ['route' => 'admin.coupons.index', 'label' => __('admin.nav.coupons'), 'match' => 'admin.coupons.*', 'badge' => null],
-                ['route' => 'admin.prize-categories.index', 'label' => __('admin.nav.prize_categories'), 'match' => 'admin.prize-categories.*', 'badge' => null],
-                ['route' => 'admin.qr-codes.create', 'label' => __('admin.nav.generate_batch'), 'match' => 'admin.qr-codes.create', 'badge' => null],
-                ['route' => 'admin.qr-codes.index', 'label' => __('admin.nav.batches'), 'match' => 'admin.qr-codes.index', 'badge' => null],
-                ['route' => 'admin.scans.index', 'label' => __('admin.nav.scan_monitor'), 'match' => 'admin.scans.*', 'badge' => null],
+                ['module' => 'loyalty', 'route' => 'admin.ranks.index', 'label' => __('admin.nav.ranks'), 'match' => 'admin.ranks.*', 'badge' => null],
+                ['module' => 'loyalty', 'route' => 'admin.loyalty.transactions', 'label' => __('admin.nav.points_ledger'), 'match' => 'admin.loyalty.transactions', 'badge' => null],
+                ['module' => 'loyalty', 'route' => 'admin.loyalty.spins', 'label' => __('admin.nav.lucky_wheel'), 'match' => 'admin.loyalty.spins', 'badge' => null],
+                ['module' => 'loyalty', 'route' => 'admin.rewards.index', 'label' => __('admin.nav.rewards'), 'match' => 'admin.rewards.*', 'badge' => null],
+                ['module' => 'coupons', 'route' => 'admin.coupons.index', 'label' => __('admin.nav.coupons'), 'match' => 'admin.coupons.*', 'badge' => null],
+                ['module' => 'qr', 'route' => 'admin.prize-categories.index', 'label' => __('admin.nav.prize_categories'), 'match' => 'admin.prize-categories.*', 'badge' => null],
+                ['module' => 'qr', 'route' => 'admin.qr-codes.create', 'label' => __('admin.nav.generate_batch'), 'match' => 'admin.qr-codes.create', 'badge' => null],
+                ['module' => 'qr', 'route' => 'admin.qr-codes.index', 'label' => __('admin.nav.batches'), 'match' => 'admin.qr-codes.index', 'badge' => null],
+                ['module' => 'qr', 'route' => 'admin.qr-codes.tracker', 'label' => __('admin.nav.qr_tracker'), 'match' => 'admin.qr-codes.tracker', 'badge' => null],
+                ['module' => 'qr', 'route' => 'admin.scans.index', 'label' => __('admin.nav.scan_monitor'), 'match' => 'admin.scans.*', 'badge' => null],
             ],
         ],
         [
@@ -63,8 +71,8 @@
             'label' => __('admin.nav.communications'),
             'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>',
             'items' => [
-                ['route' => 'admin.notifications.create', 'label' => __('admin.nav.notifications_composer'), 'match' => 'admin.notifications.create', 'badge' => null],
-                ['route' => 'admin.notifications.index', 'label' => __('admin.nav.notifications_history'), 'match' => 'admin.notifications.index', 'badge' => null],
+                ['module' => 'notifications', 'route' => 'admin.notifications.create', 'label' => __('admin.nav.notifications_composer'), 'match' => 'admin.notifications.create', 'badge' => null],
+                ['module' => 'notifications', 'route' => 'admin.notifications.index', 'label' => __('admin.nav.notifications_history'), 'match' => 'admin.notifications.index', 'badge' => null],
             ],
         ],
         [
@@ -72,23 +80,32 @@
             'label' => __('admin.nav.system'),
             'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>',
             'items' => [
-                ['route' => 'admin.risk.index', 'label' => __('admin.nav.risk_desk'), 'match' => 'admin.risk.*', 'badge' => null],
-                ['route' => 'admin.settings.index', 'label' => __('admin.nav.settings'), 'match' => 'admin.settings.*', 'badge' => null],
-                ['route' => 'admin.admins.index', 'label' => __('admin.nav.admins_rbac'), 'match' => 'admin.admins.*', 'badge' => null],
+                ['module' => 'risk', 'route' => 'admin.risk.index', 'label' => __('admin.nav.risk_desk'), 'match' => 'admin.risk.*', 'badge' => $riskAlertCount ?: null],
+                ['module' => 'settings', 'route' => 'admin.settings.index', 'label' => __('admin.nav.settings'), 'match' => 'admin.settings.*', 'badge' => null],
+                ['module' => 'admins', 'route' => 'admin.admins.index', 'label' => __('admin.nav.admins_rbac'), 'match' => 'admin.admins.*', 'badge' => null],
             ],
         ],
     ];
+
+    $navGroups = collect($navGroups)->map(function ($group) use ($can) {
+        $group['items'] = array_values(array_filter(
+            $group['items'],
+            fn ($item) => $can($item['module'] ?? 'dashboard')
+        ));
+
+        return $group;
+    })->filter(fn ($group) => count($group['items']) > 0)->values()->all();
 
     $activeGroupKey = '';
     foreach ($navGroups as $idx => $group) {
         foreach ($group['items'] as $item) {
             if (request()->routeIs($item['match']) || (!empty($item['also']) && request()->routeIs(...$item['also']))) {
-                $activeGroupKey = (string)$idx;
+                $activeGroupKey = (string) $idx;
                 break 2;
             }
         }
     }
-    $autoExpandGroupKey = ($activeGroupKey !== '' && !request()->routeIs('admin.dashboard')) ? $activeGroupKey : '';
+    $autoExpandGroupKey = ($activeGroupKey !== '' && ! request()->routeIs('admin.dashboard')) ? $activeGroupKey : '';
 @endphp
 <body class="min-h-screen bg-maqam-bg text-maqam-ink antialiased" style="font-family:'Alexandria',sans-serif">
 <div class="flex min-h-screen">

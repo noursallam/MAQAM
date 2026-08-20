@@ -4,6 +4,12 @@
 @section('subtitle', __('admin.commerce.catalog_subtitle'))
 
 @section('actions')
+<a href="{{ route('admin.products.import') }}" class="ui-btn ui-btn-ghost inline-flex items-center gap-2">
+    <svg class="h-4 w-4 text-[#217346]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm1 7V3.5L19.5 9H15zM8.2 17.2l1.5-2.4-1.4-2.3h1.5l.8 1.5.8-1.5h1.5l-1.4 2.3 1.5 2.4h-1.5l-.9-1.6-.9 1.6H8.2z"/>
+    </svg>
+    {{ __('admin.import.action') }}
+</a>
 <a href="{{ route('admin.categories.create') }}" class="ui-btn ui-btn-ghost">+ {{ __('admin.commerce.add_category') }}</a>
 <a href="{{ route('admin.products.create') }}" class="ui-btn ui-btn-primary">{{ __('admin.commerce.add_product') }}</a>
 @endsection
@@ -76,6 +82,7 @@
             <p class="ui-muted mt-2">ابدأ بإضافة الأقسام، ثم أضف المنتجات مع صورها.</p>
             <div class="mt-6 flex flex-wrap justify-center gap-3">
                 <a href="{{ route('admin.categories.create') }}" class="ui-btn ui-btn-ghost">إضافة قسم</a>
+                <a href="{{ route('admin.products.import') }}" class="ui-btn ui-btn-ghost">{{ __('admin.import.action') }}</a>
                 <a href="{{ route('admin.products.create') }}" class="ui-btn ui-btn-primary">إضافة منتج</a>
             </div>
         </div>

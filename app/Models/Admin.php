@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Support\AdminAccess;
 
 class Admin extends Model
 {
@@ -22,5 +23,10 @@ class Admin extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function canAccess(string $module): bool
+    {
+        return in_array($module, AdminAccess::modulesFor($this), true);
     }
 }

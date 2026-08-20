@@ -99,6 +99,15 @@ class CategoryController extends Controller
         return redirect()->route('admin.categories.index')->with('success', __('admin.success'));
     }
 
+    public function toggle(Category $category): RedirectResponse
+    {
+        $category->update(['is_active' => ! $category->is_active]);
+
+        return back()->with('success', $category->is_active
+            ? __('admin.commerce.category_shown')
+            : __('admin.commerce.category_hidden'));
+    }
+
     protected function validated(Request $request, ?Category $category = null): array
     {
         $data = $request->validate([

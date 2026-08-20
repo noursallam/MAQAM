@@ -10,6 +10,7 @@
         <input type="file" name="json_file" accept=".json" class="ui-input max-w-xs" id="restore-file">
         <button type="submit" class="ui-btn ui-btn-dark">{{ __('admin.qr.restore') }}</button>
     </form>
+    <a href="{{ route('admin.qr-codes.tracker') }}" class="ui-btn ui-btn-ghost">{{ __('admin.nav.qr_tracker') }}</a>
     <a href="{{ route('admin.qr-codes.create') }}" class="ui-btn ui-btn-primary">{{ __('admin.nav.generate_batch') }}</a>
 </div>
 @endsection

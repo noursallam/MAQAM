@@ -60,6 +60,89 @@ class QrCodeController extends Controller
         ]);
     }
 
+    public function tracker(Request $request): View
+    {
+        $lifecycle = $request->string('lifecycle')->toString();
+
+        $codes = QrCode::with(['categoryPrize', 'usedByCustomer.user', 'scans' => fn ($q) => $q->latest('scanned_at')->limit(1)])
+            ->when($request->batch_id, fn ($q, $batch) => $q->where('batch_id', $batch))
+            ->when($request->q, fn ($q, $term) => $q->where('serial_code', 'like', "%{$term}%"))
+            ->when($lifecycle === 'generated', fn ($q) => $q->where('status', 'active')->whereNull('printed_at')->whereNull('sold_at')->whereNull('used_at'))
+            ->when($lifecycle === 'printed', fn ($q) => $q->where('status', 'active')->whereNotNull('printed_at')->whereNull('sold_at')->whereNull('used_at'))
+            ->when($lifecycle === 'sold', fn ($q) => $q->where('status', 'active')->whereNotNull('sold_at')->whereNull('used_at'))
+            ->when($lifecycle === 'scanned', fn ($q) => $q->where(fn ($qq) => $qq->where('status', 'used')->orWhereNotNull('used_at')))
+            ->when($lifecycle === 'expired', fn ($q) => $q->where('status', 'expired'))
+            ->latest('id')
+            ->paginate(30)
+            ->withQueryString();
+
+        $summary = [
+            'generated' => QrCode::where('status', 'active')->whereNull('printed_at')->whereNull('sold_at')->whereNull('used_at')->count(),
+            'printed' => QrCode::where('status', 'active')->whereNotNull('printed_at')->whereNull('sold_at')->whereNull('used_at')->count(),
+            'sold' => QrCode::where('status', 'active')->whereNotNull('sold_at')->whereNull('used_at')->count(),
+            'scanned' => QrCode::where(fn ($q) => $q->where('status', 'used')->orWhereNotNull('used_at'))->count(),
+            'expired' => QrCode::where('status', 'expired')->count(),
+            'total' => QrCode::count(),
+        ];
+
+        return view('admin.qr-codes.tracker', [
+            'codes' => $codes,
+            'summary' => $summary,
+            'prizeCategories' => CategoryPrize::where('is_active', true)->orderBy('name_ar')->get(),
+        ]);
+    }
+
+    public function markPrinted(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'batch_id' => ['nullable', 'string', 'max:100'],
+            'ids' => ['nullable', 'array'],
+            'ids.*' => ['integer', 'exists:qr_codes,id'],
+        ]);
+
+        $query = QrCode::query()->where('status', 'active')->whereNull('used_at');
+        if (! empty($data['batch_id'])) {
+            $query->where('batch_id', $data['batch_id']);
+        } elseif (! empty($data['ids'])) {
+            $query->whereIn('id', $data['ids']);
+        } else {
+            return back()->withErrors(['batch_id' => __('admin.qr.lifecycle_select_required')]);
+        }
+
+        $count = $query->whereNull('printed_at')->update(['printed_at' => now()]);
+
+        return back()->with('success', __('admin.qr.marked_printed', ['count' => $count]));
+    }
+
+    public function markSold(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'batch_id' => ['nullable', 'string', 'max:100'],
+            'ids' => ['nullable', 'array'],
+            'ids.*' => ['integer', 'exists:qr_codes,id'],
+            'order_id' => ['nullable', 'exists:orders,id'],
+        ]);
+
+        $query = QrCode::query()->where('status', 'active')->whereNull('used_at');
+        if (! empty($data['batch_id'])) {
+            $query->where('batch_id', $data['batch_id']);
+        } elseif (! empty($data['ids'])) {
+            $query->whereIn('id', $data['ids']);
+        } else {
+            return back()->withErrors(['batch_id' => __('admin.qr.lifecycle_select_required')]);
+        }
+
+        $payload = ['sold_at' => now()];
+        if (! empty($data['order_id'])) {
+            $payload['sold_order_id'] = $data['order_id'];
+        }
+
+        $count = (clone $query)->whereNull('printed_at')->update(array_merge($payload, ['printed_at' => now()]));
+        $count += $query->whereNotNull('printed_at')->whereNull('sold_at')->update($payload);
+
+        return back()->with('success', __('admin.qr.marked_sold', ['count' => $count]));
+    }
+
     public function create(): View
     {
         return view('admin.qr-codes.generate', [
