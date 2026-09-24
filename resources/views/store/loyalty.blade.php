@@ -3,6 +3,10 @@
 @section('title', __('store.loyalty.title'))
 
 @section('content')
+@php
+    $locale = app()->getLocale();
+@endphp
+
 <section class="mq-page">
     <div class="mq-container">
         <div class="mq-breadcrumb">
@@ -31,26 +35,49 @@
             </div>
         </div>
 
-        <div class="mq-about-grid" style="margin-top:1.25rem">
+        <div class="mq-about-grid" style="margin-top:1.5rem">
             <div class="mq-panel mq-prose">
-                <h3>{{ __('store.loyalty.ranks') }}</h3>
+                <h3>{{ __('store.loyalty.ranks') }} (رتب الأعضاء والولاء)</h3>
                 <ul>
-                    <li><strong>{{ __('store.loyalty.silver') }}</strong> {{ __('store.loyalty.silver_text') }}</li>
-                    <li><strong>{{ __('store.loyalty.gold') }}</strong> {{ __('store.loyalty.gold_text') }}</li>
-                    <li><strong>{{ __('store.loyalty.platinum') }}</strong> {{ __('store.loyalty.platinum_text') }}</li>
+                    @foreach ($ranks as $r)
+                        <li>
+                            <strong style="color:var(--mq-gold);">{{ $locale === 'ar' ? $r->name_ar : $r->name_en }}</strong>:
+                            تبدأ من {{ number_format($r->min_points) }} نقطة 
+                            @if ($r->max_points)
+                                حتى {{ number_format($r->max_points) }} نقطة.
+                            @else
+                                فما فوق.
+                            @endif
+                            (مكافأة مسح QR: {{ $r->customer_points_per_scan }} نقطة لكل مسح).
+                        </li>
+                    @endforeach
                 </ul>
-                <h3>{{ __('store.loyalty.wheel') }}</h3>
-                <p>{{ __('store.loyalty.wheel_text') }}</p>
+
+                @if ($wheelEnabled && $wheelPrizes->isNotEmpty())
+                    <h3 style="margin-top:2rem;">{{ __('store.loyalty.wheel') }}</h3>
+                    <p>{{ __('store.loyalty.wheel_text') }}</p>
+                    <p style="color:var(--mq-muted);font-size:.92rem;">
+                        جوائز العجلة المتاحة: 
+                        {{ $wheelPrizes->pluck($locale === 'ar' ? 'name_ar' : 'name_en')->filter()->join('، ') }}.
+                    </p>
+                @endif
             </div>
+
             <div class="mq-panel mq-prose">
                 <h3>{{ __('store.loyalty.notes') }}</h3>
                 <ul>
                     <li>{{ __('store.loyalty.note_1') }}</li>
                     <li>{{ __('store.loyalty.note_2') }}</li>
                     <li>{{ __('store.loyalty.note_3') }}</li>
-                    <li>{{ __('store.loyalty.note_4') }}</li>
+                    <li>يمكنك استبدال نقاطك في أي وقت كخصم مباشر أثناء إتمام الشراء عند اختيار الدفع عبر المحفظة.</li>
                 </ul>
-                <a href="{{ route('store.profile') }}" class="mq-btn mq-btn-primary">{{ __('store.loyalty.my_wallet') }}</a>
+                <div style="margin-top:1.5rem;">
+                    @auth
+                        <a href="{{ route('store.profile') }}#wallet" class="mq-btn mq-btn-primary">{{ __('store.loyalty.my_wallet') }}</a>
+                    @else
+                        <a href="{{ route('store.register') }}" class="mq-btn mq-btn-primary">أنشئ حسابك وابدأ جمع النقاط</a>
+                    @endauth
+                </div>
             </div>
         </div>
     </div>

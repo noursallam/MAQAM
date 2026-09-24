@@ -20,8 +20,20 @@ class SystemSetting extends Model
 
     public static function getValue(string $key, mixed $default = null): mixed
     {
-        $setting = Cache::remember("setting.{$key}", 3600, fn () => static::query()->where('key', $key)->first());
+        try {
+            $val = Cache::remember("setting.{$key}", 3600, function () use ($key) {
+                return static::query()->where('key', $key)->value('value');
+            });
 
-        return $setting?->value ?? $default;
+            // If an old legacy incomplete object was stored in cache, fallback
+            if (is_object($val)) {
+                Cache::forget("setting.{$key}");
+                return static::query()->where('key', $key)->value('value') ?? $default;
+            }
+
+            return $val ?? $default;
+        } catch (\Throwable $e) {
+            return static::query()->where('key', $key)->value('value') ?? $default;
+        }
     }
 }

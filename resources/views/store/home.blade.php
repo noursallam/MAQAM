@@ -5,54 +5,22 @@
 
 @section('content')
 @php
-    $categories = [
-        [
-            'key' => 'all',
-            'count' => 48,
-            'tone' => '#1b2434',
-            'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
-        ],
-        [
-            'key' => 'sockets',
-            'count' => 14,
-            'tone' => '#243044',
-            'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="7" y="3" width="10" height="14" rx="2"/><path d="M10 7v4M14 7v4M9 21h6"/></svg>',
-        ],
-        [
-            'key' => 'switches',
-            'count' => 10,
-            'tone' => '#1f2937',
-            'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="6" width="16" height="12" rx="2"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/></svg>',
-        ],
-        [
-            'key' => 'cables',
-            'count' => 8,
-            'tone' => '#222b3b',
-            'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 8c4 0 4 8 8 8s4-8 8-8"/><path d="M4 16c4 0 4-8 8-8s4 8 8 8"/></svg>',
-        ],
-        [
-            'key' => 'lighting',
-            'count' => 7,
-            'tone' => '#1a2332',
-            'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6M10 21h4"/><path d="M8 10a4 4 0 1 1 8 0c0 2-1.5 3-2 4H10c-.5-1-2-2-2-4z"/></svg>',
-        ],
-        [
-            'key' => 'breakers',
-            'count' => 5,
-            'tone' => '#182131',
-            'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>',
-        ],
-    ];
+    $locale = app()->getLocale();
+    $primaryBanner = $banners->first();
 @endphp
 
 <section class="mq-hero mq-hero-calm" aria-label="{{ __('store.home.title') }}">
     <div class="mq-hero-media">
-        <img src="{{ asset('identity/7a2131bb-c88e-4ad4-9c9d-d0d836e01ea9.png') }}" alt="{{ __('store.brand') }}">
+        @if ($primaryBanner && $primaryBanner->imageUrl())
+            <img src="{{ $primaryBanner->imageUrl() }}" alt="{{ $primaryBanner->title_ar ?: __('store.brand') }}">
+        @else
+            <img src="{{ asset('identity/7a2131bb-c88e-4ad4-9c9d-d0d836e01ea9.png') }}" alt="{{ __('store.brand') }}">
+        @endif
     </div>
     <div class="mq-hero-glow" aria-hidden="true"></div>
 
     <div class="mq-container mq-hero-content">
-        <h1>{{ __('store.home.hero_title') }}</h1>
+        <h1>{{ ($primaryBanner ? ($locale === 'ar' ? $primaryBanner->title_ar : $primaryBanner->title_en) : null) ?: __('store.home.hero_title') }}</h1>
         <p class="mq-hero-slogan-en">{{ __('store.home.hero_slogan_en') }}</p>
         <p>{{ __('store.home.hero_text') }}</p>
         <div class="mq-hero-actions">
@@ -94,12 +62,21 @@
 <section class="mq-shop-cats mq-home-cats" aria-label="{{ __('store.home.product_types') }}">
     <div class="mq-container">
         <div class="mq-cat-strip" role="list">
-            @foreach ($categories as $i => $cat)
-                <a href="{{ route('store.shop') }}" class="mq-cat-item {{ $i === 0 ? 'is-active' : '' }}" role="listitem">
-                    <span class="mq-cat-avatar" style="--cat-tone: {{ $cat['tone'] }}">
-                        {!! $cat['icon'] !!}
+            <a href="{{ route('store.shop') }}" class="mq-cat-item {{ !request('category') ? 'is-active' : '' }}" role="listitem">
+                <span class="mq-cat-avatar" style="--cat-tone: #1b2434">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+                </span>
+                <span class="mq-cat-label">{{ __('store.categories.all') }}</span>
+            </a>
+            @foreach ($categories as $cat)
+                <a href="{{ route('store.shop', ['category' => $cat->id]) }}" class="mq-cat-item" role="listitem">
+                    <span class="mq-cat-avatar" style="--cat-tone: #243044">
+                        {!! $cat->icon ?? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="7" y="3" width="10" height="14" rx="2"/><path d="M10 7v4M14 7v4M9 21h6"/></svg>' !!}
                     </span>
-                    <span class="mq-cat-label">{{ __('store.categories.'.$cat['key']) }}</span>
+                    <span class="mq-cat-label">{{ $locale === 'ar' ? $cat->name_ar : $cat->name_en }}</span>
+                    @if ($cat->products_count > 0)
+                        <em class="mq-cat-count" style="font-size:.78rem;opacity:.7;">{{ $cat->products_count }}</em>
+                    @endif
                 </a>
             @endforeach
         </div>
@@ -114,14 +91,11 @@
         </div>
 
         <div class="mq-products">
-            @include('store.partials.products', [
-                'products' => [
-                    ['id' => 1, 'name_key' => 'wall_socket', 'cat_key' => 'sockets', 'price' => '45', 'tag' => null, 'tone' => '#1f2937', 'points' => 50],
-                    ['id' => 2, 'name_key' => 'multi_plug', 'cat_key' => 'sockets', 'price' => '85', 'old' => '110', 'tag' => '-23%', 'tone' => '#243044', 'points' => 80],
-                    ['id' => 3, 'name_key' => 'light_switch', 'cat_key' => 'switches', 'price' => '35', 'tag' => null, 'tone' => '#1a2332', 'points' => 40],
-                    ['id' => 4, 'name_key' => 'cable', 'cat_key' => 'cables', 'price' => '220', 'tag' => 'new', 'tone' => '#222b3b', 'points' => 120],
-                ],
-            ])
+            @include('store.partials.products', ['products' => $featuredProducts, 'enhanced' => true])
+        </div>
+
+        <div style="text-align:center;margin-top:2rem;">
+            <a href="{{ route('store.shop') }}" class="mq-btn mq-btn-ghost">{{ __('store.footer.all_products') }} →</a>
         </div>
     </div>
 </section>

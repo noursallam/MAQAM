@@ -22,22 +22,24 @@ use App\Http\Controllers\Admin\RewardController;
 use App\Http\Controllers\Admin\RiskController;
 use App\Http\Controllers\Admin\ScanController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Store\CartController;
+use App\Http\Controllers\Store\CheckoutController;
+use App\Http\Controllers\Store\CustomerAuthController;
+use App\Http\Controllers\Store\CustomerProfileController;
+use App\Http\Controllers\Store\KashierPaymentController;
 use App\Http\Controllers\Store\LocaleController as StoreLocaleController;
 use App\Http\Controllers\Store\StorefrontController;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use Illuminate\Support\Facades\Route;
 
+// Storefront Public Routes
 Route::get('/', [StorefrontController::class, 'home'])->name('store.home');
 Route::get('/shop', [StorefrontController::class, 'shop'])->name('store.shop');
 Route::get('/product/{product}', [StorefrontController::class, 'product'])->name('store.product');
-Route::get('/cart', [StorefrontController::class, 'cart'])->name('store.cart');
-Route::get('/checkout', [StorefrontController::class, 'checkout'])->name('store.checkout');
 Route::get('/about', [StorefrontController::class, 'about'])->name('store.about');
 Route::get('/contact', [StorefrontController::class, 'contact'])->name('store.contact');
+Route::post('/contact', [StorefrontController::class, 'submitContact'])->name('store.contact.submit');
 Route::get('/blog', [StorefrontController::class, 'blog'])->name('store.blog');
-Route::get('/login', [StorefrontController::class, 'login'])->name('store.login');
-Route::get('/register', [StorefrontController::class, 'register'])->name('store.register');
-Route::get('/profile', [StorefrontController::class, 'profile'])->name('store.profile');
 Route::get('/loyalty', [StorefrontController::class, 'loyalty'])->name('store.loyalty');
 Route::get('/faq', [StorefrontController::class, 'faq'])->name('store.faq');
 Route::get('/privacy', [StorefrontController::class, 'privacy'])->name('store.privacy');
@@ -45,6 +47,43 @@ Route::get('/terms', [StorefrontController::class, 'terms'])->name('store.terms'
 Route::get('/shipping', [StorefrontController::class, 'shipping'])->name('store.shipping');
 Route::get('/returns', [StorefrontController::class, 'returns'])->name('store.returns');
 Route::post('/locale', [StoreLocaleController::class, 'switch'])->name('store.locale');
+
+// Cart Routes
+Route::prefix('cart')->name('store.cart.')->group(function () {
+    Route::get('/', [CartController::class, 'index'])->name('index');
+    Route::post('/add', [CartController::class, 'add'])->name('add');
+    Route::post('/update', [CartController::class, 'update'])->name('update');
+    Route::delete('/remove/{id}', [CartController::class, 'remove'])->name('remove');
+    Route::post('/coupon', [CartController::class, 'applyCoupon'])->name('coupon.apply');
+    Route::delete('/coupon', [CartController::class, 'removeCoupon'])->name('coupon.remove');
+    Route::get('/count', [CartController::class, 'count'])->name('count');
+});
+Route::get('/cart', [CartController::class, 'index'])->name('store.cart');
+
+// Checkout & Order Routes
+Route::get('/checkout', [CheckoutController::class, 'index'])->name('store.checkout');
+Route::post('/checkout', [CheckoutController::class, 'process'])->name('store.checkout.process');
+Route::get('/order/confirmation/{orderNumber}', [CheckoutController::class, 'confirmation'])->name('store.order.confirmation');
+
+// Kashier Payment Gateway Callback & Webhook Routes
+Route::get('/payment/kashier/callback', [KashierPaymentController::class, 'callback'])->name('payment.kashier.callback');
+Route::post('/payment/kashier/webhook', [KashierPaymentController::class, 'webhook'])->name('payment.kashier.webhook');
+Route::post('/api/webhooks/kashier', [KashierPaymentController::class, 'webhook'])->name('api.webhooks.kashier');
+
+// Customer Authentication
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [CustomerAuthController::class, 'showLogin'])->name('store.login');
+    Route::post('/login', [CustomerAuthController::class, 'login'])->name('store.login.submit');
+    Route::get('/register', [CustomerAuthController::class, 'showRegister'])->name('store.register');
+    Route::post('/register', [CustomerAuthController::class, 'register'])->name('store.register.submit');
+});
+Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('store.logout');
+
+// Customer Profile
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [CustomerProfileController::class, 'index'])->name('store.profile');
+    Route::put('/profile', [CustomerProfileController::class, 'update'])->name('store.profile.update');
+});
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('guest')->group(function () {

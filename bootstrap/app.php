@@ -12,8 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->redirectGuestsTo('/admin/login');
-        $middleware->redirectUsersTo('/admin');
+        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('admin*') ? '/admin/login' : '/login');
+        $middleware->redirectUsersTo(fn (Request $request) => auth()->user()?->isAdmin() ? '/admin' : '/profile');
+        $middleware->validateCsrfTokens(except: [
+            'payment/kashier/webhook',
+            'api/webhooks/kashier',
+        ]);
         $middleware->web(append: [
             \App\Http\Middleware\SetWebLocale::class,
         ]);

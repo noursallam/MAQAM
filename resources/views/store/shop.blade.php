@@ -4,45 +4,8 @@
 
 @section('content')
 @php
-    $categories = [
-        [
-            'key' => 'all',
-            'count' => 48,
-            'active' => true,
-            'tone' => '#1b2434',
-            'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
-        ],
-        [
-            'key' => 'sockets',
-            'count' => 14,
-            'tone' => '#243044',
-            'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="7" y="3" width="10" height="14" rx="2"/><path d="M10 7v4M14 7v4M9 21h6"/></svg>',
-        ],
-        [
-            'key' => 'switches',
-            'count' => 10,
-            'tone' => '#1f2937',
-            'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="6" width="16" height="12" rx="2"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/></svg>',
-        ],
-        [
-            'key' => 'cables',
-            'count' => 8,
-            'tone' => '#222b3b',
-            'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 8c4 0 4 8 8 8s4-8 8-8"/><path d="M4 16c4 0 4-8 8-8s4 8 8 8"/></svg>',
-        ],
-        [
-            'key' => 'lighting',
-            'count' => 7,
-            'tone' => '#1a2332',
-            'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6M10 21h4"/><path d="M8 10a4 4 0 1 1 8 0c0 2-1.5 3-2 4H10c-.5-1-2-2-2-4z"/></svg>',
-        ],
-        [
-            'key' => 'breakers',
-            'count' => 5,
-            'tone' => '#182131',
-            'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>',
-        ],
-    ];
+    $locale = app()->getLocale();
+    $activeCategory = $categories->firstWhere('id', $activeCategoryId);
 @endphp
 
 <section class="mq-shop-hero" aria-label="{{ __('store.shop.heading') }}">
@@ -52,14 +15,21 @@
             <a href="{{ route('store.home') }}">{{ __('store.common.home') }}</a>
             <span class="sep">/</span>
             <span>{{ __('store.shop.breadcrumb') }}</span>
+            @if ($activeCategory)
+                <span class="sep">/</span>
+                <span>{{ $locale === 'ar' ? $activeCategory->name_ar : $activeCategory->name_en }}</span>
+            @endif
         </div>
         <div class="mq-shop-hero-copy">
             <div>
                 <span class="mq-eyebrow">{{ __('store.shop.eyebrow') }}</span>
-                <h1>{{ __('store.shop.heading') }}</h1>
+                <h1>{{ $activeCategory ? ($locale === 'ar' ? $activeCategory->name_ar : $activeCategory->name_en) : __('store.shop.heading') }}</h1>
                 <p>{{ __('store.shop.lead') }}</p>
             </div>
             <form class="mq-shop-search" action="{{ route('store.shop') }}" method="get" role="search">
+                @if (request('category'))
+                    <input type="hidden" name="category" value="{{ request('category') }}">
+                @endif
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
                 <input type="search" name="q" value="{{ request('q') }}" placeholder="{{ __('store.search.shop_placeholder') }}" aria-label="{{ __('store.nav.search') }}">
                 <button type="submit" class="mq-btn mq-btn-primary">{{ __('store.search.button') }}</button>
@@ -71,14 +41,20 @@
 <section class="mq-shop-cats" aria-label="{{ __('store.shop.sections') }}">
     <div class="mq-container">
         <div class="mq-cat-strip" role="list">
+            <a href="{{ route('store.shop', request()->except(['category', 'page'])) }}" class="mq-cat-item {{ empty($activeCategoryId) ? 'is-active' : '' }}" role="listitem">
+                <span class="mq-cat-avatar" style="--cat-tone: #1b2434">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+                </span>
+                <span class="mq-cat-label">{{ __('store.categories.all') }}</span>
+            </a>
             @foreach ($categories as $cat)
-                <button type="button" class="mq-cat-item {{ !empty($cat['active']) ? 'is-active' : '' }}" role="listitem">
-                    <span class="mq-cat-avatar" style="--cat-tone: {{ $cat['tone'] }}">
-                        {!! $cat['icon'] !!}
+                <a href="{{ route('store.shop', array_merge(request()->except(['category', 'page']), ['category' => $cat->id])) }}" class="mq-cat-item {{ (int) $activeCategoryId === $cat->id ? 'is-active' : '' }}" role="listitem">
+                    <span class="mq-cat-avatar" style="--cat-tone: #243044">
+                        {!! $cat->icon ?? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="7" y="3" width="10" height="14" rx="2"/><path d="M10 7v4M14 7v4M9 21h6"/></svg>' !!}
                     </span>
-                    <span class="mq-cat-label">{{ __('store.categories.'.$cat['key']) }}</span>
-                    <em class="mq-cat-count">{{ $cat['count'] }} {{ __('store.common.product') }}</em>
-                </button>
+                    <span class="mq-cat-label">{{ $locale === 'ar' ? $cat->name_ar : $cat->name_en }}</span>
+                    <em class="mq-cat-count">{{ $cat->products_count }} {{ __('store.common.product') }}</em>
+                </a>
             @endforeach
         </div>
     </div>
@@ -93,49 +69,59 @@
                     <button type="button" class="mq-filters-close" data-mq-filters-close aria-label="{{ __('store.shop.close_filters') }}">×</button>
                 </div>
 
-                <div class="mq-panel mq-filters-panel">
+                <form action="{{ route('store.shop') }}" method="GET" class="mq-panel mq-filters-panel">
+                    @if (request('q'))
+                        <input type="hidden" name="q" value="{{ request('q') }}">
+                    @endif
+                    @if (request('sort'))
+                        <input type="hidden" name="sort" value="{{ request('sort') }}">
+                    @endif
+
                     <div class="mq-filter-group">
                         <strong>{{ __('store.shop.sections') }}</strong>
-                        @foreach ($categories as $i => $cat)
+                        <label>
+                            <input type="radio" name="category" value="" {{ empty($activeCategoryId) ? 'checked' : '' }} onchange="this.form.submit()">
+                            <span>{{ __('store.categories.all') }}</span>
+                        </label>
+                        @foreach ($categories as $cat)
                             <label>
-                                <input type="checkbox" {{ $i === 0 ? 'checked' : '' }}>
-                                <span>{{ __('store.categories.'.$cat['key']) }}</span>
-                                <em>{{ $cat['count'] }}</em>
+                                <input type="radio" name="category" value="{{ $cat->id }}" {{ (int) $activeCategoryId === $cat->id ? 'checked' : '' }} onchange="this.form.submit()">
+                                <span>{{ $locale === 'ar' ? $cat->name_ar : $cat->name_en }}</span>
+                                <em>{{ $cat->products_count }}</em>
                             </label>
                         @endforeach
                     </div>
 
                     <div class="mq-filter-group">
                         <strong>{{ __('store.shop.price_range') }}</strong>
-                        <div class="mq-price-range">
-                            <input type="range" min="0" max="5000" value="3400" aria-label="{{ __('store.shop.price_range') }}">
-                            <div class="mq-price-inputs">
-                                <span>0 {{ __('store.common.egp') }}</span>
-                                <span>500 {{ __('store.common.egp') }}</span>
-                            </div>
-                        </div>
-                        <label><input type="radio" name="price" checked> {{ __('store.shop.all') }}</label>
-                        <label><input type="radio" name="price"> {{ __('store.shop.under_200') }}</label>
-                        <label><input type="radio" name="price"> {{ __('store.shop.between_200_500') }}</label>
-                        <label><input type="radio" name="price"> {{ __('store.shop.over_500') }}</label>
+                        <label>
+                            <input type="radio" name="price_range" value="" {{ !request('price_range') ? 'checked' : '' }} onchange="this.form.submit()">
+                            {{ __('store.shop.all') }}
+                        </label>
+                        <label>
+                            <input type="radio" name="price_range" value="under_200" {{ request('price_range') === 'under_200' ? 'checked' : '' }} onchange="this.form.submit()">
+                            {{ __('store.shop.under_200') }}
+                        </label>
+                        <label>
+                            <input type="radio" name="price_range" value="between_200_500" {{ request('price_range') === 'between_200_500' ? 'checked' : '' }} onchange="this.form.submit()">
+                            {{ __('store.shop.between_200_500') }}
+                        </label>
+                        <label>
+                            <input type="radio" name="price_range" value="over_500" {{ request('price_range') === 'over_500' ? 'checked' : '' }} onchange="this.form.submit()">
+                            {{ __('store.shop.over_500') }}
+                        </label>
                     </div>
 
                     <div class="mq-filter-group">
                         <strong>{{ __('store.shop.availability') }}</strong>
-                        <label><input type="checkbox" checked> {{ __('store.shop.in_stock') }}</label>
-                        <label><input type="checkbox"> {{ __('store.shop.offers') }}</label>
-                        <label><input type="checkbox"> {{ __('store.shop.new_arrivals') }}</label>
+                        <label>
+                            <input type="checkbox" name="in_stock" value="1" {{ request('in_stock') ? 'checked' : '' }} onchange="this.form.submit()">
+                            {{ __('store.shop.in_stock') }}
+                        </label>
                     </div>
 
-                    <div class="mq-filter-group">
-                        <strong>{{ __('store.shop.rating') }}</strong>
-                        <label><input type="radio" name="rating" checked> {{ __('store.shop.all') }}</label>
-                        <label><input type="radio" name="rating"> {{ __('store.shop.stars_4') }}</label>
-                        <label><input type="radio" name="rating"> {{ __('store.shop.stars_3') }}</label>
-                    </div>
-
-                    <button type="button" class="mq-btn mq-btn-ghost mq-btn-block">{{ __('store.common.reset_filters') }}</button>
-                </div>
+                    <a href="{{ route('store.shop') }}" class="mq-btn mq-btn-ghost mq-btn-block" style="text-align:center;">{{ __('store.common.reset_filters') }}</a>
+                </form>
             </aside>
 
             <div class="mq-shop-main">
@@ -145,8 +131,7 @@
                             {{ __('store.common.filter') }}
                         </button>
                         <div>
-                            <strong>8 {{ __('store.common.products') }}</strong>
-                            <span class="mq-shop-result-meta">{{ __('store.common.of') }} 48 {{ __('store.common.results') }}</span>
+                            <strong>{{ $products->total() }} {{ __('store.common.products') }}</strong>
                         </div>
                     </div>
 
@@ -159,36 +144,71 @@
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="5" width="18" height="3"/><rect x="3" y="10.5" width="18" height="3"/><rect x="3" y="16" width="18" height="3"/></svg>
                             </button>
                         </div>
-                        <label class="mq-sort-field">
+                        <form action="{{ route('store.shop') }}" method="GET" class="mq-sort-field">
+                            @foreach(request()->except('sort') as $key => $val)
+                                @if(is_array($val))
+                                    @foreach($val as $subVal)
+                                        <input type="hidden" name="{{ $key }}[]" value="{{ $subVal }}">
+                                    @endforeach
+                                @else
+                                    <input type="hidden" name="{{ $key }}" value="{{ $val }}">
+                                @endif
+                            @endforeach
                             <span>{{ __('store.common.sort_by') }}</span>
-                            <select aria-label="{{ __('store.common.sort_by') }}">
-                                <option>{{ __('store.shop.sort_best') }}</option>
-                                <option>{{ __('store.shop.sort_newest') }}</option>
-                                <option>{{ __('store.shop.sort_price_asc') }}</option>
-                                <option>{{ __('store.shop.sort_price_desc') }}</option>
-                                <option>{{ __('store.shop.sort_rating') }}</option>
+                            <select name="sort" aria-label="{{ __('store.common.sort_by') }}" onchange="this.form.submit()">
+                                <option value="newest" {{ request('sort') === 'newest' ? 'selected' : '' }}>{{ __('store.shop.sort_newest') }}</option>
+                                <option value="price_asc" {{ request('sort') === 'price_asc' ? 'selected' : '' }}>{{ __('store.shop.sort_price_asc') }}</option>
+                                <option value="price_desc" {{ request('sort') === 'price_desc' ? 'selected' : '' }}>{{ __('store.shop.sort_price_desc') }}</option>
+                                <option value="name_asc" {{ request('sort') === 'name_asc' ? 'selected' : '' }}>{{ __('store.shop.sort_best') }}</option>
                             </select>
-                        </label>
+                        </form>
                     </div>
                 </div>
 
-                <div class="mq-active-filters" aria-label="{{ __('store.common.filter') }}">
-                    <span class="mq-chip">{{ __('store.categories.sockets') }} <button type="button" aria-label="{{ __('store.common.remove') }}">×</button></span>
-                    <span class="mq-chip">{{ __('store.shop.in_stock') }} <button type="button" aria-label="{{ __('store.common.remove') }}">×</button></span>
-                    <button type="button" class="mq-chip-clear">{{ __('store.common.clear_all') }}</button>
-                </div>
+                @if (request('q') || request('category') || request('price_range') || request('in_stock'))
+                    <div class="mq-active-filters" aria-label="{{ __('store.common.filter') }}">
+                        @if ($activeCategory)
+                            <span class="mq-chip">{{ $locale === 'ar' ? $activeCategory->name_ar : $activeCategory->name_en }} 
+                                <a href="{{ route('store.shop', request()->except('category')) }}" aria-label="{{ __('store.common.remove') }}">×</a>
+                            </span>
+                        @endif
+                        @if (request('q'))
+                            <span class="mq-chip">"{{ request('q') }}"
+                                <a href="{{ route('store.shop', request()->except('q')) }}" aria-label="{{ __('store.common.remove') }}">×</a>
+                            </span>
+                        @endif
+                        @if (request('in_stock'))
+                            <span class="mq-chip">{{ __('store.shop.in_stock') }}
+                                <a href="{{ route('store.shop', request()->except('in_stock')) }}" aria-label="{{ __('store.common.remove') }}">×</a>
+                            </span>
+                        @endif
+                        <a href="{{ route('store.shop') }}" class="mq-chip-clear">{{ __('store.common.clear_all') }}</a>
+                    </div>
+                @endif
 
                 <div class="mq-products mq-shop-grid" data-mq-products>
-                    @include('store.partials.products', ['enhanced' => true])
+                    @include('store.partials.products', ['products' => $products, 'enhanced' => true])
                 </div>
 
-                <nav class="mq-pagination" aria-label="{{ __('store.shop.pages') }}">
-                    <button type="button" class="mq-page-btn" disabled aria-label="{{ __('store.common.previous') }}">{{ __('store.common.previous') }}</button>
-                    <button type="button" class="mq-page-btn is-active" aria-current="page">1</button>
-                    <button type="button" class="mq-page-btn">2</button>
-                    <button type="button" class="mq-page-btn">3</button>
-                    <button type="button" class="mq-page-btn" aria-label="{{ __('store.common.next') }}">{{ __('store.common.next') }}</button>
-                </nav>
+                @if ($products->hasPages())
+                    <nav class="mq-pagination" aria-label="{{ __('store.shop.pages') }}">
+                        @if ($products->onFirstPage())
+                            <span class="mq-page-btn is-disabled" aria-disabled="true">{{ __('store.common.previous') }}</span>
+                        @else
+                            <a href="{{ $products->previousPageUrl() }}" class="mq-page-btn" aria-label="{{ __('store.common.previous') }}">{{ __('store.common.previous') }}</a>
+                        @endif
+
+                        @foreach ($products->getUrlRange(1, $products->lastPage()) as $page => $url)
+                            <a href="{{ $url }}" class="mq-page-btn {{ $page == $products->currentPage() ? 'is-active' : '' }}" {{ $page == $products->currentPage() ? 'aria-current="page"' : '' }}>{{ $page }}</a>
+                        @endforeach
+
+                        @if ($products->hasMorePages())
+                            <a href="{{ $products->nextPageUrl() }}" class="mq-page-btn" aria-label="{{ __('store.common.next') }}">{{ __('store.common.next') }}</a>
+                        @else
+                            <span class="mq-page-btn is-disabled" aria-disabled="true">{{ __('store.common.next') }}</span>
+                        @endif
+                    </nav>
+                @endif
             </div>
         </div>
     </div>

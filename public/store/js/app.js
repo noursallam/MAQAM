@@ -103,4 +103,73 @@ document.addEventListener('DOMContentLoaded', function () {
             setSearchOpen(true);
         }
     });
+
+    // Toast notification helper
+    function showToast(message, type) {
+        type = type || 'success';
+        var existing = document.querySelector('.mq-toast');
+        if (existing) existing.remove();
+
+        var toast = document.createElement('div');
+        toast.className = 'mq-toast mq-toast-' + type;
+        toast.style.position = 'fixed';
+        toast.style.bottom = '24px';
+        toast.style.left = '50%';
+        toast.style.transform = 'translateX(-50%)';
+        toast.style.background = type === 'success' ? '#10b981' : '#ef4444';
+        toast.style.color = '#ffffff';
+        toast.style.padding = '12px 24px';
+        toast.style.borderRadius = '8px';
+        toast.style.boxShadow = '0 10px 25px rgba(0,0,0,0.3)';
+        toast.style.zIndex = '99999';
+        toast.style.fontWeight = '600';
+        toast.style.fontSize = '0.95rem';
+        toast.style.transition = 'opacity 0.3s ease';
+        toast.innerText = message;
+
+        document.body.appendChild(toast);
+        setTimeout(function () {
+            toast.style.opacity = '0';
+            setTimeout(function () { toast.remove(); }, 300);
+        }, 3000);
+    }
+
+    // Ajax add to cart
+    document.querySelectorAll('.mq-ajax-add-cart').forEach(function (form) {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.disabled = true;
+
+            var formData = new FormData(form);
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').getAttribute('content') : '',
+                    'Accept': 'application/json'
+                },
+                body: formData
+            })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data.success) {
+                    var badge = document.getElementById('mqCartBadge');
+                    if (badge && typeof data.count !== 'undefined') {
+                        badge.textContent = data.count;
+                    }
+                    showToast(data.message || 'تمت الإضافة إلى السلة بنجاح ✓', 'success');
+                } else {
+                    showToast(data.message || 'تعذر إضافة المنتج', 'error');
+                }
+            })
+            .catch(function () {
+                showToast('حدث خطأ أثناء الإضافة إلى السلة', 'error');
+            })
+            .finally(function () {
+                if (submitBtn) submitBtn.disabled = false;
+            });
+        });
+    });
 });
+
