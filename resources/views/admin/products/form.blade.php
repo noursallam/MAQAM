@@ -16,11 +16,11 @@
     $oldOptions = old('options');
     if ($oldOptions === null) {
         $oldOptions = $product->relationLoaded('options')
-            ? $product->options->map(fn ($o) => ['name' => $o->name, 'value' => $o->value])->all()
-            : [];
+            ? $product->options->map(fn ($o) => ['name' => $o->name, 'value' => $o->value, 'price' => $o->price !== null ? (float) $o->price : ''])->all()
+            : $product->options()->get()->map(fn ($o) => ['name' => $o->name, 'value' => $o->value, 'price' => $o->price !== null ? (float) $o->price : ''])->all();
     }
     if ($oldOptions === []) {
-        $oldOptions = [['name' => '', 'value' => '']];
+        $oldOptions = [['name' => '', 'value' => '', 'price' => '']];
     }
 
     $steps = [
@@ -215,18 +215,25 @@
         </div>
 
         <div class="rounded-xl border border-[#E4E0D7] p-4" x-data="productRows(@js($oldOptions))">
-            <div class="mb-3 flex items-center justify-between gap-2">
+            <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
                 <div>
                     <h3 class="text-sm font-semibold">{{ __('admin.commerce.options') }}</h3>
-                    <p class="ui-muted text-xs">{{ __('admin.commerce.options_hint') }}</p>
+                    <p class="ui-muted text-xs">حدد مواصفات وخيارات المنتج وسعر كل مواصفة (مثال: مقاس 16 بسعر 35 ج.م، ومقاس 24 بسعر 50 ج.م). سيُعرض في المتجر تلقائياً «يبدأ من [أرخص سعر]».</p>
                 </div>
-                <button type="button" class="ui-btn ui-btn-ghost text-xs" @click="add({name:'', value:''})">+ {{ __('admin.commerce.add_option') }}</button>
+                <button type="button" class="ui-btn ui-btn-ghost text-xs" @click="add({name:'', value:'', price:''})">+ {{ __('admin.commerce.add_option') }}</button>
             </div>
             <div class="space-y-2">
+                <div class="hidden grid-cols-[1fr_1fr_130px_auto] gap-2 px-1 text-xs font-semibold text-maqam-muted sm:grid">
+                    <div>{{ __('admin.commerce.option_key') }} (مثال: المقاس / السعة)</div>
+                    <div>{{ __('admin.commerce.option_value') }} (مثال: 24 مللي)</div>
+                    <div>السعر (ج.م)</div>
+                    <div></div>
+                </div>
                 <template x-for="(row, index) in rows" :key="index">
-                    <div class="grid grid-cols-[1fr_1fr_auto] items-center gap-2">
+                    <div class="grid grid-cols-1 items-center gap-2 sm:grid-cols-[1fr_1fr_130px_auto]">
                         <input type="text" :name="`options[${index}][name]`" x-model="row.name" class="ui-input" placeholder="{{ __('admin.commerce.option_key') }}" dir="rtl">
                         <input type="text" :name="`options[${index}][value]`" x-model="row.value" class="ui-input" placeholder="{{ __('admin.commerce.option_value') }}" dir="rtl">
+                        <input type="number" step="0.01" min="0" :name="`options[${index}][price]`" x-model="row.price" class="ui-input font-mono" placeholder="السعر ج.م" dir="ltr">
                         <button type="button" class="ui-btn ui-btn-ghost text-xs text-red-700" @click="remove(index)" x-show="rows.length > 1">{{ __('admin.delete') }}</button>
                     </div>
                 </template>

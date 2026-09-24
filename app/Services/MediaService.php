@@ -80,6 +80,11 @@ class MediaService
             }
         }
 
+        $cleanPath = ltrim($path, '/');
+        if (str_starts_with($cleanPath, 'identity/') || str_starts_with($cleanPath, 'store/') || str_starts_with($cleanPath, 'build/')) {
+            return asset($cleanPath);
+        }
+
         $path = preg_replace('/^\/?storage\//i', '', $path);
         $path = ltrim($path, '/');
 

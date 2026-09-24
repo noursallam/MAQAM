@@ -68,6 +68,8 @@ return [
         'of' => 'of',
         'results' => 'results',
         'egp' => 'EGP',
+        'from' => 'From',
+        'view_options' => 'Select Options',
         'add_to_cart' => 'Add to cart',
         'add_to_wishlist' => 'Add to wishlist',
         'view_details' => 'View details',
@@ -92,6 +94,7 @@ return [
         'shipping' => 'Shipping',
         'new' => 'New',
         'featured' => 'Featured',
+        'no_products_found' => 'No matching products found in this section.',
     ],
 
     'categories' => [
@@ -188,6 +191,7 @@ return [
         'grid' => 'Grid view',
         'list' => 'List view',
         'pages' => 'Shop pages',
+        'out_of_stock' => 'Out of stock',
     ],
 
     'product' => [
@@ -204,6 +208,18 @@ return [
         'panel_text' => 'Electrical product ready to connect with inventory and admin. Points are fixed by the prize category on the QR code, not by product price.',
         'pieces' => 'pcs',
         'sku' => 'SKU',
+        'colors' => 'Color',
+        'options' => 'Specification / Option',
+        'related' => 'Related Products',
+        'hover_zoom' => 'Hover to zoom • Click for full screen',
+        'click_expand' => 'Full screen zoom view',
+        'drag_hint' => 'Click and drag to pan • Use mouse wheel or buttons to zoom in and out',
+        'zoom_in' => 'Zoom in (+)',
+        'zoom_out' => 'Zoom out (-)',
+        'zoom_reset' => 'Reset zoom (1:1)',
+        'close_modal' => 'Close (Esc)',
+        'prev_image' => 'Previous image',
+        'next_image' => 'Next image',
     ],
 
     'cart' => [
@@ -214,6 +230,17 @@ return [
         'product' => 'Product',
         'summary' => 'Order summary',
         'checkout' => 'Checkout',
+        'empty_title' => 'Your cart is empty',
+        'empty_text' => 'You haven\'t added any items to your cart yet. Browse our store to discover products.',
+        'coupon_active' => 'Coupon code active',
+        'coupon_placeholder' => 'Enter coupon code...',
+        'apply_coupon' => 'Apply Code',
+        'discount' => 'Discount',
+        'free_shipping' => 'Free shipping',
+    ],
+
+    'order' => [
+        'confirmation_title' => 'Order Confirmation | MAQAM',
     ],
 
     'checkout' => [
@@ -258,6 +285,7 @@ return [
         'password' => 'Password',
         'create' => 'Create account',
         'have_account' => 'Already have an account?',
+        'logout' => 'Log Out',
     ],
 
     'about' => [

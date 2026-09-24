@@ -311,6 +311,7 @@ class ProductController extends Controller
             'options' => ['nullable', 'array'],
             'options.*.name' => ['nullable', 'string', 'max:100'],
             'options.*.value' => ['nullable', 'string', 'max:255'],
+            'options.*.price' => ['nullable', 'numeric', 'min:0'],
         ]);
 
         $data['is_active'] = $request->boolean('is_active', true);
@@ -360,9 +361,14 @@ class ProductController extends Controller
                 continue;
             }
 
+            $price = isset($row['price']) && $row['price'] !== '' && is_numeric($row['price'])
+                ? (float) $row['price']
+                : null;
+
             $product->options()->create([
                 'name' => $name,
                 'value' => $value,
+                'price' => $price,
                 'sort_order' => $optionSort++,
             ]);
         }

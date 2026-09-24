@@ -19,30 +19,35 @@ class StoreContentSeeder extends Seeder
                 'name_en' => 'Switches & Sockets',
                 'name_ar' => 'مفاتيح وبرايز',
                 'slug' => 'switches-sockets',
+                'image_path' => 'store/img/categories/switches-sockets.jpg',
                 'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="7" y="3" width="10" height="14" rx="2"/><path d="M10 7v4M14 7v4M9 21h6"/></svg>',
             ],
             [
                 'name_en' => 'Breakers & Panels',
                 'name_ar' => 'قواطع ولوحات توزيع',
                 'slug' => 'breakers',
+                'image_path' => 'store/img/categories/breakers.jpg',
                 'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>',
             ],
             [
                 'name_en' => 'Cables & Wires',
                 'name_ar' => 'كابلات وأسلاك',
                 'slug' => 'cables',
+                'image_path' => 'store/img/categories/cables.jpg',
                 'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 8c4 0 4 8 8 8s4-8 8-8"/><path d="M4 16c4 0 4-8 8-8s4 8 8 8"/></svg>',
             ],
             [
                 'name_en' => 'Lighting & LED',
                 'name_ar' => 'إضاءة وليد',
                 'slug' => 'lighting',
+                'image_path' => 'store/img/categories/lighting.svg',
                 'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6M10 21h4"/><path d="M8 10a4 4 0 1 1 8 0c0 2-1.5 3-2 4H10c-.5-1-2-2-2-4z"/></svg>',
             ],
             [
                 'name_en' => 'Electrical Tools & Accessories',
                 'name_ar' => 'أدوات وإكسسوارات كهربائية',
                 'slug' => 'tools',
+                'image_path' => 'store/img/categories/tools.svg',
                 'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
             ],
         ];
@@ -59,11 +64,17 @@ class StoreContentSeeder extends Seeder
                     'name_en' => $c['name_en'],
                     'name_ar' => $c['name_ar'],
                     'slug' => $c['slug'],
+                    'image_path' => $c['image_path'],
                     'icon' => $c['icon'],
                     'is_active' => true,
                 ]);
             } else {
-                $cat->update(['icon' => $c['icon'], 'is_active' => true]);
+                $cat->update([
+                    'slug' => $c['slug'],
+                    'icon' => $c['icon'],
+                    'image_path' => $c['image_path'],
+                    'is_active' => true,
+                ]);
             }
 
             $categories[$c['slug']] = $cat;
@@ -279,7 +290,7 @@ class StoreContentSeeder extends Seeder
             [
                 'title_ar' => 'أدوات ومستلزمات كهربائية بمعايير جودة فائقة',
                 'title_en' => 'Premium Electrical Supplies & Modular Switches',
-                'image_path' => 'identity/hero-prestige.png',
+                'image_path' => 'store/img/hero-switches.jpg',
                 'link_url' => '/shop',
                 'is_active' => true,
                 'sort_order' => 1,

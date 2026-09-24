@@ -14,7 +14,7 @@
         @if ($primaryBanner && $primaryBanner->imageUrl())
             <img src="{{ $primaryBanner->imageUrl() }}" alt="{{ $primaryBanner->title_ar ?: __('store.brand') }}">
         @else
-            <img src="{{ asset('identity/7a2131bb-c88e-4ad4-9c9d-d0d836e01ea9.png') }}" alt="{{ __('store.brand') }}">
+            <img src="{{ asset('store/img/hero-switches.jpg') }}" alt="{{ __('store.brand') }}">
         @endif
     </div>
     <div class="mq-hero-glow" aria-hidden="true"></div>
@@ -59,24 +59,68 @@
     </div>
 </section>
 
-<section class="mq-shop-cats mq-home-cats" aria-label="{{ __('store.home.product_types') }}">
+{{-- Luxury Category Showcase --}}
+<section class="mq-home-categories-section" aria-label="{{ __('store.home.product_types') }}">
     <div class="mq-container">
-        <div class="mq-cat-strip" role="list">
-            <a href="{{ route('store.shop') }}" class="mq-cat-item {{ !request('category') ? 'is-active' : '' }}" role="listitem">
-                <span class="mq-cat-avatar" style="--cat-tone: #1b2434">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <div class="mq-section-head mq-cat-section-head">
+            <div class="mq-section-head-info">
+                <span class="mq-eyebrow">{{ __('store.shop.sections') }}</span>
+                <h2>{{ $locale === 'ar' ? 'تصفح المنتجات حسب القسم' : 'Explore by Category' }}</h2>
+                <p>{{ $locale === 'ar' ? 'تشكيلة متكاملة من أرقى المنتجات والحلول الكهربائية المعتمدة' : 'A curated range of premium certified electrical equipment and solutions' }}</p>
+            </div>
+            <a href="{{ route('store.shop') }}" class="mq-cat-view-all">
+                <span>{{ __('store.categories.all') }}</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="{{ $locale === 'ar' ? 'M19 12H5M12 19l-7-7 7-7' : 'M5 12h14M12 5l7 7-7 7' }}"/>
+                </svg>
+            </a>
+        </div>
+
+        <div class="mq-cat-showcase-grid" role="list">
+            <a href="{{ route('store.shop') }}" class="mq-cat-card is-all" role="listitem">
+                <div class="mq-cat-card-media">
+                    <span class="mq-cat-card-icon">
+                        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                            <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                            <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                            <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                        </svg>
+                    </span>
+                </div>
+                <div class="mq-cat-card-content">
+                    <h3 class="mq-cat-card-title">{{ __('store.categories.all') }}</h3>
+                    <span class="mq-cat-card-count">{{ $categories->sum('products_count') }} {{ __('store.common.products') }}</span>
+                </div>
+                <span class="mq-cat-card-arrow" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="{{ $locale === 'ar' ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6' }}"/>
+                    </svg>
                 </span>
-                <span class="mq-cat-label">{{ __('store.categories.all') }}</span>
             </a>
             @foreach ($categories as $cat)
-                <a href="{{ route('store.shop', ['category' => $cat->id]) }}" class="mq-cat-item" role="listitem">
-                    <span class="mq-cat-avatar" style="--cat-tone: #243044">
-                        {!! $cat->icon ?? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="7" y="3" width="10" height="14" rx="2"/><path d="M10 7v4M14 7v4M9 21h6"/></svg>' !!}
+                @php
+                    $catName = $locale === 'ar' ? $cat->name_ar : $cat->name_en;
+                @endphp
+                <a href="{{ route('store.shop', ['category' => $cat->id]) }}" class="mq-cat-card" role="listitem">
+                    <div class="mq-cat-card-media">
+                        @if ($cat->hasImage())
+                            <img src="{{ $cat->image_url }}" alt="{{ $catName }}" class="mq-cat-card-img" loading="lazy">
+                        @else
+                            <span class="mq-cat-card-icon">
+                                {!! $cat->icon ?? '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="7" y="3" width="10" height="14" rx="2"/><path d="M10 7v4M14 7v4M9 21h6"/></svg>' !!}
+                            </span>
+                        @endif
+                    </div>
+                    <div class="mq-cat-card-content">
+                        <h3 class="mq-cat-card-title">{{ $catName }}</h3>
+                        <span class="mq-cat-card-count">{{ $cat->products_count }} {{ __('store.common.products') }}</span>
+                    </div>
+                    <span class="mq-cat-card-arrow" aria-hidden="true">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="{{ $locale === 'ar' ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6' }}"/>
+                        </svg>
                     </span>
-                    <span class="mq-cat-label">{{ $locale === 'ar' ? $cat->name_ar : $cat->name_en }}</span>
-                    @if ($cat->products_count > 0)
-                        <em class="mq-cat-count" style="font-size:.78rem;opacity:.7;">{{ $cat->products_count }}</em>
-                    @endif
                 </a>
             @endforeach
         </div>

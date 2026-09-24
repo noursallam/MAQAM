@@ -145,7 +145,10 @@
                         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem;margin-bottom:.75rem;font-size:.9rem;">
                             <div>
                                 <strong>{{ $pName }}</strong>
-                                <div style="color:var(--mq-muted);font-size:.82rem;">× {{ $item->quantity }}</div>
+                                @if (!empty($item->option_label))
+                                    <div style="color:var(--mq-gold);font-size:.78rem;font-weight:600;">{{ $item->option_label }}</div>
+                                @endif
+                                <div style="color:var(--mq-muted);font-size:.82rem;">× {{ $item->quantity }} · {{ number_format($item->unit_price, 2) }} {{ __('store.common.egp') }}</div>
                             </div>
                             <div style="white-space:nowrap;font-weight:600;">
                                 {{ number_format($item->unit_price * $item->quantity, 2) }} {{ __('store.common.egp') }}

@@ -111,12 +111,20 @@ class StorefrontController extends Controller
         $minPrice = (float) (Product::where('is_active', true)->min('price') ?: 0);
         $maxPrice = (float) (Product::where('is_active', true)->max('price') ?: 500);
 
+        $recommendedProducts = Product::with(['category', 'thumbnail', 'images'])
+            ->where('is_active', true)
+            ->where('stock_quantity', '>', 0)
+            ->latest()
+            ->take(4)
+            ->get();
+
         return view('store.shop', compact(
             'products',
             'categories',
             'activeCategoryId',
             'minPrice',
-            'maxPrice'
+            'maxPrice',
+            'recommendedProducts'
         ));
     }
 

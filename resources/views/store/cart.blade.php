@@ -73,7 +73,14 @@
                                                 @else
                                                     <strong>{{ $name }}</strong>
                                                 @endif
-                                                <div style="color:var(--mq-muted);font-size:.85rem">
+                                                @if (!empty($item->option_label))
+                                                    <div style="margin-top:.2rem;">
+                                                        <span style="display:inline-block;padding:.15rem .45rem;background:rgba(197,160,89,.15);border:1px solid rgba(197,160,89,.35);border-radius:4px;font-size:.76rem;color:var(--mq-gold);font-weight:600;">
+                                                            {{ $item->option_label }}
+                                                        </span>
+                                                    </div>
+                                                @endif
+                                                <div style="color:var(--mq-muted);font-size:.85rem;margin-top:.15rem;">
                                                     {{ $catName }} · +{{ $points }} {{ __('store.common.points') }}
                                                 </div>
                                             </div>

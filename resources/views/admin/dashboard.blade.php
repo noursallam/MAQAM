@@ -209,7 +209,7 @@
                     <rect x="{{ $x0 + ($barW + $gap) * 2 }}" y="{{ $base - $hS }}" width="{{ $barW }}" height="{{ $hS }}" rx="3" fill="#059669">
                         <title>{{ $row['label'] }} — {{ __('admin.home.chart_legend_scans') }}: {{ $row['scans'] }}</title>
                     </rect>
-                    <text x="{{ $cx }}" y="{{ $chartH - 12 }}" text-anchor="middle" fill="#7A756A" font-size="12" font-family="Alexandria, sans-serif">{{ $row['label'] }}</text>
+                    <text x="{{ $cx }}" y="{{ $chartH - 12 }}" text-anchor="middle" fill="#7A756A" font-size="12" font-family="'IBM Plex Sans Arabic', Inter, 'DM Sans', sans-serif">{{ $row['label'] }}</text>
                 @endforeach
             </svg>
         @endif
@@ -343,7 +343,7 @@
                     <div class="ui-muted text-xs">{{ number_format($product->price, 0) }} ج.م</div>
                 </a>
             @empty
-                <p class="ui-muted col-span-2 py-8 text-center">{{ __('admin.products.empty') }}</p>
+                <p class="ui-muted col-span-2 py-8 text-center">{{ __('admin.commerce.empty') }}</p>
             @endforelse
         </div>
     </div>

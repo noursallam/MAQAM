@@ -6,7 +6,7 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Alexandria', ui-sans-serif, system-ui, sans-serif;
+    --font-sans: "IBM Plex Sans Arabic", Inter, "DM Sans", ui-sans-serif, system-ui, sans-serif;
     --color-maqam-bg: #F3F1EB;
     --color-maqam-card: #FFFFFF;
     --color-maqam-gold: #C5A059;
@@ -21,7 +21,7 @@
 
 @layer base {
     body {
-        font-family: 'Alexandria', sans-serif;
+        font-family: var(--font-sans, "IBM Plex Sans Arabic", Inter, "DM Sans", ui-sans-serif, system-ui, sans-serif);
         color: #0B0F19;
         background: #F3F1EB;
     }

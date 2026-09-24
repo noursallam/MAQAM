@@ -42,7 +42,7 @@ class Banner extends Model
             return $this->image_path;
         }
 
-        if (str_starts_with($this->image_path, 'identity/')) {
+        if (str_starts_with($this->image_path, 'identity/') || str_starts_with($this->image_path, 'store/')) {
             return asset($this->image_path);
         }
 

@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="toolsBg" cx="50%" cy="40%" r="65%">
+      <stop offset="0%" stop-color="#1e2536"/>
+      <stop offset="50%" stop-color="#141824"/>
+      <stop offset="100%" stop-color="#0b0f19"/>
+    </radialGradient>
+    <radialGradient id="toolsGlow" cx="50%" cy="50%" r="45%">
+      <stop offset="0%" stop-color="#C5A059" stop-opacity="0.28"/>
+      <stop offset="60%" stop-color="#C5A059" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#C5A059" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="toolGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f5e1b5"/>
+      <stop offset="35%" stop-color="#C5A059"/>
+      <stop offset="70%" stop-color="#8c6d32"/>
+      <stop offset="100%" stop-color="#dcb479"/>
+    </linearGradient>
+    <linearGradient id="toolSteel" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9aa0ad"/>
+      <stop offset="50%" stop-color="#606675"/>
+      <stop offset="100%" stop-color="#3c4352"/>
+    </linearGradient>
+    <linearGradient id="meterBody" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#242b3b"/>
+      <stop offset="100%" stop-color="#121622"/>
+    </linearGradient>
+    <filter id="toolDrop" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" fill="url(#toolsBg)"/>
+  <circle cx="256" cy="256" r="210" fill="url(#toolsGlow)"/>
+
+  <!-- Tools composition with drop shadow -->
+  <g filter="url(#toolDrop)">
+    <!-- Digital Multimeter (Center) -->
+    <rect x="176" y="90" width="160" height="260" rx="20" fill="url(#meterBody)" stroke="url(#toolGold)" stroke-width="3"/>
+    
+    <!-- Multimeter LCD Display -->
+    <rect x="196" y="115" width="120" height="60" rx="8" fill="#0d111a" stroke="#2d3748" stroke-width="1.5"/>
+    <text x="296" y="156" fill="#4ade80" font-family="'Courier New', monospace" font-size="28" font-weight="700" text-anchor="end" letter-spacing="2">230.4</text>
+    <text x="306" y="140" fill="#4ade80" font-family="sans-serif" font-size="12" font-weight="600">V</text>
+
+    <!-- Rotary Dial Outer -->
+    <circle cx="256" cy="245" r="42" fill="#181e2b" stroke="url(#toolGold)" stroke-width="2.5"/>
+    <circle cx="256" cy="245" r="30" fill="#2d3748"/>
+    <!-- Rotary Dial Indicator Pointer -->
+    <polygon points="256,212 251,235 261,235" fill="url(#toolGold)"/>
+    <circle cx="256" cy="245" r="8" fill="url(#toolGold)"/>
+
+    <!-- Dial Tick Marks -->
+    <circle cx="256" cy="195" r="3" fill="url(#toolGold)"/>
+    <circle cx="218" cy="220" r="3" fill="#9aa0ad"/>
+    <circle cx="294" cy="220" r="3" fill="#9aa0ad"/>
+    <circle cx="212" cy="255" r="3" fill="#9aa0ad"/>
+    <circle cx="300" cy="255" r="3" fill="#9aa0ad"/>
+
+    <!-- Multimeter Jacks -->
+    <circle cx="216" cy="318" r="8" fill="#161b29" stroke="url(#toolSteel)" stroke-width="2"/>
+    <circle cx="256" cy="318" r="8" fill="#161b29" stroke="#991b1b" stroke-width="2.5"/>
+    <circle cx="296" cy="318" r="8" fill="#161b29" stroke="url(#toolGold)" stroke-width="2.5"/>
+
+    <!-- Screwdriver / Probe (Left crossing) -->
+    <g transform="rotate(-32 150 360)">
+      <rect x="142" y="170" width="16" height="150" rx="8" fill="url(#toolGold)"/>
+      <rect x="146" y="160" width="8" height="20" rx="2" fill="url(#toolSteel)"/>
+      <rect x="147" y="60" width="6" height="110" fill="url(#toolSteel)"/>
+      <!-- Screwdriver Tip -->
+      <polygon points="146,60 154,60 152,42 148,42" fill="url(#toolSteel)"/>
+    </g>
+
+    <!-- Precision Pliers / Cutter (Right crossing) -->
+    <g transform="rotate(32 360 360)">
+      <!-- Jaws -->
+      <path d="M352,80 Q358,60 368,52 Q372,70 368,90 Z" fill="url(#toolSteel)"/>
+      <path d="M368,80 Q362,60 352,52 Q348,70 352,90 Z" fill="url(#toolSteel)"/>
+      <!-- Pivot Bolt -->
+      <circle cx="360" cy="98" r="9" fill="url(#toolGold)"/>
+      <!-- Handles -->
+      <rect x="345" y="110" width="14" height="160" rx="7" fill="url(#toolGold)"/>
+      <rect x="361" y="110" width="14" height="160" rx="7" fill="url(#toolGold)"/>
+    </g>
+  </g>
+
+  <!-- Gold Accent Ring -->
+  <circle cx="256" cy="256" r="240" fill="none" stroke="url(#toolGold)" stroke-width="2" stroke-opacity="0.3" stroke-dasharray="8 6"/>
+</svg>

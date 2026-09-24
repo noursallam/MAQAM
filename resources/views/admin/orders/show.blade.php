@@ -87,7 +87,10 @@
                     <div class="ui-row">
                         <div>
                             <div class="font-medium text-sm">{{ $item->product?->name_ar ?? $item->product?->name_en }}</div>
-                            <div class="ui-muted mt-0.5">× {{ $item->quantity }} · {{ number_format($item->unit_price, 2) }}</div>
+                            @if (!empty($item->option_label))
+                                <div class="mt-0.5 inline-block rounded bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800 border border-amber-200">{{ $item->option_label }}</div>
+                            @endif
+                            <div class="ui-muted mt-0.5">× {{ $item->quantity }} · {{ number_format($item->unit_price, 2) }} ج.م</div>
                         </div>
                         <div class="font-semibold text-sm">{{ number_format($item->subtotal, 2) }}</div>
                     </div>

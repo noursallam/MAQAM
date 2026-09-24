@@ -7,9 +7,11 @@
     @php
         $name = $locale === 'ar' ? ($p->name_ar ?: $p->name_en) : ($p->name_en ?: $p->name_ar);
         $catName = $p->category ? ($locale === 'ar' ? $p->category->name_ar : $p->category->name_en) : __('store.categories.all');
-        $price = number_format((float) $p->price, 2) . ' ' . __('store.common.egp');
+        $isVariable = $p->isPriceVariable();
+        $displayPrice = $isVariable ? $p->minPrice() : (float) $p->price;
+        $price = number_format($displayPrice, 2) . ' ' . __('store.common.egp');
         
-        $points = (int) max(10, floor((float) $p->price / 2));
+        $points = (int) max(10, floor($displayPrice / 2));
         $imgUrl = null;
         if (!empty($p->image_path)) {
             $imgUrl = asset('storage/' . $p->image_path);
@@ -64,22 +66,63 @@
             @endif
             <div class="mq-card-foot">
                 <div class="mq-card-price">
+                    @if ($isVariable)
+                        <span class="mq-price-from">{{ __('store.common.from') }}</span>
+                    @endif
                     <span>{{ $price }}</span>
                 </div>
-                <form action="{{ route('store.cart.add') }}" method="POST" class="mq-ajax-add-cart" style="display:inline;">
-                    @csrf
-                    <input type="hidden" name="product_id" value="{{ $p->id }}">
-                    <input type="hidden" name="quantity" value="1">
-                    <button type="submit" class="mq-card-cart" aria-label="{{ __('store.common.add_to_cart') }}" title="{{ __('store.common.add_to_cart') }}">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
-                    </button>
-                </form>
+                @if ($isVariable)
+                    <a href="{{ route('store.product', $p->id) }}" class="mq-card-cart mq-card-options-link" aria-label="{{ __('store.common.view_options') }}" title="{{ __('store.common.view_options') }}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    </a>
+                @else
+                    <form action="{{ route('store.cart.add') }}" method="POST" class="mq-ajax-add-cart" style="display:inline;">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $p->id }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="mq-card-cart" aria-label="{{ __('store.common.add_to_cart') }}" title="{{ __('store.common.add_to_cart') }}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+                        </button>
+                    </form>
+                @endif
             </div>
         </div>
     </article>
 @empty
-    <div style="grid-column:1/-1;text-align:center;padding:3rem 1rem;color:var(--mq-muted);">
-        <p style="font-size:1.1rem;margin:0 0 1rem;">{{ __('store.common.no_products_found', [], $locale) ?: 'لا توجد منتجات مطابقة في هذا القسم حالياً.' }}</p>
-        <a href="{{ route('store.shop') }}" class="mq-btn mq-btn-primary">{{ __('store.common.clear_all') }}</a>
+    <div class="mq-shop-empty-state">
+        <div class="mq-empty-card">
+            <div class="mq-empty-icon-wrap" aria-hidden="true">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                    <circle cx="11" cy="11" r="7"/>
+                    <path d="m21 21-4.35-4.35"/>
+                    <line x1="8" y1="11" x2="14" y2="11"/>
+                </svg>
+            </div>
+            <h3 class="mq-empty-title">{{ __('store.common.no_products_found') }}</h3>
+            <p class="mq-empty-desc">
+                {{ $locale === 'ar' ? 'لم نعثر على أي منتجات مطابقة في هذا القسم حالياً. جرّب مسح الفلاتر أو تصفح الأقسام والمنتجات المقترحة أدناه.' : 'No products matched your criteria in this section. Try clearing filters or explore the recommended items below.' }}
+            </p>
+            <div class="mq-empty-actions">
+                <a href="{{ route('store.shop') }}" class="mq-btn mq-btn-primary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                    <span>{{ __('store.common.clear_all') }}</span>
+                </a>
+                <a href="{{ route('store.home') }}" class="mq-btn mq-btn-ghost">
+                    <span>{{ __('store.common.home') }}</span>
+                </a>
+            </div>
+        </div>
+
+        @if (!empty($recommendedProducts) && $recommendedProducts->isNotEmpty())
+            <div class="mq-empty-recommendations">
+                <div class="mq-empty-rec-head">
+                    <h4>{{ $locale === 'ar' ? 'منتجات مختارة لك' : 'Recommended For You' }}</h4>
+                    <span class="mq-empty-rec-line" aria-hidden="true"></span>
+                </div>
+                <div class="mq-products mq-shop-grid">
+                    @include('store.partials.products', ['products' => $recommendedProducts, 'enhanced' => true, 'recommendedProducts' => null])
+                </div>
+            </div>
+        @endif
     </div>
 @endforelse

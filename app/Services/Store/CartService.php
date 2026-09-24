@@ -24,14 +24,14 @@ class CartService
         $cart = null;
 
         if ($userId) {
-            $cart = Cart::with(['items.product.category', 'items.product.thumbnail', 'items.product.images'])
+            $cart = Cart::with(['items.product.category', 'items.product.thumbnail', 'items.product.images', 'items.productOption'])
                 ->where('user_id', $userId)
                 ->latest()
                 ->first();
         }
 
         if (! $cart) {
-            $cart = Cart::with(['items.product.category', 'items.product.thumbnail', 'items.product.images'])
+            $cart = Cart::with(['items.product.category', 'items.product.thumbnail', 'items.product.images', 'items.productOption'])
                 ->where('session_id', $sessionId)
                 ->whereNull('user_id')
                 ->latest()
@@ -45,18 +45,18 @@ class CartService
                 'expires_at' => now()->addDays(14),
                 'total' => 0,
             ]);
-            $cart->load(['items.product.category', 'items.product.thumbnail', 'items.product.images']);
+            $cart->load(['items.product.category', 'items.product.thumbnail', 'items.product.images', 'items.productOption']);
         }
 
         return $cart;
     }
 
     /**
-     * Add a product to the cart.
+     * Add a product to the cart with optional variant and option-specific price.
      */
-    public function addItem(int $productId, int $quantity = 1, ?string $color = null, ?string $option = null): CartItem
+    public function addItem(int $productId, int $quantity = 1, ?string $color = null, ?string $option = null, ?int $optionId = null): CartItem
     {
-        $product = Product::findOrFail($productId);
+        $product = Product::with(['options', 'colors'])->findOrFail($productId);
 
         if (! $product->is_active) {
             throw new Exception(__('store.cart.product_unavailable'));
@@ -66,7 +66,41 @@ class CartService
 
         $quantity = max(1, $quantity);
 
-        $item = $cart->items()->where('product_id', $product->id)->first();
+        // Resolve product option if selected
+        $productOption = null;
+        if ($optionId) {
+            $productOption = $product->options->firstWhere('id', $optionId);
+        } elseif ($option) {
+            $productOption = $product->options->firstWhere('id', (int) $option)
+                ?? $product->options->firstWhere('value', $option);
+        }
+
+        // Determine price: use option price if set, otherwise base product price
+        $unitPrice = (float) $product->price;
+        if ($productOption && $productOption->price !== null && (float) $productOption->price > 0) {
+            $unitPrice = (float) $productOption->price;
+        }
+
+        // Build descriptive option label
+        $labels = [];
+        if ($color) {
+            $labels[] = __('store.product.colors', [], app()->getLocale()) ?: 'اللون' . ': ' . $color;
+        }
+        if ($productOption) {
+            $labels[] = ($productOption->name ? $productOption->name . ': ' : '') . $productOption->value;
+        } elseif ($option) {
+            $labels[] = $option;
+        }
+        $optionLabel = !empty($labels) ? implode(' · ', $labels) : null;
+
+        // Find existing cart line with exact same product and option
+        $query = $cart->items()->where('product_id', $product->id);
+        if ($productOption) {
+            $query->where('product_option_id', $productOption->id);
+        } else {
+            $query->whereNull('product_option_id');
+        }
+        $item = $query->first();
 
         if ($item) {
             $newQty = $item->quantity + $quantity;
@@ -75,13 +109,16 @@ class CartService
             }
             $item->update([
                 'quantity' => $newQty,
-                'unit_price' => $product->price,
+                'unit_price' => $unitPrice,
+                'option_label' => $optionLabel ?: $item->option_label,
             ]);
         } else {
             $item = $cart->items()->create([
                 'product_id' => $product->id,
+                'product_option_id' => $productOption?->id,
+                'option_label' => $optionLabel,
                 'quantity' => min($quantity, $product->stock_quantity > 0 ? $product->stock_quantity : $quantity),
-                'unit_price' => $product->price,
+                'unit_price' => $unitPrice,
             ]);
         }
 

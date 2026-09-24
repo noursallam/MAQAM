@@ -79,4 +79,50 @@ class Product extends Model
     {
         return $this->thumbnailUrl() ?? asset('identity/MAQAM-24.jpg');
     }
+
+    public function hasOptionPricing(): bool
+    {
+        $opts = $this->relationLoaded('options') ? $this->options : $this->options()->get();
+        return $opts->contains(fn($o) => $o->price !== null && $o->price > 0);
+    }
+
+    public function minPrice(): float
+    {
+        $opts = $this->relationLoaded('options') ? $this->options : $this->options()->get();
+        $optionPrices = $opts->pluck('price')->filter(fn($p) => $p !== null && (float) $p > 0)->map(fn($p) => (float) $p);
+
+        if ($optionPrices->isNotEmpty()) {
+            return (float) $optionPrices->min();
+        }
+
+        return (float) $this->price;
+    }
+
+    public function maxPrice(): float
+    {
+        $opts = $this->relationLoaded('options') ? $this->options : $this->options()->get();
+        $optionPrices = $opts->pluck('price')->filter(fn($p) => $p !== null && (float) $p > 0)->map(fn($p) => (float) $p);
+
+        if ($optionPrices->isNotEmpty()) {
+            return (float) $optionPrices->max();
+        }
+
+        return (float) $this->price;
+    }
+
+    public function isPriceVariable(): bool
+    {
+        $opts = $this->relationLoaded('options') ? $this->options : $this->options()->get();
+        $optionPrices = $opts->pluck('price')->filter(fn($p) => $p !== null && (float) $p > 0);
+
+        if ($optionPrices->count() > 1 && $this->minPrice() < $this->maxPrice()) {
+            return true;
+        }
+
+        if ($optionPrices->isNotEmpty() && (float) $this->price > 0 && abs($this->minPrice() - (float) $this->price) > 0.001) {
+            return true;
+        }
+
+        return false;
+    }
 }

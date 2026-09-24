@@ -58,6 +58,9 @@
                         <tr>
                             <td>
                                 <strong>{{ $name }}</strong>
+                                @if (!empty($item->option_label))
+                                    <div style="color:var(--mq-gold);font-size:.78rem;font-weight:600;margin-top:.2rem;">{{ $item->option_label }}</div>
+                                @endif
                             </td>
                             <td>{{ number_format($item->unit_price, 2) }} {{ __('store.common.egp') }}</td>
                             <td>× {{ $item->quantity }}</td>

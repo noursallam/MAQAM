@@ -31,6 +31,7 @@ class CartController extends Controller
             'quantity' => ['nullable', 'integer', 'min:1', 'max:500'],
             'color' => ['nullable', 'string', 'max:50'],
             'option' => ['nullable', 'string', 'max:50'],
+            'option_id' => ['nullable', 'integer'],
         ]);
 
         try {
@@ -38,7 +39,8 @@ class CartController extends Controller
                 (int) $validated['product_id'],
                 (int) ($validated['quantity'] ?? 1),
                 $validated['color'] ?? null,
-                $validated['option'] ?? null
+                $validated['option'] ?? null,
+                !empty($validated['option_id']) ? (int) $validated['option_id'] : null
             );
 
             $count = $this->cartService->count();

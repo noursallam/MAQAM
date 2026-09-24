@@ -7,7 +7,7 @@
     <title>@yield('title', __('admin.home.title')) — MAQAM</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Inter:ital,opsz,wght@0,14..32,300..700;1,14..32,300..700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -107,7 +107,7 @@
     }
     $autoExpandGroupKey = ($activeGroupKey !== '' && ! request()->routeIs('admin.dashboard')) ? $activeGroupKey : '';
 @endphp
-<body class="min-h-screen bg-maqam-bg text-maqam-ink antialiased" style="font-family:'Alexandria',sans-serif">
+<body class="min-h-screen bg-maqam-bg text-maqam-ink antialiased" style="font-family:'IBM Plex Sans Arabic', Inter, 'DM Sans', ui-sans-serif, system-ui, sans-serif">
 <div class="flex min-h-screen">
     {{-- Sidebar --}}
     <aside class="fixed inset-y-0 {{ $isRtl ? 'right-0' : 'left-0' }} z-30 flex w-72 flex-col bg-maqam-navy text-white shadow-xl">

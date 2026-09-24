@@ -145,12 +145,14 @@ class CheckoutController extends Controller
                 // Create Order Items and decrease stock
                 foreach ($cart->items as $cartItem) {
                     $product = $cartItem->product;
-                    $unitPrice = $product ? (float) $product->price : (float) $cartItem->unit_price;
+                    $unitPrice = (float) $cartItem->unit_price;
                     $itemSubtotal = $unitPrice * $cartItem->quantity;
 
                     OrderItem::create([
                         'order_id' => $order->id,
                         'product_id' => $cartItem->product_id,
+                        'product_option_id' => $cartItem->product_option_id,
+                        'option_label' => $cartItem->option_label,
                         'quantity' => $cartItem->quantity,
                         'unit_price' => $unitPrice,
                         'subtotal' => $itemSubtotal,

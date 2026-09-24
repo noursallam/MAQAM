@@ -3,11 +3,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ __('admin.login') }} — MAQAM</title>
-    <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Inter:ital,opsz,wght@0,14..32,300..700;1,14..32,300..700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-maqam-bg font-sans text-maqam-ink" style="font-family:'Alexandria',sans-serif">
+<body class="min-h-screen bg-maqam-bg font-sans text-maqam-ink" style="font-family:'IBM Plex Sans Arabic', Inter, 'DM Sans', ui-sans-serif, system-ui, sans-serif">
 <div class="relative flex min-h-screen items-center justify-center overflow-hidden px-4">
     <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(197,160,89,0.18),_transparent_55%)]"></div>
     <div class="ui-card-static relative w-full max-w-md p-8">

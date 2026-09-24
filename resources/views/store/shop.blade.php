@@ -6,54 +6,83 @@
 @php
     $locale = app()->getLocale();
     $activeCategory = $categories->firstWhere('id', $activeCategoryId);
+    $categoryTitle = $activeCategory ? ($locale === 'ar' ? $activeCategory->name_ar : $activeCategory->name_en) : __('store.shop.heading');
+    $categoryDesc = $activeCategory 
+        ? ($locale === 'ar' 
+            ? ($activeCategory->description_ar ?: 'تشكيلة مميزة من ' . $activeCategory->name_ar . ' بأعلى معايير الجودة والضمان.') 
+            : ($activeCategory->description_en ?: 'Selected range of ' . $activeCategory->name_en . ' with trusted quality.'))
+        : __('store.shop.lead');
 @endphp
 
-<section class="mq-shop-hero" aria-label="{{ __('store.shop.heading') }}">
-    <div class="mq-shop-hero-bg" aria-hidden="true" style="--mq-shop-hero-image: url('{{ asset('identity/56829c8b-2436-44e5-9110-95abb1027fea.png') }}')"></div>
+{{-- Premium Eye-Friendly Category Header --}}
+<section class="mq-shop-hero" aria-label="{{ $categoryTitle }}">
+    <div class="mq-shop-hero-glow" aria-hidden="true"></div>
     <div class="mq-container mq-shop-hero-inner">
         <div class="mq-breadcrumb mq-breadcrumb-on-dark">
             <a href="{{ route('store.home') }}">{{ __('store.common.home') }}</a>
             <span class="sep">/</span>
-            <span>{{ __('store.shop.breadcrumb') }}</span>
+            <a href="{{ route('store.shop') }}">{{ __('store.shop.breadcrumb') }}</a>
             @if ($activeCategory)
                 <span class="sep">/</span>
-                <span>{{ $locale === 'ar' ? $activeCategory->name_ar : $activeCategory->name_en }}</span>
+                <span class="is-current">{{ $locale === 'ar' ? $activeCategory->name_ar : $activeCategory->name_en }}</span>
             @endif
         </div>
+
         <div class="mq-shop-hero-copy">
-            <div>
-                <span class="mq-eyebrow">{{ __('store.shop.eyebrow') }}</span>
-                <h1>{{ $activeCategory ? ($locale === 'ar' ? $activeCategory->name_ar : $activeCategory->name_en) : __('store.shop.heading') }}</h1>
-                <p>{{ __('store.shop.lead') }}</p>
+            <div class="mq-shop-hero-info">
+                <div class="mq-shop-badge-row">
+                    <span class="mq-eyebrow">{{ __('store.shop.eyebrow') }}</span>
+                    @if ($activeCategory)
+                        <span class="mq-hero-pill-badge">{{ $products->total() }} {{ __('store.common.products') }}</span>
+                    @endif
+                </div>
+                <h1>{{ $categoryTitle }}</h1>
+                <p>{{ $categoryDesc }}</p>
             </div>
-            <form class="mq-shop-search" action="{{ route('store.shop') }}" method="get" role="search">
-                @if (request('category'))
-                    <input type="hidden" name="category" value="{{ request('category') }}">
-                @endif
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-                <input type="search" name="q" value="{{ request('q') }}" placeholder="{{ __('store.search.shop_placeholder') }}" aria-label="{{ __('store.nav.search') }}">
-                <button type="submit" class="mq-btn mq-btn-primary">{{ __('store.search.button') }}</button>
-            </form>
+
+            <div class="mq-shop-hero-actions">
+                <form class="mq-shop-search" action="{{ route('store.shop') }}" method="get" role="search">
+                    @if (request('category'))
+                        <input type="hidden" name="category" value="{{ request('category') }}">
+                    @endif
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                    <input type="search" name="q" value="{{ request('q') }}" placeholder="{{ __('store.search.shop_placeholder') }}" aria-label="{{ __('store.nav.search') }}">
+                    <button type="submit" class="mq-btn mq-btn-primary">{{ __('store.search.button') }}</button>
+                </form>
+            </div>
         </div>
     </div>
 </section>
 
+{{-- Sleek Category Pills Carousel --}}
 <section class="mq-shop-cats" aria-label="{{ __('store.shop.sections') }}">
     <div class="mq-container">
         <div class="mq-cat-strip" role="list">
-            <a href="{{ route('store.shop', request()->except(['category', 'page'])) }}" class="mq-cat-item {{ empty($activeCategoryId) ? 'is-active' : '' }}" role="listitem">
-                <span class="mq-cat-avatar" style="--cat-tone: #1b2434">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            <a href="{{ route('store.shop', request()->except(['category', 'page'])) }}" 
+               class="mq-cat-pill {{ empty($activeCategoryId) ? 'is-active' : '' }}" 
+               role="listitem">
+                <span class="mq-pill-icon">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
                 </span>
-                <span class="mq-cat-label">{{ __('store.categories.all') }}</span>
+                <span class="mq-pill-label">{{ __('store.categories.all') }}</span>
             </a>
             @foreach ($categories as $cat)
-                <a href="{{ route('store.shop', array_merge(request()->except(['category', 'page']), ['category' => $cat->id])) }}" class="mq-cat-item {{ (int) $activeCategoryId === $cat->id ? 'is-active' : '' }}" role="listitem">
-                    <span class="mq-cat-avatar" style="--cat-tone: #243044">
-                        {!! $cat->icon ?? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="7" y="3" width="10" height="14" rx="2"/><path d="M10 7v4M14 7v4M9 21h6"/></svg>' !!}
+                @php
+                    $isCatActive = (int) $activeCategoryId === $cat->id;
+                    $cName = $locale === 'ar' ? $cat->name_ar : $cat->name_en;
+                @endphp
+                <a href="{{ route('store.shop', array_merge(request()->except(['category', 'page']), ['category' => $cat->id])) }}" 
+                   class="mq-cat-pill {{ $isCatActive ? 'is-active' : '' }}" 
+                   role="listitem">
+                    <span class="mq-pill-icon">
+                        @if ($cat->hasImage())
+                            <img src="{{ $cat->image_url }}" alt="{{ $cName }}" class="mq-pill-img" loading="lazy">
+                        @else
+                            {!! $cat->icon ?? '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="7" y="3" width="10" height="14" rx="2"/><path d="M10 7v4M14 7v4M9 21h6"/></svg>' !!}
+                        @endif
                     </span>
-                    <span class="mq-cat-label">{{ $locale === 'ar' ? $cat->name_ar : $cat->name_en }}</span>
-                    <em class="mq-cat-count">{{ $cat->products_count }} {{ __('store.common.product') }}</em>
+                    <span class="mq-pill-label">{{ $cName }}</span>
+                    <span class="mq-pill-badge">{{ $cat->products_count }}</span>
                 </a>
             @endforeach
         </div>
@@ -79,12 +108,12 @@
 
                     <div class="mq-filter-group">
                         <strong>{{ __('store.shop.sections') }}</strong>
-                        <label>
+                        <label class="{{ empty($activeCategoryId) ? 'is-selected' : '' }}">
                             <input type="radio" name="category" value="" {{ empty($activeCategoryId) ? 'checked' : '' }} onchange="this.form.submit()">
                             <span>{{ __('store.categories.all') }}</span>
                         </label>
                         @foreach ($categories as $cat)
-                            <label>
+                            <label class="{{ (int) $activeCategoryId === $cat->id ? 'is-selected' : '' }}">
                                 <input type="radio" name="category" value="{{ $cat->id }}" {{ (int) $activeCategoryId === $cat->id ? 'checked' : '' }} onchange="this.form.submit()">
                                 <span>{{ $locale === 'ar' ? $cat->name_ar : $cat->name_en }}</span>
                                 <em>{{ $cat->products_count }}</em>
@@ -187,7 +216,7 @@
                 @endif
 
                 <div class="mq-products mq-shop-grid" data-mq-products>
-                    @include('store.partials.products', ['products' => $products, 'enhanced' => true])
+                    @include('store.partials.products', ['products' => $products, 'enhanced' => true, 'recommendedProducts' => $recommendedProducts ?? collect()])
                 </div>
 
                 @if ($products->hasPages())

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class CartItem extends Model
 {
     protected $fillable = [
-        'cart_id', 'product_id', 'quantity', 'unit_price',
+        'cart_id', 'product_id', 'product_option_id', 'option_label', 'quantity', 'unit_price',
     ];
 
     protected function casts(): array
@@ -24,5 +24,10 @@ class CartItem extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function productOption(): BelongsTo
+    {
+        return $this->belongsTo(ProductOption::class, 'product_option_id');
     }
 }

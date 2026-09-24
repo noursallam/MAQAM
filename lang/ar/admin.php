@@ -618,6 +618,7 @@ return [
         'rbac_title' => 'صلاحيات الفريق',
         'rbac_subtitle' => 'تحديد صلاحيات الوصول في لوحة التحكم',
         'super_admin' => 'مدير أعلى',
+        'admin' => 'مدير',
         'content_manager' => 'مسؤول محتوى',
         'support' => 'دعم',
         'finance' => 'مالية',
