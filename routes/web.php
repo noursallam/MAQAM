@@ -183,3 +183,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
     });
 });
+
+// Storage fallback route for shared hosts where symlink may be missing or restricted
+Route::get('/storage/{path}', function (string $path) {
+    if (str_contains($path, '..')) {
+        abort(404);
+    }
+
+    $fullPath = storage_path('app/public/' . $path);
+    if (!file_exists($fullPath) || !is_file($fullPath)) {
+        abort(404);
+    }
+
+    return response()->file($fullPath, [
+        'Cache-Control' => 'public, max-age=31536000',
+    ]);
+})->where('path', '.*');
+
