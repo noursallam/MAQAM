@@ -157,7 +157,7 @@ class StorefrontController extends Controller
             ->get();
 
         $wheelPrizes = WheelPrize::where('is_active', true)
-            ->orderBy('probability', 'desc')
+            ->orderBy('weight', 'desc')
             ->get();
 
         $wheelEnabled = (bool) SystemSetting::getValue('wheel_enabled', true);

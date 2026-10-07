@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\Rank;
 use App\Models\User;
+use App\Models\WheelPrize;
 use App\Services\Payment\KashierService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -113,6 +114,19 @@ class StorefrontBuyingCycleTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee($product->name_ar);
         $response->assertSee('88.00');
+    }
+
+    public function test_loyalty_page_lists_active_wheel_prizes(): void
+    {
+        WheelPrize::create([
+            'type' => 'points', 'label_ar' => 'جائزة تجريبية', 'label_en' => 'Test Prize',
+            'weight' => 10, 'points_amount' => 100, 'is_active' => true,
+        ]);
+
+        $response = $this->get(route('store.loyalty'));
+
+        $response->assertStatus(200);
+        $response->assertSee(app()->getLocale() === 'ar' ? 'جائزة تجريبية' : 'Test Prize');
     }
 
     public function test_can_add_item_to_cart_and_view_cart(): void

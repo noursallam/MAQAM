@@ -58,7 +58,7 @@
                     <p>{{ __('store.loyalty.wheel_text') }}</p>
                     <p style="color:var(--mq-muted);font-size:.92rem;">
                         جوائز العجلة المتاحة: 
-                        {{ $wheelPrizes->pluck($locale === 'ar' ? 'name_ar' : 'name_en')->filter()->join('، ') }}.
+                        {{ $wheelPrizes->pluck($locale === 'ar' ? 'label_ar' : 'label_en')->filter()->join('، ') }}.
                     </p>
                 @endif
             </div>
