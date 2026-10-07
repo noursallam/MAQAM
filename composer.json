@@ -9,6 +9,7 @@
         "php": "^8.3",
         "endroid/qr-code": "^6.1",
         "laravel/framework": "^13.8",
+        "laravel/sanctum": "^4.3",
         "laravel/tinker": "^3.0",
         "picqer/php-barcode-generator": "^3.2"
     },
@@ -19,7 +20,8 @@
         "laravel/pint": "^1.27",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
-        "phpunit/phpunit": "^12.5.12"
+        "phpunit/phpunit": "^12.5.12",
+        "symfony/yaml": "^8.1"
     },
     "autoload": {
         "psr-4": {

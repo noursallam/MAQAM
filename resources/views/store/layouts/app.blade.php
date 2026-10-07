@@ -225,6 +225,8 @@
         </div>
     </div>
 
+    @include('store.partials.chat-widget')
+
     <script src="{{ asset('store/js/app.js') }}"></script>
     @stack('scripts')
 </body>

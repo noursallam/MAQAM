@@ -15,7 +15,7 @@
             </thead>
             <tbody>
             @php
-                $modules = ['dashboard','orders','merchants','customers','qr','loyalty','commerce','notifications','risk','settings','admins','coupons'];
+                $modules = ['dashboard','orders','merchants','customers','qr','loyalty','commerce','notifications','risk','settings','admins','coupons','api_docs'];
                 $labels = [
                     'dashboard' => __('admin.nav.command_center'),
                     'orders' => __('admin.nav.orders_pipeline'),
@@ -29,6 +29,7 @@
                     'settings' => __('admin.nav.settings'),
                     'admins' => __('admin.nav.admins_rbac'),
                     'coupons' => __('admin.nav.coupons'),
+                    'api_docs' => __('admin.nav.api_docs'),
                 ];
             @endphp
             @foreach($modules as $mod)

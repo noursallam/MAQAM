@@ -2,13 +2,14 @@
 
 namespace App\Services;
 
+use App\Exceptions\QrScanException;
 use App\Models\Customer;
 use App\Models\Merchant;
 use App\Models\PointsTransaction;
 use App\Models\QrCode;
 use App\Models\QrScan;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
+
 
 class QrScanService
 {
@@ -46,15 +47,15 @@ class QrScanService
             ->first();
 
         if (! $code) {
-            throw new RuntimeException(__('admin.qr.scan_not_found'));
+            throw new QrScanException(QrScanException::NOT_FOUND, __('admin.qr.scan_not_found'));
         }
 
         if ($code->status === 'used') {
-            throw new RuntimeException(__('admin.qr.scan_already_used'));
+            throw new QrScanException(QrScanException::ALREADY_USED, __('admin.qr.scan_already_used'));
         }
 
         if ($code->status === 'expired') {
-            throw new RuntimeException(__('admin.qr.scan_expired'));
+            throw new QrScanException(QrScanException::EXPIRED, __('admin.qr.scan_expired'));
         }
 
         $customerPoints = (int) $code->points_awarded;
@@ -85,6 +86,7 @@ class QrScanService
     /**
      * Real scan — awards points and marks the QR used.
      *
+     * @param  array{lat?: ?string, lng?: ?string, device_id?: ?string, scanned_at?: mixed}  $meta  where/when the scan happened
      * @return array{scan: QrScan, code: QrCode, customer: Customer}
      */
     public function scan(
@@ -92,10 +94,11 @@ class QrScanService
         Customer $customer,
         ?Merchant $merchant = null,
         bool $offline = false,
+        array $meta = [],
     ): array {
         $serial = trim($serial);
 
-        return DB::transaction(function () use ($serial, $customer, $merchant, $offline) {
+        return DB::transaction(function () use ($serial, $customer, $merchant, $offline, $meta) {
             $code = QrCode::query()
                 ->with('categoryPrize')
                 ->where('serial_code', $serial)
@@ -103,15 +106,15 @@ class QrScanService
                 ->first();
 
             if (! $code) {
-                throw new RuntimeException(__('admin.qr.scan_not_found'));
+                throw new QrScanException(QrScanException::NOT_FOUND, __('admin.qr.scan_not_found'));
             }
 
             if ($code->status === 'used') {
-                throw new RuntimeException(__('admin.qr.scan_already_used'));
+                throw new QrScanException(QrScanException::ALREADY_USED, __('admin.qr.scan_already_used'));
             }
 
             if ($code->status === 'expired') {
-                throw new RuntimeException(__('admin.qr.scan_expired'));
+                throw new QrScanException(QrScanException::EXPIRED, __('admin.qr.scan_expired'));
             }
 
             $customer = Customer::query()->lockForUpdate()->with('rank')->findOrFail($customer->id);
@@ -125,6 +128,7 @@ class QrScanService
             $customer->points_balance += $customerPoints;
             $customer->total_points_earned += $customerPoints;
             $customer->save();
+            app(RankService::class)->promoteIfEarned($customer);
 
             $scan = QrScan::create([
                 'qr_code_id' => $code->id,
@@ -132,12 +136,12 @@ class QrScanService
                 'merchant_id' => $merchant?->id,
                 'points_awarded_customer' => $customerPoints,
                 'points_awarded_merchant' => $merchantPoints,
-                'scan_location_lat' => '30.0444',
-                'scan_location_lng' => '31.2357',
-                'scanned_at' => now(),
+                'scan_location_lat' => array_key_exists('lat', $meta) ? $meta['lat'] : '30.0444',
+                'scan_location_lng' => array_key_exists('lng', $meta) ? $meta['lng'] : '31.2357',
+                'scanned_at' => $meta['scanned_at'] ?? now(),
                 'is_offline' => $offline,
-                'sync_status' => $offline ? 'pending' : 'synced',
-                'device_id' => 'admin-sim',
+                'sync_status' => $offline && ! $meta ? 'pending' : 'synced',
+                'device_id' => $meta['device_id'] ?? 'admin-sim',
             ]);
 
             PointsTransaction::create([

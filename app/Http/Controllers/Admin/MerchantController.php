@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Merchant;
+use App\Services\NotificationService;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -147,6 +148,15 @@ class MerchantController extends Controller
             'approved_by' => $request->user()->admin?->id,
         ]);
 
+        app(NotificationService::class)->notifyTranslated(
+            [$merchant->user_id],
+            'api.merchant.approved_title',
+            'api.merchant.approved_body',
+            ['code' => $merchant->merchant_code],
+            'merchant_update',
+            ['merchant_code' => $merchant->merchant_code, 'merchant_status' => 'approved'],
+        );
+
         return back()->with('success', __('admin.merchants.approve').' — '.$merchant->merchant_code);
     }
 
@@ -163,9 +173,19 @@ class MerchantController extends Controller
             'business_address' => trim(($merchant->business_address ?? '')."\n[REJECTED] ".$data['reason']),
         ]);
 
-        if ($merchant->user) {
+        // Only a merchant-only login is switched off; a customer who applied keeps their account
+        if ($merchant->user && $merchant->user->role === 'merchant') {
             $merchant->user->update(['is_active' => false]);
         }
+
+        app(NotificationService::class)->notifyTranslated(
+            [$merchant->user_id],
+            'api.merchant.rejected_title',
+            'api.merchant.rejected_body',
+            ['reason' => $data['reason']],
+            'merchant_update',
+            ['merchant_status' => 'rejected'],
+        );
 
         return redirect()->route('admin.merchants.inbox')->with('success', __('admin.merchants.reject'));
     }

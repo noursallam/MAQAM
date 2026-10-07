@@ -1,0 +1,1931 @@
+openapi: 3.0.3
+info:
+  title: MAQAM Mobile API
+  version: "1.0"
+  description: |
+    The API behind the MAQAM mobile app: WhatsApp sign-in, QR scanning for loyalty points, the lucky wheel,
+    the store, orders and notifications.
+
+    Everything on this page is implemented and covered by automated tests. Use **Authorize** (top right) with a token
+    from `POST /auth/whatsapp/verify` to try protected endpoints from this page.
+
+    # Conventions
+
+    - **Base URL:** `/api/v1` on the site domain (`https://maqam-eg.com/api/v1` in production).
+    - **Format:** JSON in, JSON out, UTF-8. Send `Content-Type: application/json` with every body.
+    - **Auth:** `Authorization: Bearer <token>` on protected endpoints.
+    - **Language:** send `X-App-Locale: ar` (default) or `en`. It selects the language of `message` and of the
+      convenience fields `name` / `title` / `label`. The `*_ar` and `*_en` fields are always both returned.
+    - **Money:** decimal strings with two digits (`"350.00"`), currency EGP.
+    - **Dates:** ISO 8601 with offset (`2026-09-20T14:30:00+00:00`). Dates you send may be `YYYY-MM-DD HH:MM:SS`.
+    - **Points:** integers.
+
+    ## Success envelope
+
+    ```json
+    { "success": true, "message": "…", "data": { } }
+    ```
+
+    Paginated lists add `meta` and accept `?page=` and `?per_page=` (default 20, maximum 50):
+
+    ```json
+    { "success": true, "message": "", "data": [ ],
+      "meta": { "current_page": 1, "last_page": 3, "per_page": 20, "total": 55 } }
+    ```
+
+    ## Error envelope
+
+    Every failure, on every endpoint, has this shape:
+
+    ```json
+    { "success": false, "message": "Ready to show to the user",
+      "errors": { "phone": ["…"] }, "error_code": "VALIDATION_ERROR" }
+    ```
+
+    Branch on **`error_code`**, never on the text of `message`. `errors` is filled only for `VALIDATION_ERROR`
+    (field name → list of messages) and is `{}` otherwise.
+
+    | HTTP | error_code | Meaning / what the app should do |
+    |---|---|---|
+    | 401 | `UNAUTHENTICATED` | Token missing, expired or revoked. Delete it and go to sign-in. |
+    | 403 | `ACCOUNT_FROZEN_FRAUD` | Account suspended by the risk engine; all its tokens are revoked. Show the "account suspended" screen. |
+    | 403 | `FORBIDDEN` | Not allowed. |
+    | 404 | `NOT_FOUND` | Missing, or it belongs to another user. |
+    | 422 | `VALIDATION_ERROR` | Bad input; details in `errors`. |
+    | 429 | `TOO_MANY_REQUESTS` | Rate limited. Respect the `Retry-After` header; do not auto-retry in a loop. |
+    | 500 | `SERVER_ERROR` | Unexpected failure. |
+    | 410 | `CHALLENGE_EXPIRED` | The sign-in attempt expired or was already used. Start again. |
+    | 422 | `INVALID_OTP` | Wrong sign-in code. |
+    | 503 | `WHATSAPP_UNAVAILABLE` | The WhatsApp service is down or not linked. Ask the user to try later. |
+    | 404 | `QR_NOT_FOUND` | No such QR code. |
+    | 422 | `QR_ALREADY_USED` | The code was already claimed. |
+    | 422 | `QR_EXPIRED` | The code expired. |
+    | 429 | `SCAN_LOCKED` | Scanning is blocked for 2 hours after 5 non-existent codes. |
+    | 422 | `MERCHANT_NOT_FOUND` | Merchant code unknown or not approved yet. |
+    | 422 | `MERCHANT_SELF_SCAN` | A merchant tried to credit their own code. |
+    | 422 | `INSUFFICIENT_POINTS` | Not enough points for the wheel or to pay by wallet. |
+    | 422 | `WHEEL_DISABLED` / `WHEEL_UNAVAILABLE` | The wheel is switched off or cannot be spun. |
+    | 404 | `PRODUCT_UNAVAILABLE` | Product missing or inactive. |
+    | 422 | `OUT_OF_STOCK` | Requested quantity is not in stock. |
+    | 422 | `INVALID_COUPON` | Coupon invalid, expired or below its minimum order. |
+    | 422 | `CART_EMPTY` | Checkout with an empty cart. |
+    | 502 | `PAYMENT_GATEWAY_ERROR` | Online payment could not start. No order was kept and nothing was charged. |
+    | 409 | `MERCHANT_ALREADY_EXISTS` | The user already has a merchant application. |
+    | 422 | `ORDER_NOT_CANCELLABLE` | The order already shipped, was cancelled, or was paid by card. |
+    | 422 | `ADDRESS_NOT_FOUND` | `address_id` at checkout is not one of the user's saved addresses. |
+    | 422 | `ADDRESS_LIMIT_REACHED` | The address book is full (20). |
+    | 422 | `PHONE_TAKEN` | The new phone number already belongs to an account. |
+    | 422 | `UPLOAD_FAILED` | The file could not be stored. |
+    | 503 | `CHATBOT_UNAVAILABLE` | The assistant is not configured or the AI service failed. |
+    | 429 | `CHAT_LIMIT_REACHED` | The customer used today's 60 assistant messages. |
+
+    ## Rate limits
+
+    | Scope | Limit |
+    |---|---|
+    | Whole API | 90 requests / minute per user (per IP for guests) |
+    | `auth/whatsapp/start` | 5 / minute per IP **and** 5 / 15 minutes per phone number |
+    | `auth/whatsapp/check` | 40 / minute |
+    | `auth/whatsapp/verify` | 10 / minute, and 5 wrong codes per sign-in attempt |
+    | `qr/*` | 60 / minute (`qr/sync-batch`: 10 / minute) |
+    | `wheel/spin` | 20 / minute |
+    | `store/checkout` | 10 / minute |
+    | `chat` | 10 / minute and 60 / day per customer |
+
+    # Flows
+
+    ## 1. Sign-in (the customer messages us first)
+
+    There are no passwords. The server **never sends a message first**: the customer proves the phone number by
+    sending a short code from their own WhatsApp, and only then receives the one-time sign-in code.
+
+    1. `POST /auth/whatsapp/start` with the phone → you get `challenge_id`, `code`, `whatsapp_url`.
+    2. Show the code and open `whatsapp_url` (the message is prefilled). The customer taps send.
+    3. Poll `POST /auth/whatsapp/check` every `poll_interval_seconds` until `otp_sent` is `true`.
+       At that moment the server has replied to the customer on WhatsApp with a 6-digit code.
+    4. `POST /auth/whatsapp/verify` with that code → access token. The account is created on first sign-in.
+
+    Keep `challenge_id` in memory only. Store the token in **Flutter Secure Storage** only. Biometric unlock is a local
+    feature (`local_auth`) that guards the stored token; there is no biometric endpoint. Tokens live 90 days; on any
+    `401`, sign in again. One token per `device_name`: signing in again from the same device replaces the old token.
+
+    ## 2. Scanning, online and offline
+
+    A QR code is not tied to a merchant when printed. The merchant is chosen **at scan time** by passing an optional
+    `merchant_code` (typed once, then picked from `GET /merchants/my-recent`).
+
+    - **Online:** optionally `POST /qr/preview`, then `POST /qr/scan`. Always send GPS coordinates when available.
+    - **Offline:** store scans locally (SQLite) with the device time, and upload them with `POST /qr/sync-batch` when the
+      connection returns. Each scan succeeds or fails on its own. Re-sending the same batch is safe and never
+      double-credits: remove from the local queue every result whose `status` is `success`, `already_synced` or `failed`,
+      and re-send the whole batch unchanged only when the request itself failed (network error / 5xx).
+    - If a scan response has `account_frozen: true`, the risk engine saw impossible travel between two scans:
+      the token is already revoked, so move the user to the suspended screen.
+
+    ## 3. Balance versus rank
+
+    - `points_balance` is what the customer can **spend** (wheel, paying an order). It goes down when spent.
+    - The **rank**, `points_left_for_next_rank` and `progress_percent` follow `total_points_earned` (lifetime points),
+      so spending never lowers a rank. Promotion is automatic and arrives with a `rank_upgrade` notification.
+
+    ## 4. Lucky wheel
+
+    Load `GET /wheel/config`, draw `slices` in the given order (the last slice is always "no prize"), then call
+    `POST /wheel/spin`. The server decides the outcome; stop the animation on `slices[slice_index]`.
+
+    ## 5. Cart and checkout
+
+    The catalog is public. The cart belongs to the signed-in account and is the same cart the website shows.
+    Keep a guest cart locally and replay it with `POST /store/cart/add` after sign-in.
+
+    **Coupons and rewards share one field.** `POST /store/cart/coupon` accepts a public coupon code *or* the `code` of one of the
+    customer's own rewards from `GET /customer/rewards` (wheel coupon, wheel discount or gift product). A reward is spent
+    when the order is placed and comes back if the order is cancelled. A gift-product reward adds the product to the order
+    as a free line (`unit_price` "0.00").
+
+    **Addresses.** Checkout takes either `address_id` (from the address book) or a typed address, which is then saved to the
+    address book automatically.
+
+    **Cancelling.** While an order's `can_cancel` is `true`, `POST /orders/{order_number}/cancel` cancels it and returns
+    stock, coupon, reward and wallet points.
+
+    `POST /store/checkout` creates the order from the server-side cart. Prices and totals are always computed by the
+    server; nothing priced by the app is accepted. On any error nothing changes: stock, points and cart stay as they were.
+
+    - `cod`: order `new`, payment `pending`.
+    - `wallet`: 10 points pay 1 EGP. Points are deducted immediately; order `processing`, payment `paid`.
+    - `kashier`: the response carries `payment_url`. Open it in a WebView. When the WebView navigates to a URL that
+      starts with `payment_return_url`, close it and read `GET /orders/{order_number}` for the real `payment_status`.
+      Trust the server, not the WebView.
+
+    ## 6. Push notifications
+
+    Every notification is stored (see `GET /notifications`) and also pushed through Firebase Cloud Messaging
+    (project `maqam-430eb`, Android package and iOS bundle `maqam.egypt`).
+
+    1. Add `firebase_messaging` with `google-services.json` / `GoogleService-Info.plist`.
+    2. After sign-in and on every token refresh, call `POST /notifications/device-token`.
+    3. Ask the user for notification permission (iOS, Android 13+).
+
+    Message shape:
+
+    ```json
+    { "notification": { "title": "…", "body": "…" },
+      "data": { "type": "order_update", "order_number": "MQ-20260922-A812ZQ", "status": "shipped" } }
+    ```
+
+    `data.type` is always present (`rank_upgrade`, `offer`, `reminder`, `order_update`, `promotion`, `merchant_update`) and
+    tells you which screen to open. `order_number` and `status` come only with `order_update`; `merchant_status`
+    (`approved` / `rejected`) and `merchant_code` come with `merchant_update`. All `data` values are strings.
+
+    Notifications are written in each user's `preferred_language`. Every signed-in device of an account receives: register
+    each device's token, and pass it to `POST /auth/logout` so a signed-out device stops receiving.
+
+    ## 7. Launch checklist for the app
+
+    1. `GET /app/config` — force or suggest an update.
+    2. If a token is stored: `GET /user/profile`. On `401` go to sign-in; on `403 ACCOUNT_FROZEN_FRAUD` show the suspended screen.
+    3. Register the FCM token, upload any offline scans, refresh the cart badge.
+
+    Store review requirements covered by the API: in-app account deletion (`DELETE /user/account`) and a public privacy
+    policy (`GET /content/pages/privacy`, field `url`).
+
+servers:
+  - url: /api/v1
+    description: This server
+
+tags:
+  - name: Auth
+    description: WhatsApp sign-in and session management.
+  - name: Profile
+    description: The signed-in user.
+  - name: QR Scanning
+    description: Earning points by scanning codes, online and offline.
+  - name: Loyalty
+    description: Wallet, ranks, rewards and the lucky wheel.
+  - name: Catalog
+    description: Public store content. No token needed.
+  - name: Cart
+    description: The signed-in user's cart. Every endpoint returns the full cart.
+  - name: Orders
+    description: Checkout and order history.
+  - name: Notifications
+    description: In-app notification inbox and the push token.
+  - name: Addresses
+    description: The signed-in user's address book.
+  - name: App
+    description: Version check, static content and the support assistant.
+  - name: Merchant
+    description: Applying to become a merchant and merchant statistics.
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/whatsapp/start:
+    post:
+      tags: [Auth]
+      summary: Step 1 — get the code the customer must send on WhatsApp
+      security: []
+      parameters: [{ $ref: '#/components/parameters/Locale' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone]
+              properties:
+                phone:
+                  type: string
+                  description: Egyptian mobile (010 / 011 / 012 / 015). `+20…` and spaces are accepted and normalised.
+                  example: "01012345678"
+                full_name:
+                  type: string
+                  maxLength: 255
+                  description: Used only if this phone has no account yet.
+                  example: أحمد محمود
+      responses:
+        "200":
+          description: Challenge created.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          challenge_id: { type: string, description: "Opaque id of this sign-in attempt. Keep in memory only.", example: k3JxQ9…48chars }
+                          code: { type: string, description: "The text the customer must send.", example: MAQAM-482913 }
+                          whatsapp_number: { type: string, description: "Our number in international digits.", example: "201000000000" }
+                          whatsapp_url: { type: string, description: "Opens WhatsApp with the message prefilled.", example: "https://wa.me/201000000000?text=MAQAM-482913" }
+                          expires_in_seconds: { type: integer, example: 600 }
+                          poll_interval_seconds: { type: integer, example: 4 }
+        "422": { $ref: '#/components/responses/ValidationError' }
+        "429": { $ref: '#/components/responses/TooManyRequests' }
+        "503": { $ref: '#/components/responses/WhatsAppUnavailable' }
+
+  /auth/whatsapp/check:
+    post:
+      tags: [Auth]
+      summary: Step 2 — poll until the customer's message has arrived
+      description: When `otp_sent` becomes `true` the server has just sent the 6-digit code to the customer on WhatsApp. Show the code input.
+      security: []
+      parameters: [{ $ref: '#/components/parameters/Locale' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [challenge_id]
+              properties:
+                challenge_id: { type: string }
+      responses:
+        "200":
+          description: Poll result.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          otp_sent: { type: boolean, example: true }
+                          otp_expires_in_seconds: { type: integer, nullable: true, example: 300, description: "`null` until the code is sent." }
+        "410": { $ref: '#/components/responses/ChallengeExpired' }
+        "429": { $ref: '#/components/responses/TooManyRequests' }
+        "503": { $ref: '#/components/responses/WhatsAppUnavailable' }
+
+  /auth/whatsapp/verify:
+    post:
+      tags: [Auth]
+      summary: Step 3 — exchange the code for an access token
+      description: The code is single-use and valid for 5 minutes. After 5 wrong codes the attempt is destroyed (`CHALLENGE_EXPIRED`).
+      security: []
+      parameters: [{ $ref: '#/components/parameters/Locale' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [challenge_id, otp, device_name]
+              properties:
+                challenge_id: { type: string }
+                otp: { type: string, pattern: '^\d{6}$', example: "842109" }
+                device_name: { type: string, maxLength: 100, description: "Human label of the device; one live token per name.", example: Pixel 8 – Ahmed }
+                device_token: { type: string, nullable: true, description: "FCM token, if already available." }
+                platform: { type: string, nullable: true, enum: [android, ios] }
+      responses:
+        "200":
+          description: Signed in.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          token: { type: string, example: 3|Kj89qLmNzT… }
+                          token_type: { type: string, example: Bearer }
+                          expires_at: { type: string, format: date-time }
+                          is_new_user: { type: boolean, description: "True when this sign-in created the account." }
+                          user: { $ref: '#/components/schemas/User' }
+                          customer: { $ref: '#/components/schemas/Wallet' }
+        "403":
+          description: "`ACCOUNT_FROZEN_FRAUD` or `FORBIDDEN` (admin accounts cannot use the app)."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+        "410": { $ref: '#/components/responses/ChallengeExpired' }
+        "422":
+          description: "`INVALID_OTP` or `VALIDATION_ERROR`."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+        "429": { $ref: '#/components/responses/TooManyRequests' }
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Revoke the current device's token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                device_token: { type: string, nullable: true, description: "This device's FCM token, so it stops receiving push notifications." }
+      responses:
+        "200": { $ref: '#/components/responses/Done' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+
+  /auth/logout-all:
+    post:
+      tags: [Auth]
+      summary: Revoke the tokens of every device
+      responses:
+        "200": { $ref: '#/components/responses/Done' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+
+  /user/profile:
+    get:
+      tags: [Profile]
+      summary: The signed-in user, their wallet and merchant profile
+      responses:
+        "200": { $ref: '#/components/responses/Profile' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "403": { $ref: '#/components/responses/Frozen' }
+    put:
+      tags: [Profile]
+      summary: Update profile fields
+      description: All fields are optional; send only what changed. Anything else in the body (role, phone, balances…) is ignored.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                full_name: { type: string, maxLength: 255 }
+                email: { type: string, format: email, nullable: true, description: "Must be unique." }
+                preferred_language: { type: string, enum: [ar, en] }
+                date_of_birth: { type: string, format: date, nullable: true, description: "Must be in the past." }
+      responses:
+        "200": { $ref: '#/components/responses/Profile' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "422": { $ref: '#/components/responses/ValidationError' }
+
+  /qr/preview:
+    post:
+      tags: [QR Scanning]
+      summary: Dry run — what would this code give?
+      description: Changes nothing. A non-existent code still counts towards the `SCAN_LOCKED` limit.
+      requestBody: { $ref: '#/components/requestBodies/ScanCode' }
+      responses:
+        "200":
+          description: The code is valid.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          serial_code: { type: string }
+                          status: { type: string, example: active }
+                          category: { type: string, nullable: true, description: "Prize category name." }
+                          points_customer: { type: integer, example: 25 }
+                          points_merchant: { type: integer, example: 5, description: "0 when no merchant code was sent." }
+                          merchant_name: { type: string, nullable: true }
+                          balance_now: { type: integer, example: 350 }
+                          balance_after: { type: integer, example: 375 }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "404": { $ref: '#/components/responses/QrNotFound' }
+        "422": { $ref: '#/components/responses/ScanRejected' }
+        "429": { $ref: '#/components/responses/ScanLocked' }
+
+  /qr/scan:
+    post:
+      tags: [QR Scanning]
+      summary: Claim a code — awards the points and burns the code
+      parameters: [{ $ref: '#/components/parameters/DeviceId' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [serial_code]
+              properties:
+                serial_code: { type: string, example: "9812736451209384" }
+                merchant_code: { type: string, nullable: true, example: M-AB12CD34 }
+                latitude: { type: number, nullable: true, minimum: -90, maximum: 90, example: 30.0444 }
+                longitude: { type: number, nullable: true, minimum: -180, maximum: 180, example: 31.2357 }
+                device_id: { type: string, nullable: true, description: "Falls back to the `X-Device-Id` header." }
+      responses:
+        "200":
+          description: Points awarded.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          scan_id: { type: integer, example: 892 }
+                          points_awarded: { type: integer, example: 25 }
+                          new_balance: { type: integer, example: 375 }
+                          total_earned: { type: integer, example: 1225 }
+                          merchant_credited: { type: string, nullable: true, example: معرض الأمل }
+                          merchant_points: { type: integer, example: 5 }
+                          account_frozen: { type: boolean, description: "True when this scan triggered the impossible-travel freeze. The token is already revoked." }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "404": { $ref: '#/components/responses/QrNotFound' }
+        "422": { $ref: '#/components/responses/ScanRejected' }
+        "429": { $ref: '#/components/responses/ScanLocked' }
+
+  /qr/sync-batch:
+    post:
+      tags: [QR Scanning]
+      summary: Upload scans captured offline
+      description: |
+        Up to 200 scans per request; each is processed independently. The request returns `200` even when
+        individual scans fail — read `results`. `scanned_at` in the future or older than 30 days is replaced by the server time.
+      parameters: [{ $ref: '#/components/parameters/DeviceId' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [scans]
+              properties:
+                device_id: { type: string, nullable: true }
+                scans:
+                  type: array
+                  minItems: 1
+                  maxItems: 200
+                  items:
+                    type: object
+                    required: [serial_code, scanned_at]
+                    properties:
+                      serial_code: { type: string, example: "1111222233334444" }
+                      merchant_code: { type: string, nullable: true, example: M-AB12CD34 }
+                      scanned_at: { type: string, example: "2026-09-22 10:15:30", description: "Device time of the scan." }
+                      latitude: { type: number, nullable: true }
+                      longitude: { type: number, nullable: true }
+      responses:
+        "200":
+          description: Batch processed.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          total_synced: { type: integer, example: 1 }
+                          total_failed: { type: integer, example: 1 }
+                          total_points_gained: { type: integer, example: 25 }
+                          current_balance: { type: integer, example: 400 }
+                          results:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                serial_code: { type: string }
+                                status:
+                                  type: string
+                                  enum: [success, already_synced, failed]
+                                  description: |
+                                    `success` — credited now. `already_synced` — credited to this customer earlier (a re-send).
+                                    `failed` — will never succeed; show `message`. In all three cases remove it from the local queue.
+                                points: { type: integer }
+                                error_code: { type: string, nullable: true, example: QR_ALREADY_USED }
+                                message: { type: string, nullable: true }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "422": { $ref: '#/components/responses/ValidationError' }
+        "429": { $ref: '#/components/responses/ScanLocked' }
+
+  /merchants/my-recent:
+    get:
+      tags: [QR Scanning]
+      summary: Merchants this customer scanned with before
+      description: Up to 20, most recent first. Use it as a quick picker instead of retyping the merchant code.
+      responses:
+        "200":
+          description: Recent merchants.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            merchant_code: { type: string, example: M-AB12CD34 }
+                            business_name: { type: string, example: معرض الأمل }
+                            logo_url: { type: string, nullable: true }
+                            last_scanned_at: { type: string, format: date-time }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+
+  /wallet:
+    get:
+      tags: [Loyalty]
+      summary: Balance, rank and progress to the next rank
+      responses:
+        "200":
+          description: Wallet.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Wallet' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+
+  /wallet/transactions:
+    get:
+      tags: [Loyalty]
+      summary: Points history
+      parameters:
+        - { name: type, in: query, schema: { type: string, enum: [earn, spend, refund, expire, adjust] } }
+        - { $ref: '#/components/parameters/Page' }
+        - { $ref: '#/components/parameters/PerPage' }
+      responses:
+        "200":
+          description: Newest first.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Paginated'
+                  - type: object
+                    properties:
+                      data: { type: array, items: { $ref: '#/components/schemas/Transaction' } }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+
+  /ranks:
+    get:
+      tags: [Loyalty]
+      summary: All active ranks, lowest first
+      security: []
+      responses:
+        "200":
+          description: Ranks.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data: { type: array, items: { $ref: '#/components/schemas/Rank' } }
+
+  /customer/rewards:
+    get:
+      tags: [Loyalty]
+      summary: Rewards won by the customer (coupons, discounts, gift products)
+      parameters:
+        - { name: status, in: query, schema: { type: string, enum: [available, used, expired, revoked] } }
+        - { $ref: '#/components/parameters/Page' }
+        - { $ref: '#/components/parameters/PerPage' }
+      responses:
+        "200":
+          description: Newest first.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Paginated'
+                  - type: object
+                    properties:
+                      data: { type: array, items: { $ref: '#/components/schemas/Reward' } }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+
+  /wheel/config:
+    get:
+      tags: [Loyalty]
+      summary: Wheel slices and whether the customer can spin
+      responses:
+        "200":
+          description: Wheel configuration.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          is_enabled: { type: boolean }
+                          cost_points: { type: integer, example: 50, description: "Cost of one spin for this customer's rank." }
+                          customer_balance: { type: integer, example: 425 }
+                          can_spin: { type: boolean }
+                          slices:
+                            type: array
+                            description: Draw in this order. The last slice is always the "no prize" slice (`id` null, `type` none).
+                            items: { $ref: '#/components/schemas/WheelSlice' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+
+  /wheel/spin:
+    post:
+      tags: [Loyalty]
+      summary: Spin the wheel
+      description: No body. The cost is deducted and the outcome is decided on the server.
+      responses:
+        "200":
+          description: Spin result (win or loss).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          spin:
+                            type: object
+                            properties:
+                              id: { type: integer }
+                              is_win: { type: boolean }
+                              prize_type: { type: string, enum: [points, discount, coupon, product, none] }
+                              prize_label: { type: string, nullable: true }
+                              points_cost: { type: integer, example: 50 }
+                              points_won: { type: integer, example: 50 }
+                          reward:
+                            allOf: [{ $ref: '#/components/schemas/Reward' }]
+                            type: object
+                            nullable: true
+                            description: Filled when the prize is a coupon, discount or product.
+                          new_points_balance: { type: integer }
+                          slice_index: { type: integer, description: "Index into `slices` from `GET /wheel/config` where the animation must stop." }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "422":
+          description: "`INSUFFICIENT_POINTS`, `WHEEL_DISABLED` or `WHEEL_UNAVAILABLE`."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+        "429": { $ref: '#/components/responses/TooManyRequests' }
+
+  /store/banners:
+    get:
+      tags: [Catalog]
+      summary: Home banners for the app
+      security: []
+      parameters: [{ $ref: '#/components/parameters/Locale' }]
+      responses:
+        "200":
+          description: Active banners in display order.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id: { type: integer }
+                            title: { type: string, nullable: true }
+                            title_ar: { type: string, nullable: true }
+                            title_en: { type: string, nullable: true }
+                            image_url: { type: string, nullable: true }
+                            link_url: { type: string, nullable: true }
+                            sort_order: { type: integer }
+
+  /store/categories:
+    get:
+      tags: [Catalog]
+      summary: Active product categories
+      security: []
+      parameters: [{ $ref: '#/components/parameters/Locale' }]
+      responses:
+        "200":
+          description: Flat list; build the tree with `parent_id`.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data: { type: array, items: { $ref: '#/components/schemas/Category' } }
+
+  /store/products:
+    get:
+      tags: [Catalog]
+      summary: Browse and search products
+      security: []
+      parameters:
+        - { $ref: '#/components/parameters/Locale' }
+        - { name: category_id, in: query, schema: { type: integer } }
+        - { name: search, in: query, description: "Matches Arabic name, English name or SKU.", schema: { type: string, maxLength: 100 } }
+        - { name: sort, in: query, schema: { type: string, enum: [newest, price_asc, price_desc], default: newest } }
+        - { $ref: '#/components/parameters/Page' }
+        - { $ref: '#/components/parameters/PerPage' }
+      responses:
+        "200":
+          description: Active products.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Paginated'
+                  - type: object
+                    properties:
+                      data: { type: array, items: { $ref: '#/components/schemas/ProductSummary' } }
+
+  /store/products/{id}:
+    get:
+      tags: [Catalog]
+      summary: Product details with images, colors and options
+      security: []
+      parameters:
+        - { $ref: '#/components/parameters/Locale' }
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: Product.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Product' }
+        "404": { $ref: '#/components/responses/NotFound' }
+
+  /settings:
+    get:
+      tags: [Catalog]
+      summary: Public store settings
+      description: Key/value settings the admin marked as public, e.g. `shipping_cost`, `free_shipping_threshold`, `support_email`, `store_whatsapp`, `wheel_enabled`. All values are strings.
+      security: []
+      responses:
+        "200":
+          description: Settings map.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        additionalProperties: { type: string }
+                        example: { shipping_cost: "35.00", free_shipping_threshold: "500.00", support_email: support@maqam-eg.com }
+
+  /store/cart:
+    get:
+      tags: [Cart]
+      summary: The current cart
+      responses:
+        "200": { $ref: '#/components/responses/Cart' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+
+  /store/cart/add:
+    post:
+      tags: [Cart]
+      summary: Add a product
+      description: Adding the same product and option again increases the quantity. Quantities are capped at the available stock.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [product_id]
+              properties:
+                product_id: { type: integer, example: 5 }
+                quantity: { type: integer, minimum: 1, maximum: 999, default: 1 }
+                option_id: { type: integer, nullable: true, description: "One of the product's `options[].id`. Sets the line price when the option has its own price." }
+                color: { type: string, nullable: true, description: "Color name, stored in the line label.", example: أسود }
+      responses:
+        "200": { $ref: '#/components/responses/Cart' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "404":
+          description: "`PRODUCT_UNAVAILABLE`."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+        "422":
+          description: "`OUT_OF_STOCK` or `VALIDATION_ERROR` (e.g. `option_id` does not belong to the product)."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+
+  /store/cart/update:
+    post:
+      tags: [Cart]
+      summary: Change a line's quantity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [item_id, quantity]
+              properties:
+                item_id: { type: integer, description: "`items[].id` from the cart.", example: 14 }
+                quantity: { type: integer, minimum: 0, maximum: 999, description: "0 removes the line." }
+      responses:
+        "200": { $ref: '#/components/responses/Cart' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "404": { $ref: '#/components/responses/NotFound' }
+
+  /store/cart/remove/{itemId}:
+    delete:
+      tags: [Cart]
+      summary: Remove a line
+      parameters:
+        - { name: itemId, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200": { $ref: '#/components/responses/Cart' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "404": { $ref: '#/components/responses/NotFound' }
+
+  /store/cart/coupon:
+    post:
+      tags: [Cart]
+      summary: Apply a coupon or reward code
+      description: "Accepts a public coupon code, or the `code` of one of the customer's own available rewards. One code at a time; applying another replaces it."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: { type: string, maxLength: 50, example: MAQAM2026 }
+      responses:
+        "200": { $ref: '#/components/responses/Cart' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "422":
+          description: "`INVALID_COUPON`."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    delete:
+      tags: [Cart]
+      summary: Remove the applied coupon
+      responses:
+        "200": { $ref: '#/components/responses/Cart' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+
+  /store/checkout:
+    post:
+      tags: [Orders]
+      summary: Place an order from the cart
+      description: See "Cart and checkout" in the introduction for the three payment methods.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [payment_method]
+              description: "Send `address_id`, or the five address fields (`full_name`, `phone`, `governorate`, `city`, `address`)."
+              properties:
+                address_id: { type: integer, nullable: true, description: "A saved address from `GET /addresses`. When sent, the typed address fields are ignored." }
+                full_name: { type: string, maxLength: 255, example: أحمد محمود }
+                phone: { type: string, description: "Egyptian mobile of the recipient.", example: "01012345678" }
+                governorate: { type: string, maxLength: 100, example: القاهرة }
+                city: { type: string, maxLength: 100, example: مدينة نصر }
+                address: { type: string, maxLength: 500, example: شارع الطيران عمارة 12 }
+                notes: { type: string, nullable: true, maxLength: 1000 }
+                payment_method: { type: string, enum: [cod, wallet, kashier] }
+      responses:
+        "201":
+          description: Order created.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          order: { $ref: '#/components/schemas/OrderDetails' }
+                          payment_url: { type: string, nullable: true, description: "Only for `kashier`. Open in a WebView." }
+                          payment_return_url: { type: string, nullable: true, description: "Close the WebView when it navigates to a URL starting with this." }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "422":
+          description: "`CART_EMPTY`, `OUT_OF_STOCK`, `PRODUCT_UNAVAILABLE`, `INSUFFICIENT_POINTS` or `VALIDATION_ERROR`."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+        "429": { $ref: '#/components/responses/TooManyRequests' }
+        "502":
+          description: "`PAYMENT_GATEWAY_ERROR` — the order was cancelled, stock restored, cart kept."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+
+  /orders:
+    get:
+      tags: [Orders]
+      summary: The user's orders, newest first
+      parameters:
+        - { $ref: '#/components/parameters/Page' }
+        - { $ref: '#/components/parameters/PerPage' }
+      responses:
+        "200":
+          description: Orders without items.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Paginated'
+                  - type: object
+                    properties:
+                      data: { type: array, items: { $ref: '#/components/schemas/Order' } }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+
+  /orders/{orderNumber}:
+    get:
+      tags: [Orders]
+      summary: One order with its items and address
+      parameters:
+        - { name: orderNumber, in: path, required: true, schema: { type: string }, example: MQ-20260922-A812ZQ }
+      responses:
+        "200":
+          description: Order.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/OrderDetails' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "404": { $ref: '#/components/responses/NotFound' }
+
+  /notifications:
+    get:
+      tags: [Notifications]
+      summary: Notification inbox, newest first
+      parameters:
+        - { $ref: '#/components/parameters/Page' }
+        - { $ref: '#/components/parameters/PerPage' }
+      responses:
+        "200":
+          description: "`meta.unread_count` holds the total number of unread notifications."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Paginated'
+                  - type: object
+                    properties:
+                      data: { type: array, items: { $ref: '#/components/schemas/Notification' } }
+                      meta:
+                        type: object
+                        properties:
+                          unread_count: { type: integer, example: 3 }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+
+  /notifications/{id}/read:
+    post:
+      tags: [Notifications]
+      summary: Mark one notification as read
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: The updated notification.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Notification' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "404": { $ref: '#/components/responses/NotFound' }
+
+  /notifications/read-all:
+    post:
+      tags: [Notifications]
+      summary: Mark every notification as read
+      responses:
+        "200": { $ref: '#/components/responses/Done' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+
+  /notifications/device-token:
+    post:
+      tags: [Notifications]
+      summary: Register the device's FCM token
+      description: Call after sign-in and on every FCM token refresh. Each device keeps its own token; a token moves to whichever account registered it last.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [device_token]
+              properties:
+                device_token: { type: string, maxLength: 512 }
+                platform: { type: string, nullable: true, enum: [android, ios] }
+      responses:
+        "200": { $ref: '#/components/responses/Done' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "422": { $ref: '#/components/responses/ValidationError' }
+
+  /merchant/apply:
+    post:
+      tags: [Merchant]
+      summary: Apply to become a merchant
+      description: "Creates a merchant profile with a unique code and `is_approved: false`. The code does not work in scans until an admin approves it; the decision arrives as a `merchant_update` notification. Send as multipart to include an optional `logo` image."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [business_name]
+              properties:
+                business_name: { type: string, maxLength: 255, example: معرض النور }
+                business_address: { type: string, nullable: true, maxLength: 1000 }
+      responses:
+        "201":
+          description: Application stored.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Merchant' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "409":
+          description: "`MERCHANT_ALREADY_EXISTS`."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+        "422": { $ref: '#/components/responses/ValidationError' }
+
+  /merchant:
+    get:
+      tags: [Merchant]
+      summary: The user's merchant profile and statistics
+      description: Merchant points are a running total for display; they cannot be spent.
+      responses:
+        "200":
+          description: Merchant profile.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        allOf:
+                          - $ref: '#/components/schemas/Merchant'
+                          - type: object
+                            properties:
+                              stats:
+                                type: object
+                                properties:
+                                  total_scans: { type: integer, example: 120 }
+                                  total_points: { type: integer, example: 600 }
+                                  scans_this_month: { type: integer, example: 18 }
+                                  unique_customers: { type: integer, example: 37 }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "404":
+          description: The user never applied (`NOT_FOUND`).
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+
+  /user/account:
+    delete:
+      tags: [Profile]
+      summary: Permanently delete the account
+      description: |
+        Required by the App Store and Google Play: offer this inside the app (e.g. Profile → Delete account) behind a clear confirmation.
+
+        Personal data is erased (name, phone, email, addresses, notifications, cart, push tokens), every token is revoked and the
+        phone number is released, so the same number can register again as a brand-new account. Past orders and points history
+        remain as anonymous records. This cannot be undone.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [confirm]
+              properties:
+                confirm: { type: string, enum: [DELETE], description: "Must be the literal text DELETE, as a guard against accidental calls." }
+      responses:
+        "200": { $ref: '#/components/responses/Done' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "422": { $ref: '#/components/responses/ValidationError' }
+
+  /user/phone/start:
+    post:
+      tags: [Profile]
+      summary: Change phone number, step 1
+      description: |
+        Same mechanics as sign-in, but the code must be sent from the **new** number. Poll `POST /auth/whatsapp/check` with the
+        returned `challenge_id`, then confirm with `POST /user/phone/verify`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone]
+              properties:
+                phone: { type: string, description: The new Egyptian mobile number., example: "01212345678" }
+      responses:
+        "200":
+          description: Challenge created (same shape as `POST /auth/whatsapp/start`).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          challenge_id: { type: string }
+                          code: { type: string, example: MAQAM-482913 }
+                          whatsapp_number: { type: string, example: "201000000000" }
+                          whatsapp_url: { type: string }
+                          expires_in_seconds: { type: integer, example: 600 }
+                          poll_interval_seconds: { type: integer, example: 4 }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "422":
+          description: "`PHONE_TAKEN` (already used, or it is the current number) or `VALIDATION_ERROR`."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+        "429": { $ref: '#/components/responses/TooManyRequests' }
+        "503": { $ref: '#/components/responses/WhatsAppUnavailable' }
+
+  /user/phone/verify:
+    post:
+      tags: [Profile]
+      summary: Change phone number, step 3
+      description: The access token stays valid; only the phone number changes.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [challenge_id, otp]
+              properties:
+                challenge_id: { type: string }
+                otp: { type: string, pattern: '^\d{6}$', example: "842109" }
+      responses:
+        "200":
+          description: Phone changed.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          phone_number: { type: string, example: "01212345678" }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "410": { $ref: '#/components/responses/ChallengeExpired' }
+        "422":
+          description: "`INVALID_OTP`, `PHONE_TAKEN` or `VALIDATION_ERROR`."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+
+  /orders/{orderNumber}/cancel:
+    post:
+      tags: [Orders]
+      summary: Cancel an order that has not shipped
+      description: |
+        Allowed while `can_cancel` is `true` on the order: status `new` or `processing`, and not already paid by card.
+        Stock, coupon usage and a used reward are restored; an order paid with points is refunded to the wallet
+        (`payment_status` becomes `refunded`). Card-paid orders must go through support.
+      parameters:
+        - { name: orderNumber, in: path, required: true, schema: { type: string } }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason: { type: string, nullable: true, maxLength: 500 }
+      responses:
+        "200":
+          description: The cancelled order.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/OrderDetails' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "404": { $ref: '#/components/responses/NotFound' }
+        "422":
+          description: "`ORDER_NOT_CANCELLABLE`."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+
+  /addresses:
+    get:
+      tags: [Addresses]
+      summary: Saved addresses, default first
+      responses:
+        "200":
+          description: Addresses.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data: { type: array, items: { $ref: '#/components/schemas/Address' } }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+    post:
+      tags: [Addresses]
+      summary: Add an address
+      description: The first address becomes the default automatically. At most 20 saved addresses.
+      requestBody: { $ref: '#/components/requestBodies/Address' }
+      responses:
+        "201":
+          description: Created.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Address' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "422":
+          description: "`VALIDATION_ERROR` or `ADDRESS_LIMIT_REACHED`."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+
+  /addresses/{id}:
+    put:
+      tags: [Addresses]
+      summary: Replace an address
+      description: Send the full address. `is_default` true makes it the default.
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody: { $ref: '#/components/requestBodies/Address' }
+      responses:
+        "200":
+          description: Updated.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Address' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "404": { $ref: '#/components/responses/NotFound' }
+        "422": { $ref: '#/components/responses/ValidationError' }
+    delete:
+      tags: [Addresses]
+      summary: Remove an address
+      description: Orders already shipped to it keep showing it. If it was the default, the most recent remaining address becomes the default.
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200": { $ref: '#/components/responses/Done' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "404": { $ref: '#/components/responses/NotFound' }
+
+  /app/config:
+    get:
+      tags: [App]
+      summary: Version check — call at every launch
+      description: |
+        When `update_required` is `true`, block the app behind an "update now" screen that opens `store_url`.
+        When only `update_available` is `true`, show a dismissible prompt. Versions are set by the admin in Settings.
+      security: []
+      parameters:
+        - { name: platform, in: query, required: true, schema: { type: string, enum: [android, ios] } }
+        - { name: version, in: query, required: true, description: The installed app version., schema: { type: string, example: 1.4.2 } }
+      responses:
+        "200":
+          description: Version status.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          update_required: { type: boolean }
+                          update_available: { type: boolean }
+                          minimum_version: { type: string, example: 1.2.0 }
+                          latest_version: { type: string, example: 1.5.0 }
+                          store_url: { type: string, nullable: true }
+        "422": { $ref: '#/components/responses/ValidationError' }
+
+  /content/faq:
+    get:
+      tags: [App]
+      summary: Frequently asked questions
+      security: []
+      parameters: [{ $ref: '#/components/parameters/Locale' }]
+      responses:
+        "200":
+          description: Questions and answers in the request locale.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id: { type: integer }
+                            question: { type: string }
+                            answer: { type: string }
+
+  /content/pages/{slug}:
+    get:
+      tags: [App]
+      summary: A legal page (privacy, terms, shipping, returns)
+      description: "`html` is simple trusted HTML (p, h3, ul, li) for an HTML widget. `url` is the same page on the website, e.g. for the store listing's privacy-policy link."
+      security: []
+      parameters:
+        - { $ref: '#/components/parameters/Locale' }
+        - { name: slug, in: path, required: true, schema: { type: string, enum: [privacy, terms, shipping, returns] } }
+      responses:
+        "200":
+          description: Page.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          slug: { type: string }
+                          title: { type: string }
+                          lead: { type: string }
+                          html: { type: string }
+                          url: { type: string }
+        "404": { $ref: '#/components/responses/NotFound' }
+
+  /chat:
+    post:
+      tags: [App]
+      summary: Ask the support assistant
+      description: |
+        An AI assistant that answers questions about MAQAM (orders, shipping, points, the wheel, the app). It cannot see or
+        change orders and performs no actions. The server keeps no conversation: send the last turns back in `history`
+        (at most 10) so the assistant has context. Limits: 10 messages per minute and 60 per day per customer.
+        Show replies as plain text.
+      parameters: [{ $ref: '#/components/parameters/Locale' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message]
+              properties:
+                message: { type: string, maxLength: 1000, example: كم تكلفة الشحن؟ }
+                history:
+                  type: array
+                  maxItems: 10
+                  description: Earlier turns, oldest first.
+                  items:
+                    type: object
+                    required: [role, text]
+                    properties:
+                      role: { type: string, enum: [user, assistant] }
+                      text: { type: string, maxLength: 2000 }
+      responses:
+        "200":
+          description: The assistant's answer.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          reply: { type: string }
+                          messages_left_today: { type: integer, example: 59 }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "422": { $ref: '#/components/responses/ValidationError' }
+        "429":
+          description: "`CHAT_LIMIT_REACHED` (daily allowance used) or `TOO_MANY_REQUESTS`."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+        "503":
+          description: "`CHATBOT_UNAVAILABLE`."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+
+  /merchant/logo:
+    post:
+      tags: [Merchant]
+      summary: Upload or replace the merchant logo
+      description: Multipart upload. JPG, PNG or WebP, up to 2 MB. `POST /merchant/apply` also accepts an optional `logo` file when sent as multipart.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [logo]
+              properties:
+                logo: { type: string, format: binary }
+      responses:
+        "200":
+          description: The merchant profile with the new `logo_url`.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Merchant' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "404": { $ref: '#/components/responses/NotFound' }
+        "422":
+          description: "`VALIDATION_ERROR` or `UPLOAD_FAILED`."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: The `token` returned by `POST /auth/whatsapp/verify`.
+
+  parameters:
+    Locale:
+      name: X-App-Locale
+      in: header
+      description: Language of messages and of the `name` / `title` / `label` fields.
+      schema: { type: string, enum: [ar, en], default: ar }
+    DeviceId:
+      name: X-Device-Id
+      in: header
+      description: Stable device identifier, recorded with scans.
+      schema: { type: string }
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    PerPage:
+      name: per_page
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 50, default: 20 }
+
+  requestBodies:
+    Address:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [recipient_name, phone, governorate, city, address]
+            properties:
+              recipient_name: { type: string, maxLength: 255, example: أحمد محمود }
+              phone: { type: string, description: Egyptian mobile., example: "01012345678" }
+              governorate: { type: string, maxLength: 100, example: القاهرة }
+              city: { type: string, maxLength: 100, example: مدينة نصر }
+              address: { type: string, maxLength: 500, example: شارع الطيران عمارة 12 }
+              notes: { type: string, nullable: true, maxLength: 1000 }
+              is_default: { type: boolean, nullable: true }
+    ScanCode:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [serial_code]
+            properties:
+              serial_code: { type: string, description: "The 16-digit code read from the QR.", example: "9812736451209384" }
+              merchant_code: { type: string, nullable: true, description: "Optional. The merchant to credit.", example: M-AB12CD34 }
+
+  responses:
+    Done:
+      description: Done; `data` is null.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Success' }
+    Profile:
+      description: Profile.
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Success'
+              - type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      user: { $ref: '#/components/schemas/User' }
+                      customer: { $ref: '#/components/schemas/Wallet' }
+                      merchant:
+                        allOf: [{ $ref: '#/components/schemas/Merchant' }]
+                        type: object
+                        nullable: true
+    Cart:
+      description: The full cart after the operation.
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Success'
+              - type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Cart' }
+    Unauthenticated:
+      description: "`UNAUTHENTICATED` — token missing, expired or revoked."
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { success: false, message: يجب تسجيل الدخول أولاً., errors: {}, error_code: UNAUTHENTICATED }
+    Frozen:
+      description: "`ACCOUNT_FROZEN_FRAUD` — returned by every protected endpoint once the account is suspended."
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { success: false, message: تم إيقاف الحساب مؤقتاً للمراجعة. تواصل مع الدعم., errors: {}, error_code: ACCOUNT_FROZEN_FRAUD }
+    NotFound:
+      description: "`NOT_FOUND`."
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { success: false, message: العنصر المطلوب غير موجود., errors: {}, error_code: NOT_FOUND }
+    ValidationError:
+      description: "`VALIDATION_ERROR` — `errors` maps each field to its messages."
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { success: false, message: البيانات المرسلة غير صالحة., errors: { phone: [The phone field format is invalid.] }, error_code: VALIDATION_ERROR }
+    TooManyRequests:
+      description: "`TOO_MANY_REQUESTS` — wait for `Retry-After` seconds."
+      headers:
+        Retry-After: { schema: { type: integer }, description: "Seconds to wait." }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    ChallengeExpired:
+      description: "`CHALLENGE_EXPIRED` — start the sign-in again."
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    WhatsAppUnavailable:
+      description: "`WHATSAPP_UNAVAILABLE`."
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    QrNotFound:
+      description: "`QR_NOT_FOUND`. Five of these lock scanning for 2 hours."
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    ScanRejected:
+      description: "`QR_ALREADY_USED`, `QR_EXPIRED`, `MERCHANT_NOT_FOUND`, `MERCHANT_SELF_SCAN` or `VALIDATION_ERROR`."
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    ScanLocked:
+      description: "`SCAN_LOCKED` (too many invalid codes) or `TOO_MANY_REQUESTS`."
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+  schemas:
+    Success:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string, description: "Localised, may be empty." }
+        data: { description: "The payload. Its shape is documented per endpoint; `null` when there is nothing to return." }
+    Paginated:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string, example: "" }
+        data: { type: array, items: {} }
+        meta:
+          type: object
+          properties:
+            current_page: { type: integer, example: 1 }
+            last_page: { type: integer, example: 3 }
+            per_page: { type: integer, example: 20 }
+            total: { type: integer, example: 55 }
+    Error:
+      type: object
+      properties:
+        success: { type: boolean, example: false }
+        message: { type: string, description: "Localised text you can show to the user." }
+        errors:
+          type: object
+          description: Field → messages. Only for `VALIDATION_ERROR`; `{}` otherwise.
+          additionalProperties: { type: array, items: { type: string } }
+        error_code: { type: string, example: VALIDATION_ERROR }
+    User:
+      type: object
+      properties:
+        id: { type: integer, example: 14 }
+        full_name: { type: string, example: أحمد محمود }
+        phone_number: { type: string, example: "01012345678" }
+        email: { type: string, nullable: true, description: "A placeholder `…@customer.maqam-eg.com` until the user sets a real one." }
+        role: { type: string, enum: [customer, merchant] }
+        is_active: { type: boolean }
+        preferred_language: { type: string, enum: [ar, en] }
+        phone_verified_at: { type: string, format: date-time, nullable: true }
+    Rank:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        name: { type: string, description: "In the request locale.", example: فضي }
+        name_ar: { type: string, example: فضي }
+        name_en: { type: string, example: Silver }
+        min_points: { type: integer, example: 0, description: "Lifetime earned points needed for this rank." }
+        max_points: { type: integer, nullable: true, example: 999 }
+        merchant_points_per_scan: { type: integer, example: 5, description: "What a merchant earns when a customer of this rank scans with their code." }
+        wheel_cost_points: { type: integer, example: 50 }
+        icon_url: { type: string, nullable: true }
+    Wallet:
+      type: object
+      properties:
+        customer_id: { type: integer, example: 8 }
+        points_balance: { type: integer, example: 400, description: "Spendable points." }
+        total_points_earned: { type: integer, example: 1200, description: "Lifetime points. Drives the rank." }
+        total_points_spent: { type: integer, example: 800 }
+        date_of_birth: { type: string, format: date, nullable: true }
+        rank:
+          allOf: [{ $ref: '#/components/schemas/Rank' }]
+          type: object
+          nullable: true
+        next_rank:
+          allOf: [{ $ref: '#/components/schemas/Rank' }]
+          type: object
+          nullable: true
+          description: "`null` at the highest rank."
+        points_left_for_next_rank: { type: integer, example: 600, description: "Lifetime points still needed. 0 at the highest rank." }
+        progress_percent: { type: integer, minimum: 5, maximum: 100, example: 40, description: "Ready for a progress bar. 100 at the highest rank." }
+    Merchant:
+      type: object
+      properties:
+        id: { type: integer, example: 4 }
+        merchant_code: { type: string, example: M-AB12CD34 }
+        business_name: { type: string, example: معرض النور }
+        business_address: { type: string, nullable: true }
+        logo_url: { type: string, nullable: true }
+        is_approved: { type: boolean }
+        approved_at: { type: string, format: date-time, nullable: true }
+    Transaction:
+      type: object
+      properties:
+        id: { type: integer, example: 51 }
+        type: { type: string, enum: [earn, spend, refund, expire, adjust] }
+        amount: { type: integer, example: 25, description: "Negative when points left the balance." }
+        balance_after: { type: integer, nullable: true, example: 400 }
+        description: { type: string, nullable: true }
+        date: { type: string, format: date-time }
+    Reward:
+      type: object
+      properties:
+        id: { type: integer, example: 12 }
+        code: { type: string, example: WD-9812AXYZ }
+        type: { type: string, enum: [coupon, discount, product] }
+        source: { type: string, example: wheel }
+        status: { type: string, enum: [available, used, expired, revoked] }
+        amount_type: { type: string, nullable: true, enum: [percentage, fixed] }
+        amount_value: { type: string, nullable: true, example: "15.00" }
+        product:
+          allOf: [{ $ref: '#/components/schemas/ProductSummary' }]
+          type: object
+          nullable: true
+          description: "The gift product, for `type: product`."
+        expires_at: { type: string, format: date-time, nullable: true }
+        used_at: { type: string, format: date-time, nullable: true }
+    WheelSlice:
+      type: object
+      properties:
+        id: { type: integer, nullable: true, description: "`null` for the \"no prize\" slice." }
+        type: { type: string, enum: [points, discount, coupon, product, none] }
+        label: { type: string, example: 50 نقطة }
+        label_ar: { type: string }
+        label_en: { type: string }
+    Category:
+      type: object
+      properties:
+        id: { type: integer, example: 2 }
+        name: { type: string }
+        name_ar: { type: string }
+        name_en: { type: string }
+        slug: { type: string }
+        parent_id: { type: integer, nullable: true }
+        image_url: { type: string }
+    ProductSummary:
+      type: object
+      properties:
+        id: { type: integer, example: 5 }
+        name: { type: string }
+        name_ar: { type: string, example: طقم كوالين فاخر }
+        name_en: { type: string, example: Luxury Lock Set }
+        price: { type: string, example: "350.00", description: "Base price." }
+        min_price: { type: string, example: "350.00" }
+        max_price: { type: string, example: "420.00", description: "Differs from `min_price` when options have their own prices; show a range." }
+        stock_quantity: { type: integer, example: 40, description: "0 means out of stock." }
+        sku: { type: string, nullable: true, example: LCK-092 }
+        image_url: { type: string, description: "Always a usable URL (falls back to a placeholder)." }
+        category:
+          type: object
+          nullable: true
+          properties:
+            id: { type: integer }
+            name: { type: string }
+    Product:
+      allOf:
+        - $ref: '#/components/schemas/ProductSummary'
+        - type: object
+          properties:
+            description: { type: string, nullable: true }
+            description_ar: { type: string, nullable: true }
+            description_en: { type: string, nullable: true }
+            weight: { type: string, nullable: true }
+            dimensions: { type: string, nullable: true }
+            images:
+              type: array
+              items:
+                type: object
+                properties:
+                  id: { type: integer }
+                  url: { type: string }
+                  is_thumbnail: { type: boolean }
+            colors:
+              type: array
+              items:
+                type: object
+                properties:
+                  id: { type: integer }
+                  name: { type: string, example: أسود }
+                  hex: { type: string, nullable: true, example: "#000000" }
+            options:
+              type: array
+              items:
+                type: object
+                properties:
+                  id: { type: integer, description: "Send as `option_id` when adding to the cart." }
+                  name: { type: string, nullable: true, example: المقاس }
+                  value: { type: string, example: 20 سم }
+                  price: { type: string, example: "420.00", description: "The price charged when this option is chosen." }
+    CartItem:
+      type: object
+      properties:
+        id: { type: integer, example: 14 }
+        product:
+          allOf: [{ $ref: '#/components/schemas/ProductSummary' }]
+          type: object
+          nullable: true
+        product_option_id: { type: integer, nullable: true }
+        option_label: { type: string, nullable: true, example: "المقاس: 20 سم" }
+        quantity: { type: integer, example: 2 }
+        unit_price: { type: string, example: "420.00" }
+        line_total: { type: string, example: "840.00" }
+    Cart:
+      type: object
+      properties:
+        id: { type: integer }
+        items: { type: array, items: { $ref: '#/components/schemas/CartItem' } }
+        items_count: { type: integer, example: 2, description: "Sum of quantities; use for the cart badge." }
+        coupon_code: { type: string, nullable: true }
+        subtotal: { type: string, example: "840.00" }
+        discount: { type: string, example: "0.00" }
+        shipping: { type: string, example: "0.00" }
+        total: { type: string, example: "840.00" }
+        currency: { type: string, example: EGP }
+    Address:
+      type: object
+      properties:
+        id: { type: integer }
+        recipient_name: { type: string }
+        phone: { type: string }
+        governorate: { type: string }
+        city: { type: string }
+        address: { type: string }
+        notes: { type: string, nullable: true }
+        is_default: { type: boolean }
+    Order:
+      type: object
+      properties:
+        order_number: { type: string, example: MQ-20260922-A812ZQ }
+        status:
+          type: string
+          enum: [new, processing, shipped, delivered, cancelled, refunded]
+          description: "`new` → `processing` → `shipped` → `delivered`, or `cancelled` / `refunded`."
+        payment_method: { type: string, enum: [cod, wallet, kashier] }
+        payment_status: { type: string, enum: [pending, paid, failed, refunded] }
+        subtotal: { type: string, example: "840.00" }
+        discount: { type: string, example: "0.00" }
+        shipping_cost: { type: string, example: "0.00" }
+        total_amount: { type: string, example: "840.00" }
+        currency: { type: string, example: EGP }
+        coupon_code: { type: string, nullable: true, description: The coupon or reward code used. }
+        can_cancel: { type: boolean, description: "Whether `POST /orders/{order_number}/cancel` is allowed right now." }
+        cancellation_reason: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+        shipped_at: { type: string, format: date-time, nullable: true }
+        delivered_at: { type: string, format: date-time, nullable: true }
+        cancelled_at: { type: string, format: date-time, nullable: true }
+    OrderDetails:
+      allOf:
+        - $ref: '#/components/schemas/Order'
+        - type: object
+          properties:
+            shipping_address:
+              allOf: [{ $ref: '#/components/schemas/Address' }]
+              type: object
+              nullable: true
+            items:
+              type: array
+              items:
+                type: object
+                properties:
+                  id: { type: integer }
+                  product:
+                    allOf: [{ $ref: '#/components/schemas/ProductSummary' }]
+                    type: object
+                    nullable: true
+                  option_label: { type: string, nullable: true }
+                  quantity: { type: integer }
+                  unit_price: { type: string, example: "420.00" }
+                  subtotal: { type: string, example: "840.00" }
+    Notification:
+      type: object
+      properties:
+        id: { type: integer, example: 7 }
+        title: { type: string }
+        body: { type: string }
+        type: { type: string, enum: [rank_upgrade, offer, reminder, order_update, promotion, merchant_update] }
+        is_read: { type: boolean }
+        read_at: { type: string, format: date-time, nullable: true }
+        created_at: { type: string, format: date-time }

@@ -2,18 +2,16 @@
 
 namespace App\Http\Controllers\Store;
 
+use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Order;
-use App\Models\OrderItem;
-use App\Models\Payment;
-use App\Models\PointsTransaction;
-use App\Models\Product;
 use App\Models\Rank;
 use App\Models\ShippingAddress;
 use App\Models\User;
 use App\Services\Payment\KashierService;
 use App\Services\Store\CartService;
+use App\Services\Store\OrderPlacementService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,6 +27,7 @@ class CheckoutController extends Controller
     public function __construct(
         protected CartService $cartService,
         protected KashierService $kashierService,
+        protected OrderPlacementService $orders,
     ) {}
 
     public function index(): View|RedirectResponse
@@ -67,180 +66,89 @@ class CheckoutController extends Controller
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $summary = $this->cartService->getSummary($cart);
-
         // Standardize Egyptian phone number (e.g. 01012345678)
         $cleanPhone = preg_replace('/\D/', '', $validated['phone']);
         if (str_starts_with($cleanPhone, '20')) {
             $cleanPhone = '0'.substr($cleanPhone, 2);
         }
 
-        try {
-            $order = DB::transaction(function () use ($validated, $cleanPhone, $cart, $summary) {
-                // Ensure a User account exists for the order
-                $user = Auth::user();
-
-                if (! $user) {
-                    $user = User::where('phone_number', $cleanPhone)->first();
-
-                    if (! $user) {
-                        $user = User::create([
-                            'full_name' => $validated['full_name'],
-                            'phone_number' => $cleanPhone,
-                            'email' => $cleanPhone.'@customer.maqam-eg.com',
-                            'password' => Hash::make(Str::random(16)),
-                            'role' => 'customer',
-                            'is_active' => true,
-                            'preferred_language' => app()->getLocale(),
-                        ]);
-
-                        $silverRank = Rank::where('name_en', 'Silver')->first() ?? Rank::first();
-                        Customer::create([
-                            'user_id' => $user->id,
-                            'rank_id' => $silverRank?->id,
-                            'points_balance' => 0,
-                            'total_points_earned' => 0,
-                            'total_points_spent' => 0,
-                        ]);
-                    }
-                }
-
-                // Save or retrieve shipping address
-                $shippingAddress = ShippingAddress::create([
-                    'user_id' => $user->id,
-                    'recipient_name' => $validated['full_name'],
-                    'phone' => $cleanPhone,
-                    'governorate' => $validated['governorate'],
-                    'city' => $validated['city'],
-                    'address_line1' => $validated['address'],
-                    'address_line2' => $validated['notes'] ?? null,
-                    'country' => 'Egypt',
-                    'is_default' => ! ShippingAddress::where('user_id', $user->id)->exists(),
-                ]);
-
-                // Generate distinct order number
-                $orderNumber = 'MQ-'.date('Ymd').'-'.strtoupper(Str::random(5));
-
-                $order = Order::create([
-                    'user_id' => $user->id,
-                    'order_number' => $orderNumber,
-                    'status' => 'new',
-                    'subtotal' => $summary['subtotal'],
-                    'tax' => 0,
-                    'discount' => $summary['discount'],
-                    'shipping_cost' => $summary['shipping'],
-                    'total_amount' => $summary['total'],
-                    'payment_method' => $validated['payment_method'],
-                    'payment_status' => 'pending',
-                    'shipping_address_id' => $shippingAddress->id,
-                    'coupon_id' => $summary['coupon']?->id,
-                    'coupon_code' => $summary['coupon_code'],
-                ]);
-
-                // Increment coupon used count if used
-                if ($summary['coupon']) {
-                    $summary['coupon']->increment('used_count');
-                }
-
-                // Create Order Items and decrease stock
-                foreach ($cart->items as $cartItem) {
-                    $product = $cartItem->product;
-                    $unitPrice = (float) $cartItem->unit_price;
-                    $itemSubtotal = $unitPrice * $cartItem->quantity;
-
-                    OrderItem::create([
-                        'order_id' => $order->id,
-                        'product_id' => $cartItem->product_id,
-                        'product_option_id' => $cartItem->product_option_id,
-                        'option_label' => $cartItem->option_label,
-                        'quantity' => $cartItem->quantity,
-                        'unit_price' => $unitPrice,
-                        'subtotal' => $itemSubtotal,
-                    ]);
-
-                    if ($product && $product->stock_quantity > 0) {
-                        $product->decrement('stock_quantity', min($cartItem->quantity, $product->stock_quantity));
-                    }
-                }
-
-                // Create Payment record
-                Payment::create([
-                    'order_id' => $order->id,
-                    'transaction_id' => 'TX-INIT-'.$order->id.'-'.Str::random(8),
-                    'gateway' => $validated['payment_method'],
-                    'amount' => $order->total_amount,
-                    'status' => 'pending',
-                ]);
-
-                return $order;
-            });
-
-            // Route based on payment method
-            if ($validated['payment_method'] === 'cod') {
-                $this->cartService->clear();
-
-                return redirect()->route('store.order.confirmation', ['orderNumber' => $order->order_number])
-                    ->with('success', __('store.checkout.order_placed_cod'));
-            }
-
-            if ($validated['payment_method'] === 'wallet') {
-                $user = $order->user;
-                $customer = $user?->customer;
-                // E.g., 10 points = 1 EGP
-                $pointsNeeded = (int) ceil((float) $order->total_amount * 10);
-
-                if (! $customer || $customer->points_balance < $pointsNeeded) {
-                    return back()->withErrors([
-                        'payment' => __('store.checkout.insufficient_points', ['needed' => $pointsNeeded, 'balance' => $customer?->points_balance ?? 0]),
-                    ]);
-                }
-
-                // Deduct points
-                $customer->decrement('points_balance', $pointsNeeded);
-                $customer->increment('total_points_spent', $pointsNeeded);
-
-                PointsTransaction::create([
-                    'customer_id' => $customer->id,
-                    'type' => 'spend',
-                    'amount' => -$pointsNeeded,
-                    'balance_after' => $customer->points_balance,
-                    'description' => "Order #{$order->order_number} payment",
-                ]);
-
-                $order->update([
-                    'payment_status' => 'paid',
-                    'status' => 'processing',
-                ]);
-
-                $order->payments()->latest()->first()?->update([
-                    'status' => 'success',
-                    'paid_at' => now(),
-                ]);
-
-                $this->cartService->clear();
-
-                return redirect()->route('store.order.confirmation', ['orderNumber' => $order->order_number])
-                    ->with('success', __('store.checkout.order_paid_wallet'));
-            }
-
-            if ($validated['payment_method'] === 'kashier') {
-                $session = $this->kashierService->createPaymentSession($order, app()->getLocale());
-
-                $order->payments()->latest()->first()?->update([
-                    'transaction_id' => $session['sessionId'],
-                    'gateway_response' => $session['raw'] ?? null,
-                ]);
-
-                // Redirect user to Kashier hosted checkout URL
-                return redirect()->away($session['sessionUrl']);
-            }
-
-            return redirect()->route('store.order.confirmation', ['orderNumber' => $order->order_number]);
-        } catch (Exception $e) {
-            Log::error('Checkout processing error: '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
-
-            return back()->withErrors(['checkout' => $e->getMessage()])->withInput();
+        // Paying with points spends an account's balance, so the account owner must be signed in
+        if ($validated['payment_method'] === 'wallet' && ! Auth::check()) {
+            return redirect()->route('store.login')->withErrors(['phone' => __('store.auth.login_required')]);
         }
+
+        try {
+            $user = Auth::user() ?? DB::transaction(fn () => $this->findOrCreateCustomer($cleanPhone, $validated['full_name']));
+
+            $order = $this->orders->place($user, $cart, [
+                'full_name' => $validated['full_name'],
+                'phone' => $cleanPhone,
+                'governorate' => $validated['governorate'],
+                'city' => $validated['city'],
+                'address' => $validated['address'],
+                'notes' => $validated['notes'] ?? null,
+            ], $validated['payment_method']);
+        } catch (ApiException $e) {
+            return back()->withErrors([
+                $e->errorCode === 'INSUFFICIENT_POINTS' ? 'payment' : 'checkout' => $e->getMessage(),
+            ])->withInput();
+        }
+
+        if ($validated['payment_method'] === 'kashier') {
+            try {
+                $session = $this->kashierService->createPaymentSession($order, app()->getLocale());
+            } catch (Exception $e) {
+                Log::error('Checkout processing error: '.$e->getMessage());
+                $this->orders->cancel($order, 'Payment session could not be created');
+
+                return back()->withErrors(['checkout' => $e->getMessage()])->withInput();
+            }
+
+            $order->payments()->latest('id')->first()?->update([
+                'transaction_id' => $session['sessionId'],
+                'gateway_response' => $session['raw'] ?? null,
+            ]);
+
+            // Redirect user to Kashier hosted checkout URL
+            return redirect()->away($session['sessionUrl']);
+        }
+
+        return redirect()->route('store.order.confirmation', ['orderNumber' => $order->order_number])
+            ->with('success', $validated['payment_method'] === 'wallet'
+                ? __('store.checkout.order_paid_wallet')
+                : __('store.checkout.order_placed_cod'));
+    }
+
+    /**
+     * Guest checkout: the order is filed under the account of the phone number given.
+     */
+    private function findOrCreateCustomer(string $phone, string $fullName): User
+    {
+        $user = User::where('phone_number', $phone)->first();
+
+        if ($user) {
+            return $user;
+        }
+
+        $user = User::create([
+            'full_name' => $fullName,
+            'phone_number' => $phone,
+            'email' => $phone.'@customer.maqam-eg.com',
+            'password' => Hash::make(Str::random(16)),
+            'role' => 'customer',
+            'is_active' => true,
+            'preferred_language' => app()->getLocale(),
+        ]);
+
+        Customer::create([
+            'user_id' => $user->id,
+            'rank_id' => (Rank::where('name_en', 'Silver')->first() ?? Rank::first())?->id,
+            'points_balance' => 0,
+            'total_points_earned' => 0,
+            'total_points_spent' => 0,
+        ]);
+
+        return $user;
     }
 
     public function confirmation(string $orderNumber): View

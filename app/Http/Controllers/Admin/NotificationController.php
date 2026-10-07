@@ -7,6 +7,7 @@ use App\Models\AppNotification;
 use App\Models\Customer;
 use App\Models\Rank;
 use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -55,10 +56,13 @@ class NotificationController extends Controller
             default => User::whereIn('role', ['customer', 'merchant'])->where('is_active', true)->get(),
         };
 
+        // Users who chose English get the English text when the admin wrote one
+        $inEnglish = fn (User $user) => $user->preferred_language === 'en' && filled($data['title_en'] ?? null) && filled($data['body_en'] ?? null);
+
         $rows = $users->map(fn (User $user) => [
             'user_id' => $user->id,
-            'title' => $data['title'],
-            'body' => $data['body'],
+            'title' => $inEnglish($user) ? $data['title_en'] : $data['title'],
+            'body' => $inEnglish($user) ? $data['body_en'] : $data['body'],
             'type' => $data['type'],
             'is_read' => false,
             'created_at' => now(),
@@ -68,6 +72,10 @@ class NotificationController extends Controller
         foreach (array_chunk($rows, 500) as $chunk) {
             AppNotification::insert($chunk);
         }
+
+        [$english, $arabic] = $users->partition($inEnglish);
+        app(NotificationService::class)->push($arabic->pluck('id')->all(), $data['title'], $data['body'], $data['type']);
+        app(NotificationService::class)->push($english->pluck('id')->all(), (string) ($data['title_en'] ?? ''), (string) ($data['body_en'] ?? ''), $data['type']);
 
         return redirect()->route('admin.notifications.index')
             ->with('success', __('admin.notifications.sent').': '.count($rows));

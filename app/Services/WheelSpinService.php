@@ -78,6 +78,10 @@ class WheelSpinService
 
             $customer->save();
 
+            if ($pointsWon > 0) {
+                app(RankService::class)->promoteIfEarned($customer);
+            }
+
             PointsTransaction::create([
                 'customer_id' => $customer->id,
                 'type' => 'spend',

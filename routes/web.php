@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\ApiDocsController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\CategoryController;
@@ -22,7 +23,9 @@ use App\Http\Controllers\Admin\RewardController;
 use App\Http\Controllers\Admin\RiskController;
 use App\Http\Controllers\Admin\ScanController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\WhatsAppController;
 use App\Http\Controllers\Store\CartController;
+use App\Http\Controllers\Store\ChatController;
 use App\Http\Controllers\Store\CheckoutController;
 use App\Http\Controllers\Store\CustomerAuthController;
 use App\Http\Controllers\Store\CustomerProfileController;
@@ -47,6 +50,10 @@ Route::get('/terms', [StorefrontController::class, 'terms'])->name('store.terms'
 Route::get('/shipping', [StorefrontController::class, 'shipping'])->name('store.shipping');
 Route::get('/returns', [StorefrontController::class, 'returns'])->name('store.returns');
 Route::post('/locale', [StoreLocaleController::class, 'switch'])->name('store.locale');
+
+// Support assistant (bot checks are inside the controller; these limits are the outer layer)
+Route::get('/chat/challenge', [ChatController::class, 'challenge'])->middleware('throttle:30,1')->name('store.chat.challenge');
+Route::post('/chat', [ChatController::class, 'send'])->middleware('throttle:8,1')->name('store.chat.send');
 
 // Cart Routes
 Route::prefix('cart')->name('store.cart.')->group(function () {
@@ -73,7 +80,10 @@ Route::post('/api/webhooks/kashier', [KashierPaymentController::class, 'webhook'
 // Customer Authentication
 Route::middleware('guest')->group(function () {
     Route::get('/login', [CustomerAuthController::class, 'showLogin'])->name('store.login');
-    Route::post('/login', [CustomerAuthController::class, 'login'])->name('store.login.submit');
+    Route::post('/login', [CustomerAuthController::class, 'login'])->middleware('throttle:10,1')->name('store.login.submit');
+    Route::get('/login/whatsapp', [CustomerAuthController::class, 'showWhatsApp'])->name('store.login.whatsapp');
+    Route::post('/login/whatsapp/check', [CustomerAuthController::class, 'checkWhatsApp'])->middleware('throttle:30,1')->name('store.login.whatsapp.check');
+    Route::post('/login/whatsapp/verify', [CustomerAuthController::class, 'verifyWhatsApp'])->middleware('throttle:10,1')->name('store.login.whatsapp.verify');
     Route::get('/register', [CustomerAuthController::class, 'showRegister'])->name('store.register');
     Route::post('/register', [CustomerAuthController::class, 'register'])->name('store.register.submit');
 });
@@ -181,6 +191,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
         Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
+
+        Route::get('api-docs', [ApiDocsController::class, 'index'])->name('api-docs.index');
+        Route::get('api-docs/openapi.yaml', [ApiDocsController::class, 'spec'])->name('api-docs.spec');
+
+        Route::get('whatsapp', [WhatsAppController::class, 'index'])->name('whatsapp.index');
+        Route::get('whatsapp/status', [WhatsAppController::class, 'status'])->name('whatsapp.status');
+        Route::post('whatsapp/connect', [WhatsAppController::class, 'connect'])->name('whatsapp.connect');
+        Route::delete('whatsapp/disconnect', [WhatsAppController::class, 'disconnect'])->name('whatsapp.disconnect');
     });
 });
 

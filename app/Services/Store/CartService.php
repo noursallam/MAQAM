@@ -5,6 +5,7 @@ namespace App\Services\Store;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Coupon;
+use App\Models\CustomerReward;
 use App\Models\Product;
 use App\Models\SystemSetting;
 use Exception;
@@ -188,13 +189,26 @@ class CartService
     {
         $code = trim($code);
         $coupon = Coupon::where('code', $code)->first();
-
-        if (! $coupon || ! $coupon->isCurrentlyValid()) {
-            throw new Exception(__('store.cart.invalid_coupon'));
-        }
-
         $cart = $this->getCart();
         $subtotal = $this->calculateSubtotal($cart);
+
+        // Not a public coupon: it may be a reward this customer won (wheel coupon, discount or gift product)
+        if (! $coupon || ! $coupon->isCurrentlyValid()) {
+            $reward = $this->findUsableReward($cart, $code);
+
+            if (! $reward) {
+                throw new Exception(__('store.cart.invalid_coupon'));
+            }
+
+            $cart->update(['coupon_code' => $reward->code]);
+            $this->refreshTotals($cart);
+
+            return [
+                'success' => true,
+                'code' => $reward->code,
+                'discount' => $this->calculateRewardDiscount($cart, $reward, $subtotal),
+            ];
+        }
 
         if ($coupon->min_order_amount && $subtotal < $coupon->min_order_amount) {
             throw new Exception(__('store.cart.coupon_min_spend', ['amount' => $coupon->min_order_amount]));
@@ -233,10 +247,15 @@ class CartService
 
         $discount = 0.00;
         $coupon = null;
+        $reward = null;
         if ($cart->coupon_code) {
             $coupon = Coupon::where('code', $cart->coupon_code)->first();
             if ($coupon && $coupon->isCurrentlyValid()) {
                 $discount = $this->calculateDiscount($cart, $coupon, $subtotal);
+            } else {
+                $coupon = null;
+                $reward = $this->findUsableReward($cart, $cart->coupon_code);
+                $discount = $reward ? $this->calculateRewardDiscount($cart, $reward, $subtotal) : 0.00;
             }
         }
 
@@ -253,8 +272,9 @@ class CartService
             'shipping' => round($shipping, 2),
             'total' => round($total, 2),
             'items_count' => $itemsCount,
-            'coupon_code' => $coupon?->code,
+            'coupon_code' => $coupon?->code ?? $reward?->code,
             'coupon' => $coupon,
+            'reward' => $reward,
         ];
     }
 
@@ -299,10 +319,48 @@ class CartService
         $this->refreshTotals($userCart);
     }
 
+    /**
+     * A reward code only works for the customer who owns it, while it is still usable.
+     */
+    protected function findUsableReward(Cart $cart, string $code): ?CustomerReward
+    {
+        if (! $cart->user_id) {
+            return null;
+        }
+
+        $reward = CustomerReward::with(['coupon', 'product'])
+            ->where('code', trim($code))
+            ->whereHas('customer', fn ($q) => $q->where('user_id', $cart->user_id))
+            ->first();
+
+        return $reward && $reward->isUsable() ? $reward : null;
+    }
+
+    protected function calculateRewardDiscount(Cart $cart, CustomerReward $reward, float $subtotal): float
+    {
+        if ($reward->type === CustomerReward::TYPE_COUPON) {
+            return $reward->coupon && $subtotal >= (float) $reward->coupon->min_order_amount
+                ? $this->calculateDiscount($cart, $reward->coupon, $subtotal)
+                : 0.00;
+        }
+
+        if ($reward->type === CustomerReward::TYPE_DISCOUNT) {
+            $value = (float) $reward->amount_value;
+
+            return min($subtotal, $reward->amount_type === 'percentage' ? $subtotal * $value / 100 : $value);
+        }
+
+        // A gift product costs nothing and discounts nothing
+        return 0.00;
+    }
+
     protected function calculateSubtotal(Cart $cart): float
     {
         return (float) $cart->items->sum(function ($item) {
-            $price = $item->product ? (float) $item->product->price : (float) $item->unit_price;
+            // A line with a priced option is charged at the option price captured on add
+            $price = $item->product && ! $item->product_option_id
+                ? (float) $item->product->price
+                : (float) $item->unit_price;
             return $price * $item->quantity;
         });
     }
@@ -311,8 +369,8 @@ class CartService
     {
         if ($coupon->type === 'percentage') {
             $discount = ($subtotal * (float) $coupon->value) / 100;
-            if ($coupon->max_discount && $discount > (float) $coupon->max_discount) {
-                $discount = (float) $coupon->max_discount;
+            if ($coupon->max_discount_amount && $discount > (float) $coupon->max_discount_amount) {
+                $discount = (float) $coupon->max_discount_amount;
             }
             return min($subtotal, $discount);
         }

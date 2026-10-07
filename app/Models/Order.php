@@ -36,7 +36,8 @@ class Order extends Model
 
     public function shippingAddress(): BelongsTo
     {
-        return $this->belongsTo(ShippingAddress::class);
+        // An order keeps showing its address after the customer removes it from their address book
+        return $this->belongsTo(ShippingAddress::class)->withTrashed();
     }
 
     public function coupon(): BelongsTo

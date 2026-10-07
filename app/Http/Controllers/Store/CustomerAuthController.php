@@ -7,17 +7,21 @@ use App\Models\Customer;
 use App\Models\Rank;
 use App\Models\User;
 use App\Services\Store\CartService;
+use App\Services\WhatsApp\WhatsAppOtpService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Throwable;
 
 class CustomerAuthController extends Controller
 {
     public function __construct(
-        protected CartService $cartService
+        protected CartService $cartService,
+        protected WhatsAppOtpService $whatsAppOtp
     ) {}
 
     public function showLogin(): View|RedirectResponse
@@ -51,15 +55,90 @@ class CustomerAuthController extends Controller
             ]);
         }
 
-        // If password is provided, check it; if omitted and phone matches, allow OTP direct verification
-        if (! empty($validated['password'])) {
-            if (! Hash::check($validated['password'], $user->password)) {
+        // No password: the customer proves the number by messaging us on WhatsApp first
+        if (empty($validated['password'])) {
+            if (! $this->whatsAppOtp->businessNumber()) {
                 throw ValidationException::withMessages([
-                    'password' => __('store.auth.wrong_password'),
+                    'phone' => __('store.auth.wa_unavailable'),
                 ]);
             }
+
+            $challenge = $this->whatsAppOtp->start($user->phone_number);
+            session(['whatsapp_otp_id' => $challenge['id']]);
+
+            return redirect()->route('store.login.whatsapp');
         }
 
+        if (! Hash::check($validated['password'], $user->password)) {
+            throw ValidationException::withMessages([
+                'password' => __('store.auth.wrong_password'),
+            ]);
+        }
+
+        return $this->completeLogin($user);
+    }
+
+    public function showWhatsApp(): View|RedirectResponse
+    {
+        $challenge = $this->whatsAppOtp->find(session('whatsapp_otp_id'));
+        $businessNumber = $this->whatsAppOtp->businessNumber();
+
+        if (! $challenge || ! $businessNumber) {
+            return redirect()->route('store.login')->withErrors(['phone' => __('store.auth.wa_expired')]);
+        }
+
+        return view('store.auth.whatsapp', [
+            'code' => $challenge['code'],
+            'businessNumber' => $businessNumber,
+            'otpSent' => $challenge['otp_hash'] !== null,
+        ]);
+    }
+
+    public function checkWhatsApp(): JsonResponse
+    {
+        $id = session('whatsapp_otp_id');
+
+        if (! $this->whatsAppOtp->find($id)) {
+            return response()->json(['expired' => true]);
+        }
+
+        try {
+            return response()->json(['sent' => $this->whatsAppOtp->sendOtpIfChallengeReceived($id)]);
+        } catch (Throwable $e) {
+            report($e);
+
+            return response()->json(['sent' => false, 'message' => __('store.auth.wa_unavailable')], 502);
+        }
+    }
+
+    public function verifyWhatsApp(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'otp' => ['required', 'digits:6'],
+        ]);
+
+        $id = session('whatsapp_otp_id');
+
+        if (! $this->whatsAppOtp->find($id)) {
+            return redirect()->route('store.login')->withErrors(['phone' => __('store.auth.wa_expired')]);
+        }
+
+        $challenge = $this->whatsAppOtp->verify($id, $validated['otp']);
+        $user = $challenge ? User::where('phone_number', $challenge['phone'])->first() : null;
+
+        if (! $user) {
+            throw ValidationException::withMessages([
+                'otp' => __('store.auth.wa_wrong_otp'),
+            ]);
+        }
+
+        $user->forceFill(['phone_verified_at' => $user->phone_verified_at ?? now()])->save();
+
+        return $this->completeLogin($user);
+    }
+
+    private function completeLogin(User $user): RedirectResponse
+    {
         Auth::login($user, true);
 
         // Migrate guest cart

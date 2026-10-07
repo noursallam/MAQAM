@@ -7,8 +7,8 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PointsTransaction;
 use App\Services\Payment\KashierService;
+use App\Services\RankService;
 use App\Services\Store\CartService;
-use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,79 +24,44 @@ class KashierPaymentController extends Controller
 
     /**
      * User return callback from Kashier hosted checkout.
+     *
+     * The query string is only trusted when Kashier's signature on it is valid:
+     * anyone can open this URL by hand, so an unsigned "SUCCESS" proves nothing.
      */
     public function callback(Request $request): RedirectResponse
     {
         $params = $request->query();
-
-        Log::info('Kashier: Redirect callback received', $params);
-
         $orderNumber = $params['merchantOrderId'] ?? null;
 
-        if (! $orderNumber) {
-            return redirect()->route('store.home')->withErrors(['payment' => 'Missing order reference in callback.']);
-        }
+        Log::info('Kashier: Redirect callback received', ['order' => $orderNumber, 'status' => $params['paymentStatus'] ?? null]);
 
-        $order = Order::where('order_number', $orderNumber)->first();
+        $order = $orderNumber ? Order::where('order_number', $orderNumber)->first() : null;
 
         if (! $order) {
-            return redirect()->route('store.home')->withErrors(['payment' => 'Order not found.']);
+            return redirect()->route('store.home')->withErrors(['payment' => __('store.checkout.payment_declined')]);
         }
 
-        // Validate redirect signature
-        $isValidSignature = $this->kashierService->validateRedirectSignature($params);
+        $confirmation = redirect()->route('store.order.confirmation', ['orderNumber' => $order->order_number]);
 
-        if (! $isValidSignature) {
-            Log::warning('Kashier: Invalid redirect signature for order '.$orderNumber, $params);
-            // In sandbox/testing or if strict signature verification differs, log warning and check session if needed
+        if ($order->payment_status === 'paid') {
+            return $confirmation->with('success', __('store.checkout.payment_success'));
         }
 
-        $paymentStatus = strtoupper((string) ($params['paymentStatus'] ?? ''));
+        if (! $this->kashierService->validateRedirectSignature($params)) {
+            Log::warning('Kashier: Invalid redirect signature, order left untouched', ['order' => $orderNumber]);
 
-        if ($paymentStatus === 'SUCCESS') {
-            DB::transaction(function () use ($order, $params) {
-                $order->update([
-                    'payment_status' => 'paid',
-                    'status' => $order->status === 'new' ? 'processing' : $order->status,
-                ]);
+            // The signed server-to-server webhook is what settles the order
+            return $confirmation->with('info', __('store.checkout.payment_pending_confirmation'));
+        }
 
-                $payment = $order->payments()->latest()->first();
-                if ($payment) {
-                    $payment->update([
-                        'transaction_id' => $params['transactionId'] ?? ('TX-'.$order->id.'-'.time()),
-                        'status' => 'success',
-                        'paid_at' => now(),
-                        'gateway_response' => $params,
-                    ]);
-                } else {
-                    Payment::create([
-                        'order_id' => $order->id,
-                        'transaction_id' => $params['transactionId'] ?? ('TX-'.$order->id.'-'.time()),
-                        'gateway' => 'kashier',
-                        'amount' => $order->total_amount,
-                        'status' => 'success',
-                        'paid_at' => now(),
-                        'gateway_response' => $params,
-                    ]);
-                }
-
-                // Award points to customer if customer exists
-                $this->awardLoyaltyPoints($order);
-            });
-
-            // Clear customer cart
+        if (strtoupper((string) ($params['paymentStatus'] ?? '')) === 'SUCCESS' && $this->amountMatches($order, $params['amount'] ?? null)) {
+            $this->markPaid($order, $params['transactionId'] ?? null, $params);
             $this->cartService->clear();
 
-            return redirect()->route('store.order.confirmation', ['orderNumber' => $order->order_number])
-                ->with('success', __('store.checkout.payment_success'));
+            return $confirmation->with('success', __('store.checkout.payment_success'));
         }
 
-        // Payment failed or cancelled
-        $order->update(['payment_status' => 'failed']);
-        $order->payments()->latest()->first()?->update([
-            'status' => 'failed',
-            'gateway_response' => $params,
-        ]);
+        $this->markFailed($order, $params);
 
         return redirect()->route('store.checkout')
             ->withErrors(['payment' => __('store.checkout.payment_declined')]);
@@ -107,24 +72,19 @@ class KashierPaymentController extends Controller
      */
     public function webhook(Request $request): JsonResponse
     {
-        $signature = $request->header('x-kashier-signature', '');
+        $signature = (string) $request->header('x-kashier-signature', '');
         $payload = $request->all();
+        $data = is_array($payload['data'] ?? null) ? $payload['data'] : [];
 
-        Log::info('Kashier: Webhook received', [
-            'signature' => $signature,
-            'payload' => $payload,
-        ]);
+        Log::info('Kashier: Webhook received', ['order' => $data['merchantOrderId'] ?? null, 'status' => $data['status'] ?? null]);
 
-        // Validate webhook signature
-        if (! empty($signature)) {
-            $isValid = $this->kashierService->validateWebhookSignature($payload, $signature);
-            if (! $isValid) {
-                Log::warning('Kashier: Invalid webhook signature', ['signature' => $signature]);
-                return response()->json(['error' => 'Invalid signature'], 400);
-            }
+        // A webhook without a valid signature could come from anyone
+        if ($signature === '' || ! $this->kashierService->validateWebhookSignature($payload, $signature)) {
+            Log::warning('Kashier: Webhook rejected, missing or invalid signature');
+
+            return response()->json(['error' => 'Invalid signature'], 400);
         }
 
-        $data = $payload['data'] ?? [];
         $orderNumber = $data['merchantOrderId'] ?? null;
         $status = strtoupper((string) ($data['status'] ?? ''));
 
@@ -138,49 +98,77 @@ class KashierPaymentController extends Controller
             return response()->json(['error' => 'Order not found'], 404);
         }
 
-        // Idempotency: If order is already marked paid, return 200 immediately
         if ($order->payment_status === 'paid') {
             return response()->json(['status' => 'already_processed'], 200);
         }
 
         if ($status === 'SUCCESS') {
-            DB::transaction(function () use ($order, $data) {
-                $order->update([
-                    'payment_status' => 'paid',
-                    'status' => $order->status === 'new' ? 'processing' : $order->status,
-                ]);
+            if (! $this->amountMatches($order, $data['amount'] ?? null)) {
+                Log::warning('Kashier: Webhook amount does not match the order', ['order' => $orderNumber]);
 
-                $payment = $order->payments()->latest()->first();
-                if ($payment) {
-                    $payment->update([
-                        'transaction_id' => $data['transactionId'] ?? $payment->transaction_id,
-                        'status' => 'success',
-                        'paid_at' => now(),
-                        'gateway_response' => $data,
-                    ]);
-                } else {
-                    Payment::create([
-                        'order_id' => $order->id,
-                        'transaction_id' => $data['transactionId'] ?? ('TX-'.$order->id.'-'.time()),
-                        'gateway' => 'kashier',
-                        'amount' => $order->total_amount,
-                        'status' => 'success',
-                        'paid_at' => now(),
-                        'gateway_response' => $data,
-                    ]);
-                }
+                return response()->json(['error' => 'Amount mismatch'], 422);
+            }
 
-                $this->awardLoyaltyPoints($order);
-            });
+            $this->markPaid($order, $data['transactionId'] ?? null, $data);
         } elseif (in_array($status, ['FAILED', 'DECLINED', 'CANCELLED'], true)) {
-            $order->update(['payment_status' => 'failed']);
-            $order->payments()->latest()->first()?->update([
-                'status' => 'failed',
-                'gateway_response' => $data,
-            ]);
+            $this->markFailed($order, $data);
         }
 
         return response()->json(['status' => 'ok'], 200);
+    }
+
+    /**
+     * Settle the order exactly once, even when the callback and the webhook arrive together.
+     */
+    protected function markPaid(Order $order, ?string $transactionId, array $gatewayResponse): void
+    {
+        DB::transaction(function () use ($order, $transactionId, $gatewayResponse) {
+            $order = Order::whereKey($order->id)->lockForUpdate()->first();
+
+            if ($order->payment_status === 'paid' || $order->status === 'cancelled') {
+                return;
+            }
+
+            $order->update([
+                'payment_status' => 'paid',
+                'status' => $order->status === 'new' ? 'processing' : $order->status,
+            ]);
+
+            $attributes = [
+                'transaction_id' => $transactionId ?: 'TX-'.$order->id.'-'.time(),
+                'status' => 'success',
+                'paid_at' => now(),
+                'gateway_response' => $gatewayResponse,
+            ];
+
+            $payment = $order->payments()->latest('id')->first();
+            $payment
+                ? $payment->update($attributes)
+                : Payment::create($attributes + ['order_id' => $order->id, 'gateway' => 'kashier', 'amount' => $order->total_amount]);
+
+            $this->awardLoyaltyPoints($order);
+        });
+    }
+
+    protected function markFailed(Order $order, array $gatewayResponse): void
+    {
+        if ($order->payment_status === 'paid') {
+            return;
+        }
+
+        $order->update(['payment_status' => 'failed']);
+        $order->payments()->latest('id')->first()?->update([
+            'status' => 'failed',
+            'gateway_response' => $gatewayResponse,
+        ]);
+    }
+
+    /**
+     * The paid amount must be the order total; a missing amount is not accepted.
+     */
+    protected function amountMatches(Order $order, mixed $amount): bool
+    {
+        return is_numeric($amount) && abs((float) $amount - (float) $order->total_amount) < 0.01;
     }
 
     /**
@@ -198,6 +186,7 @@ class KashierPaymentController extends Controller
         if ($points > 0) {
             $customer->increment('points_balance', $points);
             $customer->increment('total_points_earned', $points);
+            app(RankService::class)->promoteIfEarned($customer);
 
             PointsTransaction::create([
                 'customer_id' => $customer->id,

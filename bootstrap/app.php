@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
+        apiPrefix: 'api/v1',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
@@ -21,7 +23,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\SetWebLocale::class,
         ]);
+        $middleware->throttleApi();
+        $middleware->api(prepend: [
+            \App\Http\Middleware\PrepareApiRequest::class,
+        ]);
         $middleware->alias([
+            'active' => \App\Http\Middleware\EnsureAccountActive::class,
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
             'admin.module' => \App\Http\Middleware\EnsureAdminModuleAccess::class,
         ]);
@@ -30,4 +37,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );
+        $exceptions->render(function (Throwable $e, Request $request) {
+            if ($request->is('api/v1/*')) {
+                return \App\Support\ApiExceptionRenderer::render($e);
+            }
+        });
     })->create();

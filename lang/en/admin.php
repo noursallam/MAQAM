@@ -84,7 +84,9 @@ return [
         'notifications_history' => 'Notification History',
         'system' => 'System',
         'settings' => 'Settings',
+        'whatsapp' => 'WhatsApp Connection',
         'admins_rbac' => 'Team Permissions',
+        'api_docs' => 'API Docs',
         'menu' => 'Menu',
         'general' => 'General',
     ],
@@ -601,6 +603,28 @@ return [
         'unknown_user' => 'Unknown technician',
     ],
 
+    'whatsapp' => [
+        'title' => 'WhatsApp Connection',
+        'subtitle' => 'Link the WhatsApp number that sends OTP codes',
+        'not_configured' => 'Senderbot is not configured. Set SENDER_BOT_URL and SENDER_BOT in the .env file.',
+        'checking' => 'Checking connection…',
+        'connected' => 'Connected',
+        'disconnected' => 'Not connected',
+        'connected_hint' => 'OTP messages will be sent from this number.',
+        'disconnected_hint' => 'Generate a QR code and scan it with the WhatsApp account you want to send from.',
+        'generate_qr' => 'Generate QR code',
+        'refresh_qr' => 'New QR code',
+        'generating' => 'Generating…',
+        'waiting_scan' => 'Waiting for scan…',
+        'disconnect' => 'Disconnect',
+        'disconnect_confirm' => 'Disconnect this WhatsApp number? OTP messages will stop until you link again.',
+        'steps_title' => 'How to link',
+        'step_1' => 'Open WhatsApp on your phone.',
+        'step_2' => 'Go to Settings → Linked devices → Link a device.',
+        'step_3' => 'Point the phone at the QR code on this page.',
+        'error' => 'Could not reach the WhatsApp service.',
+    ],
+
     'settings' => [
         'title' => 'Settings',
         'subtitle' => 'General, loyalty, wheel, security',
@@ -618,6 +642,7 @@ return [
         'content_manager' => 'Content manager',
         'support' => 'Support',
         'finance' => 'Finance',
+        'developer' => 'App developer',
     ],
 
     'loyalty' => [

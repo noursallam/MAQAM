@@ -14,6 +14,11 @@ class EnsureAdminModuleAccess
         $module = AdminAccess::moduleForRoute($request->route()?->getName());
 
         if ($module && ! AdminAccess::can($request->user(), $module)) {
+            // Docs-only accounts land on the documentation instead of a 403 after login
+            if ($request->routeIs('admin.dashboard') && AdminAccess::can($request->user(), 'api_docs')) {
+                return redirect()->route('admin.api-docs.index');
+            }
+
             abort(403, __('admin.access_denied'));
         }
 

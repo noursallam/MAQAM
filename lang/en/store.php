@@ -267,6 +267,21 @@ return [
         'mansoura' => 'Mansoura',
     ],
 
+    'chat' => [
+        'title' => 'MAQAM Assistant',
+        'subtitle' => 'Ask about products, shipping and points',
+        'greeting' => 'Hello! I am the MAQAM assistant. How can I help?',
+        'placeholder' => 'Type your question…',
+        'send' => 'Send',
+        'open' => 'Open assistant',
+        'close' => 'Close',
+        'thinking' => 'Typing…',
+        'fallback' => 'Thanks for your message. You can contact support for any question.',
+        'verify_failed' => 'The request could not be verified. Please try again.',
+        'unavailable' => 'The assistant is unavailable right now. Try later or contact support.',
+        'limit_reached' => 'You have reached today\'s message limit. Try tomorrow or contact support.',
+    ],
+
     'auth' => [
         'login_title' => 'Sign in | MAQAM',
         'login_heading' => 'Sign in',
@@ -285,7 +300,20 @@ return [
         'password' => 'Password',
         'create' => 'Create account',
         'have_account' => 'Already have an account?',
+        'login_required' => 'Please sign in first.',
         'logout' => 'Log Out',
+        'password_optional' => 'Leave the password empty to sign in with WhatsApp.',
+        'wa_heading' => 'Verify with WhatsApp',
+        'wa_send_lead' => 'Send this code to our WhatsApp number and we will reply with your sign-in code.',
+        'wa_open' => 'Open WhatsApp and send the code',
+        'wa_waiting' => 'Waiting for your message…',
+        'wa_otp_lead' => 'We sent your sign-in code on WhatsApp. Enter it here.',
+        'wa_otp_label' => 'Sign-in code',
+        'wa_back' => 'Back to sign in',
+        'wa_wrong_otp' => 'The sign-in code is wrong or expired.',
+        'wa_expired' => 'Verification expired, please try again.',
+        'wa_unavailable' => 'WhatsApp verification is unavailable right now. Use your password or try again later.',
+        'wa_otp_message' => 'Your MAQAM sign-in code: :otp'."\n".'Valid for :minutes minutes. Do not share it with anyone.',
     ],
 
     'about' => [

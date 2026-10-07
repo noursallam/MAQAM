@@ -17,6 +17,7 @@
                 <div class="mq-field">
                     <label for="login_password">{{ __('store.auth.password') ?? 'كلمة المرور' }}</label>
                     <input type="password" id="login_password" name="password" placeholder="••••••••">
+                    <small style="display:block;margin-top:.35rem;opacity:.7;">{{ __('store.auth.password_optional') }}</small>
                 </div>
                 <button type="submit" class="mq-btn mq-btn-primary mq-btn-block">{{ __('store.auth.login_heading') }}</button>
                 <div class="mq-auth-alt">

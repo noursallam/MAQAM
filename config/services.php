@@ -42,4 +42,16 @@ return [
         'cache_minutes' => (int) env('GEMINI_CACHE_MINUTES', 1440),
     ],
 
+    'firebase' => [
+        // Service-account key (Firebase console > Project settings > Service accounts). Never place it under public/
+        'credentials' => env('FIREBASE_CREDENTIALS', storage_path('app/private/firebase/service-account.json')),
+    ],
+
+    'senderbot' => [
+        // WhatsApp microservice (see docs/Senderbot.json); SENDER_BOT is the bearer token
+        'url' => env('SENDER_BOT_URL', 'http://127.0.0.1:3333'),
+        'token' => env('SENDER_BOT'),
+        'session' => env('SENDER_BOT_SESSION', 'maqam'),
+    ],
+
 ];

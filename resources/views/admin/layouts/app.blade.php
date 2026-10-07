@@ -82,7 +82,9 @@
             'items' => [
                 ['module' => 'risk', 'route' => 'admin.risk.index', 'label' => __('admin.nav.risk_desk'), 'match' => 'admin.risk.*', 'badge' => $riskAlertCount ?: null],
                 ['module' => 'settings', 'route' => 'admin.settings.index', 'label' => __('admin.nav.settings'), 'match' => 'admin.settings.*', 'badge' => null],
+                ['module' => 'settings', 'route' => 'admin.whatsapp.index', 'label' => __('admin.nav.whatsapp'), 'match' => 'admin.whatsapp.*', 'badge' => null],
                 ['module' => 'admins', 'route' => 'admin.admins.index', 'label' => __('admin.nav.admins_rbac'), 'match' => 'admin.admins.*', 'badge' => null],
+                ['module' => 'api_docs', 'route' => 'admin.api-docs.index', 'label' => __('admin.nav.api_docs'), 'match' => 'admin.api-docs.*', 'badge' => null],
             ],
         ],
     ];

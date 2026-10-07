@@ -13,10 +13,12 @@ class AdminAccess
     public static function matrix(): array
     {
         return [
-            'super_admin' => ['dashboard', 'orders', 'merchants', 'customers', 'qr', 'loyalty', 'commerce', 'coupons', 'notifications', 'risk', 'settings', 'admins'],
+            'super_admin' => ['dashboard', 'orders', 'merchants', 'customers', 'qr', 'loyalty', 'commerce', 'coupons', 'notifications', 'risk', 'settings', 'admins', 'api_docs'],
             'content_manager' => ['dashboard', 'qr', 'loyalty', 'commerce', 'coupons', 'notifications', 'settings'],
             'support' => ['dashboard', 'orders', 'merchants', 'customers', 'notifications', 'risk'],
             'finance' => ['dashboard', 'orders', 'coupons', 'loyalty', 'settings'],
+            // App developers: API documentation only, no business data
+            'developer' => ['api_docs'],
         ];
     }
 
@@ -52,7 +54,11 @@ class AdminAccess
         }
 
         // Always allowed within admin panel.
-        if (in_array($routeName, ['admin.locale', 'admin.logout', 'admin.dashboard', 'admin.search'], true)) {
+        if (in_array($routeName, ['admin.locale', 'admin.logout'], true)) {
+            return null;
+        }
+
+        if (in_array($routeName, ['admin.dashboard', 'admin.search'], true)) {
             return 'dashboard';
         }
 
@@ -74,7 +80,9 @@ class AdminAccess
             'admin.notifications.' => 'notifications',
             'admin.risk.' => 'risk',
             'admin.settings.' => 'settings',
+            'admin.whatsapp.' => 'settings',
             'admin.admins.' => 'admins',
+            'admin.api-docs.' => 'api_docs',
         ];
 
         foreach ($map as $prefix => $module) {

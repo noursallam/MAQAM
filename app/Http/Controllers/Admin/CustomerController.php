@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\PointsTransaction;
 use App\Models\Rank;
 use App\Models\User;
+use App\Services\RankService;
 use App\Models\WheelSpin;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -36,12 +37,13 @@ class CustomerController extends Controller
     {
         $customer->load(['user', 'rank']);
         $ranks = Rank::where('is_active', true)->orderBy('min_points')->get();
-        $nextRank = $ranks->first(fn ($r) => $r->min_points > ($customer->points_balance ?? 0));
+        // Ranks follow lifetime earned points, not the spendable balance
+        $nextRank = $ranks->first(fn ($r) => $r->min_points > ($customer->rank?->min_points ?? -1));
 
         $progress = 0;
         if ($customer->rank && $nextRank) {
             $span = max(1, $nextRank->min_points - $customer->rank->min_points);
-            $progress = min(100, max(0, (($customer->points_balance - $customer->rank->min_points) / $span) * 100));
+            $progress = min(100, max(0, (($customer->total_points_earned - $customer->rank->min_points) / $span) * 100));
         } elseif ($customer->rank && ! $nextRank) {
             $progress = 100;
         }
@@ -157,6 +159,7 @@ class CustomerController extends Controller
                     ? $customer->total_points_spent + abs($data['amount'])
                     : $customer->total_points_spent,
             ]);
+            app(RankService::class)->promoteIfEarned($customer);
 
             PointsTransaction::create([
                 'customer_id' => $customer->id,

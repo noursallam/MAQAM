@@ -85,7 +85,9 @@ return [
         'notifications_history' => 'سجل الإشعارات',
         'system' => 'النظام',
         'settings' => 'الإعدادات',
+        'whatsapp' => 'ربط واتساب',
         'admins_rbac' => 'صلاحيات الفريق',
+        'api_docs' => 'توثيق الـ API',
         'menu' => 'القائمة',
         'general' => 'عام',
     ],
@@ -605,6 +607,28 @@ return [
         'unknown_user' => 'فني غير معروف',
     ],
 
+    'whatsapp' => [
+        'title' => 'ربط واتساب',
+        'subtitle' => 'اربط رقم واتساب الذي يرسل أكواد التحقق',
+        'not_configured' => 'خدمة Senderbot غير مهيأة. أضف SENDER_BOT_URL و SENDER_BOT في ملف .env.',
+        'checking' => 'جارٍ فحص الاتصال…',
+        'connected' => 'متصل',
+        'disconnected' => 'غير متصل',
+        'connected_hint' => 'سيتم إرسال أكواد التحقق من هذا الرقم.',
+        'disconnected_hint' => 'أنشئ رمز QR وامسحه بحساب واتساب الذي تريد الإرسال منه.',
+        'generate_qr' => 'إنشاء رمز QR',
+        'refresh_qr' => 'رمز QR جديد',
+        'generating' => 'جارٍ الإنشاء…',
+        'waiting_scan' => 'في انتظار المسح…',
+        'disconnect' => 'فصل الاتصال',
+        'disconnect_confirm' => 'فصل هذا الرقم؟ سيتوقف إرسال أكواد التحقق حتى تربطه مرة أخرى.',
+        'steps_title' => 'طريقة الربط',
+        'step_1' => 'افتح واتساب على هاتفك.',
+        'step_2' => 'اذهب إلى الإعدادات ← الأجهزة المرتبطة ← ربط جهاز.',
+        'step_3' => 'وجّه الهاتف نحو رمز QR في هذه الصفحة.',
+        'error' => 'تعذر الوصول إلى خدمة واتساب.',
+    ],
+
     'settings' => [
         'title' => 'الإعدادات',
         'subtitle' => 'إعدادات عامة والولاء والعجلة والأمان',
@@ -622,6 +646,7 @@ return [
         'content_manager' => 'مسؤول محتوى',
         'support' => 'دعم',
         'finance' => 'مالية',
+        'developer' => 'مطوّر التطبيق',
     ],
 
     'loyalty' => [

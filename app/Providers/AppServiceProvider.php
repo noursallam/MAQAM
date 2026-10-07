@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +22,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        RateLimiter::for('api', fn (Request $request) => Limit::perMinute(90)->by($request->user()?->id ?: $request->ip()));
+
+        // Starting a WhatsApp verification is limited per IP and per phone number
+        RateLimiter::for('otp-start', fn (Request $request) => [
+            Limit::perMinute(5)->by('otp-ip:'.$request->ip()),
+            Limit::perMinutes(15, 5)->by('otp-phone:'.preg_replace('/\D/', '', (string) $request->input('phone'))),
+        ]);
+        RateLimiter::for('otp-poll', fn (Request $request) => Limit::perMinute(40)->by($request->ip()));
+        RateLimiter::for('otp-verify', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
+
         \Illuminate\Support\Facades\View::composer('store.*', function ($view) {
             $cartCount = 0;
             try {
