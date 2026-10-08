@@ -29,6 +29,8 @@ class NotificationService
                 'title' => $title,
                 'body' => $body,
                 'type' => $type,
+                // A bulk insert bypasses the model's cast, so encode by hand
+                'data' => $data ? json_encode($data) : null,
                 'is_read' => false,
                 'created_at' => $now,
                 'updated_at' => $now,

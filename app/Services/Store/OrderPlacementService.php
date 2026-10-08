@@ -26,7 +26,8 @@ class OrderPlacementService
     public const POINTS_PER_EGP = 10;
 
     public function __construct(
-        protected CartService $cartService
+        protected CartService $cartService,
+        protected OrderNotifier $notifier,
     ) {}
 
     /**
@@ -34,7 +35,7 @@ class OrderPlacementService
      */
     public function place(User $user, Cart $cart, array $shipping, string $paymentMethod): Order
     {
-        return DB::transaction(function () use ($user, $cart, $shipping, $paymentMethod) {
+        $order = DB::transaction(function () use ($user, $cart, $shipping, $paymentMethod) {
             $cart->load('items');
 
             if ($cart->items->isEmpty()) {
@@ -172,6 +173,13 @@ class OrderPlacementService
 
             return $order;
         });
+
+        // An online order is announced once its payment is confirmed, not before
+        if ($paymentMethod !== 'kashier') {
+            $this->notifier->placed($order);
+        }
+
+        return $order;
     }
 
     /**
@@ -190,14 +198,18 @@ class OrderPlacementService
     /**
      * Cancel an order and give back everything it took: stock, coupon use, reward and wallet points.
      */
-    public function cancel(Order $order, string $reason): Order
+    public function cancel(Order $order, string $reason, bool $notify = true): Order
     {
-        return DB::transaction(function () use ($order, $reason) {
+        $cancelledNow = false;
+
+        $order = DB::transaction(function () use ($order, $reason, &$cancelledNow) {
             $order = Order::with('items')->whereKey($order->id)->lockForUpdate()->first();
 
             if ($order->status === 'cancelled') {
                 return $order;
             }
+
+            $cancelledNow = true;
 
             $giftProductId = null;
 
@@ -257,6 +269,12 @@ class OrderPlacementService
 
             return $order;
         });
+
+        if ($cancelledNow && $notify) {
+            $this->notifier->statusChanged($order);
+        }
+
+        return $order;
     }
 
     public function emptyCart(Cart $cart): void

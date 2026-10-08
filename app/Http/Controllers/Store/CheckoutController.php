@@ -99,7 +99,8 @@ class CheckoutController extends Controller
                 $session = $this->kashierService->createPaymentSession($order, app()->getLocale());
             } catch (Exception $e) {
                 Log::error('Checkout processing error: '.$e->getMessage());
-                $this->orders->cancel($order, 'Payment session could not be created');
+                // The customer sees the error on screen; the order was never announced to them
+                $this->orders->cancel($order, 'Payment session could not be created', notify: false);
 
                 return back()->withErrors(['checkout' => $e->getMessage()])->withInput();
             }

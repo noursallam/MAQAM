@@ -274,6 +274,8 @@ class ApiPresenter
             'title' => $notification->title,
             'body' => $notification->body,
             'type' => $notification->type,
+            // What it is about, e.g. {"order_number": "MQ-…"}; an object, empty when there is nothing
+            'data' => (object) ($notification->data ?? []),
             'is_read' => (bool) $notification->is_read,
             'read_at' => $notification->read_at?->toIso8601String(),
             'created_at' => $notification->created_at?->toIso8601String(),

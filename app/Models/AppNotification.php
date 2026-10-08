@@ -10,12 +10,13 @@ class AppNotification extends Model
     protected $table = 'notifications';
 
     protected $fillable = [
-        'user_id', 'title', 'body', 'type', 'is_read', 'read_at',
+        'user_id', 'title', 'body', 'type', 'data', 'is_read', 'read_at',
     ];
 
     protected function casts(): array
     {
         return [
+            'data' => 'array',
             'is_read' => 'boolean',
             'read_at' => 'datetime',
         ];

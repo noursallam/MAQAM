@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Services\NotificationService;
+use App\Services\Store\OrderNotifier;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -77,15 +77,8 @@ class OrderController extends Controller
         $statusChanged = $order->status !== $data['status'];
         $order->update($updates);
 
-        if ($statusChanged && $order->user_id) {
-            app(NotificationService::class)->notifyTranslated(
-                [$order->user_id],
-                'api.order.status_title',
-                'api.order.status_'.$data['status'],
-                ['number' => $order->order_number],
-                'order_update',
-                ['order_number' => $order->order_number, 'status' => $data['status']],
-            );
+        if ($statusChanged) {
+            app(OrderNotifier::class)->statusChanged($order);
         }
 
         return back()->with('success', __('admin.orders.update_status').': '.__('admin.orders.'.$data['status']));

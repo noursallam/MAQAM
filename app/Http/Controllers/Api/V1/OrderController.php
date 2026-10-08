@@ -52,7 +52,8 @@ class OrderController extends ApiController
                 $session = $this->kashier->createPaymentSession($order, app()->getLocale());
             } catch (Throwable $e) {
                 report($e);
-                $this->orders->cancel($order, 'Payment session could not be created');
+                // The customer sees the error on screen; the order was never announced to them
+                $this->orders->cancel($order, 'Payment session could not be created', notify: false);
 
                 throw new ApiException('PAYMENT_GATEWAY_ERROR', __('api.checkout.gateway_error'), 502);
             }

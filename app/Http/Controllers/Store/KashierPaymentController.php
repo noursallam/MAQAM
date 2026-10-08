@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Store;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\Store\OrderNotifier;
 use App\Models\Payment;
 use App\Models\PointsTransaction;
 use App\Services\Payment\KashierService;
@@ -122,12 +123,16 @@ class KashierPaymentController extends Controller
      */
     protected function markPaid(Order $order, ?string $transactionId, array $gatewayResponse): void
     {
-        DB::transaction(function () use ($order, $transactionId, $gatewayResponse) {
+        $paidNow = false;
+
+        DB::transaction(function () use ($order, $transactionId, $gatewayResponse, &$paidNow) {
             $order = Order::whereKey($order->id)->lockForUpdate()->first();
 
             if ($order->payment_status === 'paid' || $order->status === 'cancelled') {
                 return;
             }
+
+            $paidNow = true;
 
             $order->update([
                 'payment_status' => 'paid',
@@ -148,6 +153,11 @@ class KashierPaymentController extends Controller
 
             $this->awardLoyaltyPoints($order);
         });
+
+        // Once only, however many times the gateway reports the same payment
+        if ($paidNow) {
+            app(OrderNotifier::class)->paymentConfirmed($order->fresh());
+        }
     }
 
     protected function markFailed(Order $order, array $gatewayResponse): void
@@ -156,11 +166,17 @@ class KashierPaymentController extends Controller
             return;
         }
 
+        $failedNow = $order->payment_status !== 'failed';
+
         $order->update(['payment_status' => 'failed']);
         $order->payments()->latest('id')->first()?->update([
             'status' => 'failed',
             'gateway_response' => $gatewayResponse,
         ]);
+
+        if ($failedNow) {
+            app(OrderNotifier::class)->paymentFailed($order);
+        }
     }
 
     /**
