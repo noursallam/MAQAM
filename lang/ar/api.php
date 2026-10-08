@@ -34,6 +34,11 @@ return [
         'signed_in' => 'تم تسجيل الدخول بنجاح.',
         'signed_out' => 'تم تسجيل الخروج.',
         'default_name' => 'عميل مقام',
+        'invalid_credentials' => 'رقم الجوال أو كلمة المرور غير صحيحة.',
+        'profile_completed' => 'تم حفظ بياناتك.',
+        'password_updated' => 'تم تحديث كلمة المرور.',
+        'wrong_current_password' => 'كلمة المرور الحالية غير صحيحة.',
+        'verify_to_set_password' => 'ادخل بكود واتساب أولاً لتعيين كلمة مرور جديدة.',
     ],
 
     'qr' => [

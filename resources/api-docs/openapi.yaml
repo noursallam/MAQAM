@@ -222,6 +222,92 @@ security:
   - bearerAuth: []
 
 paths:
+  /auth/methods:
+    post:
+      tags: [Auth]
+      summary: How does this number sign in?
+      description: >-
+        Call this after the customer types their number. `has_password: true` means ask for the
+        password (`POST /auth/login`); otherwise go to the WhatsApp flow, which also registers new
+        numbers. An unknown number answers `false`, the same as an account without a password.
+      security: []
+      parameters: [{ $ref: '#/components/parameters/Locale' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone]
+              properties:
+                phone: { type: string, example: "01012345678" }
+      responses:
+        "200":
+          description: The sign-in method for this number.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          has_password: { type: boolean }
+        "422": { $ref: '#/components/responses/ValidationError' }
+        "429": { $ref: '#/components/responses/TooManyRequests' }
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Sign in with phone number and password
+      description: >-
+        For customers who chose a password (`user.has_password`). A wrong password and an unknown
+        number give the same `INVALID_CREDENTIALS`. A session opened this way must send
+        `current_password` to change the password; to replace a forgotten one, sign in over WhatsApp.
+      security: []
+      parameters: [{ $ref: '#/components/parameters/Locale' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, password, device_name]
+              properties:
+                phone: { type: string, example: "01012345678" }
+                password: { type: string, format: password }
+                device_name: { type: string, maxLength: 100, description: "One live token per name." }
+                device_token: { type: string, nullable: true, description: "FCM token, if already available." }
+                platform: { type: string, nullable: true, enum: [android, ios] }
+      responses:
+        "200":
+          description: Signed in.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          token: { type: string, example: 3|Kj89qLmNzT… }
+                          token_type: { type: string, example: Bearer }
+                          expires_at: { type: string, format: date-time }
+                          is_new_user: { type: boolean }
+                          user: { $ref: '#/components/schemas/User' }
+                          customer: { $ref: '#/components/schemas/Wallet' }
+        "403":
+          description: "`ACCOUNT_FROZEN_FRAUD`."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+        "422":
+          description: "`INVALID_CREDENTIALS` or `VALIDATION_ERROR`."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+        "429": { $ref: '#/components/responses/TooManyRequests' }
+
   /auth/whatsapp/start:
     post:
       tags: [Auth]
@@ -400,6 +486,60 @@ paths:
         "200": { $ref: '#/components/responses/Profile' }
         "401": { $ref: '#/components/responses/Unauthenticated' }
         "422": { $ref: '#/components/responses/ValidationError' }
+
+  /user/complete-profile:
+    post:
+      tags: [Profile]
+      summary: First-time details after a WhatsApp sign-up
+      description: >-
+        Show this form when `user.has_password` is false. Sets the name and a password of the
+        customer's own, after which they can use `POST /auth/login`. Only a session opened with a
+        WhatsApp code may call it (`OTP_REQUIRED` otherwise).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [full_name, password, password_confirmation]
+              properties:
+                full_name: { type: string, maxLength: 255 }
+                email: { type: string, format: email, nullable: true, description: "Must be unique." }
+                date_of_birth: { type: string, format: date, nullable: true, description: "Must be in the past." }
+                password: { type: string, format: password, minLength: 8 }
+                password_confirmation: { type: string, format: password }
+      responses:
+        "200": { $ref: '#/components/responses/Profile' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "403":
+          description: "`OTP_REQUIRED` — sign in with a WhatsApp code first."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+        "422": { $ref: '#/components/responses/ValidationError' }
+
+  /user/password:
+    put:
+      tags: [Profile]
+      summary: Change or reset the password
+      description: >-
+        `current_password` is required unless the session was opened with a WhatsApp code, which is
+        how a forgotten password is replaced. Every other device is signed out.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password, password_confirmation]
+              properties:
+                current_password: { type: string, format: password, nullable: true }
+                password: { type: string, format: password, minLength: 8 }
+                password_confirmation: { type: string, format: password }
+      responses:
+        "200": { $ref: '#/components/responses/Done' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "422":
+          description: "`WRONG_PASSWORD` or `VALIDATION_ERROR`."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
 
   /qr/preview:
     post:
@@ -1699,6 +1839,7 @@ components:
         is_active: { type: boolean }
         preferred_language: { type: string, enum: [ar, en] }
         phone_verified_at: { type: string, format: date-time, nullable: true }
+        has_password: { type: boolean, description: "False until the customer has chosen a password; show the complete-profile form." }
     Rank:
       type: object
       properties:

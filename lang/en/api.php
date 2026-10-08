@@ -34,6 +34,11 @@ return [
         'signed_in' => 'Signed in successfully.',
         'signed_out' => 'Signed out.',
         'default_name' => 'MAQAM Customer',
+        'invalid_credentials' => 'The mobile number or password is incorrect.',
+        'profile_completed' => 'Your details have been saved.',
+        'password_updated' => 'Your password has been updated.',
+        'wrong_current_password' => 'The current password is incorrect.',
+        'verify_to_set_password' => 'Sign in with a WhatsApp code first to set a new password.',
     ],
 
     'qr' => [

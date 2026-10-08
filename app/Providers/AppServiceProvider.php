@@ -29,6 +29,11 @@ class AppServiceProvider extends ServiceProvider
             Limit::perMinute(5)->by('otp-ip:'.$request->ip()),
             Limit::perMinutes(15, 5)->by('otp-phone:'.preg_replace('/\D/', '', (string) $request->input('phone'))),
         ]);
+        // Password guesses are limited per IP and, more tightly, per phone number
+        RateLimiter::for('password-login', fn (Request $request) => [
+            Limit::perMinute(10)->by('pw-ip:'.$request->ip()),
+            Limit::perMinutes(15, 8)->by('pw-phone:'.preg_replace('/\D/', '', (string) $request->input('phone'))),
+        ]);
         RateLimiter::for('otp-poll', fn (Request $request) => Limit::perMinute(40)->by($request->ip()));
         RateLimiter::for('otp-verify', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
 

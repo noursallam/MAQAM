@@ -33,6 +33,8 @@ class ApiPresenter
             'is_active' => (bool) $user->is_active,
             'preferred_language' => $user->preferred_language,
             'phone_verified_at' => $user->phone_verified_at?->toIso8601String(),
+            // False until the customer has chosen a password of their own
+            'has_password' => $user->password_set_at !== null,
         ];
     }
 

@@ -19,6 +19,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Sign-in: the customer messages our WhatsApp first, then receives an OTP
+Route::post('auth/methods', [AuthController::class, 'methods'])->middleware('throttle:password-login');
+Route::post('auth/login', [AuthController::class, 'login'])->middleware('throttle:password-login');
+
 Route::prefix('auth/whatsapp')->group(function () {
     Route::post('start', [AuthController::class, 'start'])->middleware('throttle:otp-start');
     Route::post('check', [AuthController::class, 'check'])->middleware('throttle:otp-poll');
@@ -43,6 +46,8 @@ Route::get('ranks', [LoyaltyController::class, 'ranks']);
 Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::post('auth/logout', [AuthController::class, 'logout']);
     Route::post('auth/logout-all', [AuthController::class, 'logoutAll']);
+    Route::post('user/complete-profile', [AuthController::class, 'completeProfile'])->middleware('throttle:10,1');
+    Route::put('user/password', [AuthController::class, 'updatePassword'])->middleware('throttle:10,1');
 
     Route::get('user/profile', [AuthController::class, 'profile']);
     Route::put('user/profile', [AuthController::class, 'updateProfile']);

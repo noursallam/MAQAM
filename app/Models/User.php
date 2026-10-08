@@ -46,6 +46,7 @@ class User extends Authenticatable
             'is_active' => 'boolean',
             'face_id_enabled' => 'boolean',
             'phone_verified_at' => 'datetime',
+            'password_set_at' => 'datetime',
             'last_login_at' => 'datetime',
             'otp_expires_at' => 'datetime',
         ];

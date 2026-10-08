@@ -16,10 +16,17 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 use Throwable;
 
 class AuthController extends ApiController
 {
+    /** Every app session. */
+    private const ABILITY_APP = 'app';
+
+    /** Sessions opened with a WhatsApp code, which may set a password without knowing the old one. */
+    private const ABILITY_SET_PASSWORD = 'set-password';
+
     public function __construct(
         protected WhatsAppOtpService $whatsAppOtp
     ) {}
@@ -110,36 +117,124 @@ class AuthController extends ApiController
 
         $user = DB::transaction(fn () => $this->resolveUser($challenge));
 
-        if ($user->role === 'admin') {
-            throw new ApiException('FORBIDDEN', __('api.forbidden'), 403);
+        $this->ensureMaySignIn($user);
+
+        $user->forceFill(['phone_verified_at' => $user->phone_verified_at ?? now()])->save();
+
+        // Having just proved the number, this session may also choose a new password
+        return $this->issueSession($user, $validated, [self::ABILITY_APP, self::ABILITY_SET_PASSWORD]);
+    }
+
+    /**
+     * How a phone number signs in: with its password, or over WhatsApp when it has none
+     * (which is also how a new number registers).
+     */
+    public function methods(Request $request): JsonResponse
+    {
+        $request->merge(['phone' => $this->normalizePhone((string) $request->input('phone'))]);
+        $validated = $request->validate(['phone' => ['required', 'regex:/^01[0125]\d{8}$/']]);
+
+        return $this->ok([
+            'has_password' => User::where('phone_number', $validated['phone'])
+                ->where('role', '!=', 'admin')
+                ->whereNotNull('password_set_at')
+                ->exists(),
+        ]);
+    }
+
+    /**
+     * Sign in with phone number and password.
+     */
+    public function login(Request $request): JsonResponse
+    {
+        $request->merge(['phone' => $this->normalizePhone((string) $request->input('phone'))]);
+
+        $validated = $request->validate([
+            'phone' => ['required', 'regex:/^01[0125]\d{8}$/'],
+            'password' => ['required', 'string', 'max:255'],
+            'device_name' => ['required', 'string', 'max:100'],
+            'device_token' => ['nullable', 'string', 'max:512'],
+            'platform' => ['nullable', Rule::in(['android', 'ios'])],
+        ]);
+
+        $user = User::where('phone_number', $validated['phone'])->first();
+
+        // One answer for "no such account" and "wrong password", so numbers cannot be probed
+        if (! $user || $user->role === 'admin' || ! Hash::check($validated['password'], $user->password)) {
+            throw new ApiException('INVALID_CREDENTIALS', __('api.auth.invalid_credentials'), 422);
         }
 
-        if (! $user->is_active) {
-            throw new ApiException('ACCOUNT_FROZEN_FRAUD', __('api.account_frozen'), 403);
+        $this->ensureMaySignIn($user);
+
+        // Accounts registered on the website before this flag existed
+        if ($user->password_set_at === null) {
+            $user->forceFill(['password_set_at' => now()])->save();
+        }
+        $this->customerOf($user);
+
+        return $this->issueSession($user, $validated, [self::ABILITY_APP]);
+    }
+
+    /**
+     * First-time details after a WhatsApp sign-up: a name and a password of the customer's own.
+     */
+    public function completeProfile(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $this->ensureMaySetPassword($request);
+
+        $validated = $request->validate([
+            'full_name' => ['required', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'date_of_birth' => ['nullable', 'date', 'before:today'],
+            'password' => ['required', 'confirmed', Password::min(8)],
+        ]);
+
+        DB::transaction(function () use ($request, $user, $validated) {
+            $user->full_name = $validated['full_name'];
+            if (! empty($validated['email'])) {
+                $user->email = $validated['email'];
+            }
+            $user->forceFill([
+                'password' => Hash::make($validated['password']),
+                'password_set_at' => now(),
+            ])->save();
+
+            if (! empty($validated['date_of_birth'])) {
+                $this->customer($request)->update(['date_of_birth' => $validated['date_of_birth']]);
+            }
+        });
+
+        return $this->ok($this->profile($request)->getData(true)['data'], __('api.auth.profile_completed'));
+    }
+
+    /**
+     * Change the password. A session opened with a WhatsApp code may do so without the old one,
+     * which is how a forgotten password is replaced.
+     */
+    public function updatePassword(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $verifiedByOtp = $user->currentAccessToken()->can(self::ABILITY_SET_PASSWORD);
+
+        $validated = $request->validate([
+            'current_password' => [$verifiedByOtp ? 'nullable' : 'required', 'string', 'max:255'],
+            'password' => ['required', 'confirmed', Password::min(8)],
+        ]);
+
+        if (! $verifiedByOtp && ! Hash::check($validated['current_password'], $user->password)) {
+            throw new ApiException('WRONG_PASSWORD', __('api.auth.wrong_current_password'), 422);
         }
 
         $user->forceFill([
-            'phone_verified_at' => $user->phone_verified_at ?? now(),
-            'last_login_at' => now(),
+            'password' => Hash::make($validated['password']),
+            'password_set_at' => now(),
         ])->save();
 
-        if (! empty($validated['device_token'])) {
-            DeviceToken::register($user, $validated['device_token'], $validated['platform'] ?? null);
-        }
+        // Whoever knew the old password is signed out everywhere else
+        $user->tokens()->where('id', '!=', $user->currentAccessToken()->id)->delete();
 
-        // One live token per device
-        $user->tokens()->where('name', $validated['device_name'])->delete();
-        $token = $user->createToken($validated['device_name']);
-
-        return $this->ok([
-            'token' => $token->plainTextToken,
-            'token_type' => 'Bearer',
-            'expires_at' => $token->accessToken->expires_at?->toIso8601String()
-                ?? (config('sanctum.expiration') ? now()->addMinutes(config('sanctum.expiration'))->toIso8601String() : null),
-            'is_new_user' => $user->wasRecentlyCreated,
-            'user' => ApiPresenter::user($user),
-            'customer' => ApiPresenter::wallet($this->customerOf($user)),
-        ], __('api.auth.signed_in'));
+        return $this->ok(null, __('api.auth.password_updated'));
     }
 
     public function logout(Request $request): JsonResponse
@@ -210,6 +305,53 @@ class AuthController extends ApiController
         DeviceToken::register($request->user(), $validated['device_token'], $validated['platform'] ?? null);
 
         return $this->ok(null, __('api.saved'));
+    }
+
+    private function ensureMaySignIn(User $user): void
+    {
+        if ($user->role === 'admin') {
+            throw new ApiException('FORBIDDEN', __('api.forbidden'), 403);
+        }
+
+        if (! $user->is_active) {
+            throw new ApiException('ACCOUNT_FROZEN_FRAUD', __('api.account_frozen'), 403);
+        }
+    }
+
+    private function ensureMaySetPassword(Request $request): void
+    {
+        if (! $request->user()->currentAccessToken()->can(self::ABILITY_SET_PASSWORD)) {
+            throw new ApiException('OTP_REQUIRED', __('api.auth.verify_to_set_password'), 403);
+        }
+    }
+
+    /**
+     * Record the sign-in and hand the app its access token.
+     *
+     * @param  array{device_name: string, device_token?: ?string, platform?: ?string}  $device
+     * @param  list<string>  $abilities
+     */
+    private function issueSession(User $user, array $device, array $abilities): JsonResponse
+    {
+        $user->forceFill(['last_login_at' => now()])->save();
+
+        if (! empty($device['device_token'])) {
+            DeviceToken::register($user, $device['device_token'], $device['platform'] ?? null);
+        }
+
+        // One live token per device
+        $user->tokens()->where('name', $device['device_name'])->delete();
+        $token = $user->createToken($device['device_name'], $abilities);
+
+        return $this->ok([
+            'token' => $token->plainTextToken,
+            'token_type' => 'Bearer',
+            'expires_at' => $token->accessToken->expires_at?->toIso8601String()
+                ?? (config('sanctum.expiration') ? now()->addMinutes(config('sanctum.expiration'))->toIso8601String() : null),
+            'is_new_user' => $user->wasRecentlyCreated,
+            'user' => ApiPresenter::user($user),
+            'customer' => ApiPresenter::wallet($this->customerOf($user)),
+        ], __('api.auth.signed_in'));
     }
 
     private function resolveUser(array $challenge): User

@@ -185,6 +185,7 @@ class CustomerAuthController extends Controller
             'is_active' => true,
             'preferred_language' => app()->getLocale(),
         ]);
+        $user->forceFill(['password_set_at' => now()])->save();
 
         $silverRank = Rank::where('name_en', 'Silver')->first() ?? Rank::first();
         Customer::create([
