@@ -35,6 +35,7 @@ class WhatsAppLoginTest extends TestCase
                 'user_info' => ['id' => '201000000000:5@s.whatsapp.net', 'name' => 'MAQAM'],
             ]]),
             'senderbot.test/chats/send*' => Http::response(['success' => true, 'data' => []]),
+            'senderbot.test/chats?*' => Http::response(['success' => true, 'data' => []]),
             'senderbot.test/chats/*' => function () use (&$incoming) {
                 return Http::response(['success' => true, 'data' => array_map(fn ($text) => [
                     'key' => ['fromMe' => false],

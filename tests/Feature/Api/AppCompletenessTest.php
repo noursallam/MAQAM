@@ -188,6 +188,7 @@ class AppCompletenessTest extends TestCase
         Http::fake([
             'senderbot.test/sessions/status/*' => Http::response(['success' => true, 'data' => ['status' => 'authenticated', 'valid_session' => true, 'user_info' => ['id' => '201000000000@s.whatsapp.net']]]),
             'senderbot.test/chats/send*' => Http::response(['success' => true, 'data' => []]),
+            'senderbot.test/chats?*' => Http::response(['success' => true, 'data' => []]),
             'senderbot.test/chats/*' => function () use (&$incoming) {
                 return Http::response(['success' => true, 'data' => array_map(fn ($t) => ['key' => ['fromMe' => false], 'message' => ['conversation' => $t]], $incoming)]);
             },

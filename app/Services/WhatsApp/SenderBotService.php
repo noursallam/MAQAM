@@ -105,11 +105,36 @@ class SenderBotService
     /**
      * Whether the given phone has sent us a message containing $needle recently.
      *
+     * WhatsApp delivers many chats under an anonymous "@lid" address that carries
+     * no phone number, so a message is often not in the phone's own chat. When it
+     * is not there, chats of that kind active since $since are searched as well.
+     * That match cannot tell who sent the message; callers must only reply to
+     * $phone itself, never to the chat the message was found in.
+     *
+     * @param  int  $since  Unix time before which messages are ignored (0 = no limit)
+     *
      * @throws Exception
      */
-    public function hasIncomingText(string $phone, string $needle): bool
+    public function hasIncomingText(string $phone, string $needle, int $since = 0): bool
     {
-        $jid = $this->toWhatsAppNumber($phone).'@s.whatsapp.net';
+        if ($this->chatHasIncomingText($this->toWhatsAppNumber($phone).'@s.whatsapp.net', $needle, $since)) {
+            return true;
+        }
+
+        foreach ($this->recentLidChats($since) as $jid) {
+            if ($this->chatHasIncomingText($jid, $needle, $since)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function chatHasIncomingText(string $jid, string $needle, int $since): bool
+    {
         $response = $this->client()->get("{$this->baseUrl}/chats/{$jid}", [
             'id' => $this->sessionId,
             'limit' => 25,
@@ -128,6 +153,10 @@ class SenderBotService
                 continue;
             }
 
+            if (isset($message['messageTimestamp']) && (int) $message['messageTimestamp'] < $since) {
+                continue;
+            }
+
             $content = is_array($message['message'] ?? null) ? $message['message'] : [];
             $text = $content['conversation']
                 ?? $content['extendedTextMessage']['text']
@@ -141,6 +170,33 @@ class SenderBotService
         }
 
         return false;
+    }
+
+    /**
+     * The most recently active "@lid" chats, newest first.
+     *
+     * @return list<string>
+     *
+     * @throws Exception
+     */
+    private function recentLidChats(int $since): array
+    {
+        $response = $this->client()->get("{$this->baseUrl}/chats", ['id' => $this->sessionId]);
+
+        if ($response->status() === 404) {
+            return [];
+        }
+
+        return collect($this->data($response, 'chat list'))
+            ->filter(fn ($chat) => is_array($chat)
+                && str_ends_with((string) ($chat['id'] ?? ''), '@lid')
+                && (int) ($chat['conversationTimestamp'] ?? 0) >= $since)
+            ->sortByDesc('conversationTimestamp')
+            // Each one costs a request on every poll
+            ->take(5)
+            ->pluck('id')
+            ->values()
+            ->all();
     }
 
     /**

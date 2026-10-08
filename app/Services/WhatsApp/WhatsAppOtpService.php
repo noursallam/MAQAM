@@ -35,6 +35,7 @@ class WhatsAppOtpService
             'id' => Str::random(48),
             'phone' => $phone,
             'code' => 'MAQAM-'.random_int(100000, 999999),
+            'started_at' => now()->timestamp,
             'expires_at' => now()->addMinutes(self::CHALLENGE_MINUTES)->timestamp,
             'otp_hash' => null,
             'attempts' => 0,
@@ -76,12 +77,16 @@ class WhatsAppOtpService
                 return true;
             }
 
-            if (! $this->senderBot->hasIncomingText($challenge['phone'], $challenge['code'])) {
+            // A minute of slack for clock drift between us and WhatsApp
+            $since = ($challenge['started_at'] ?? $challenge['expires_at'] - self::CHALLENGE_MINUTES * 60) - 60;
+
+            if (! $this->senderBot->hasIncomingText($challenge['phone'], $challenge['code'], $since)) {
                 return false;
             }
 
             $otp = (string) random_int(100000, 999999);
 
+            // Always to the number being verified: receiving this is what proves ownership
             $this->senderBot->sendText(
                 $challenge['phone'],
                 __('store.auth.wa_otp_message', ['otp' => $otp, 'minutes' => self::OTP_MINUTES])
