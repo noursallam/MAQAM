@@ -76,6 +76,16 @@ return [
         'upgraded_body' => 'You have been promoted to :rank. Enjoy your new benefits.',
     ],
 
+    'payment_return' => [
+        'paid_title' => 'Payment successful',
+        'paid_body' => 'We got your order and are preparing it.',
+        'pending_title' => 'Confirming your payment',
+        'pending_body' => 'We will update your order as soon as the bank confirms it.',
+        'failed_title' => 'The payment did not go through',
+        'failed_body' => 'Nothing was charged. You can try again from the app.',
+        'back_to_app' => 'Close this page and continue in the app.',
+    ],
+
     'order' => [
         'status_title' => 'Order :number update',
         'placed' => 'We got your order and are preparing it.',

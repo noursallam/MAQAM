@@ -74,6 +74,9 @@ Route::get('/order/confirmation/{orderNumber}', [CheckoutController::class, 'con
 
 // Kashier Payment Gateway Callback & Webhook Routes
 Route::get('/payment/kashier/callback', [KashierPaymentController::class, 'callback'])->name('payment.kashier.callback');
+// Same return for payments made inside the mobile app; it starts with the web one on purpose,
+// because the app recognises the return by that prefix
+Route::get('/payment/kashier/callback/app', [KashierPaymentController::class, 'appCallback'])->name('payment.kashier.callback.app');
 Route::post('/payment/kashier/webhook', [KashierPaymentController::class, 'webhook'])->name('payment.kashier.webhook');
 Route::post('/api/webhooks/kashier', [KashierPaymentController::class, 'webhook'])->name('api.webhooks.kashier');
 
@@ -208,8 +211,8 @@ Route::get('/storage/{path}', function (string $path) {
         abort(404);
     }
 
-    $fullPath = storage_path('app/public/' . $path);
-    if (!file_exists($fullPath) || !is_file($fullPath)) {
+    $fullPath = storage_path('app/public/'.$path);
+    if (! file_exists($fullPath) || ! is_file($fullPath)) {
         abort(404);
     }
 
@@ -217,4 +220,3 @@ Route::get('/storage/{path}', function (string $path) {
         'Cache-Control' => 'public, max-age=31536000',
     ]);
 })->where('path', '.*');
-

@@ -4,17 +4,16 @@ namespace App\Http\Controllers\Store;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Services\Store\OrderNotifier;
 use App\Models\Payment;
-use App\Models\PointsTransaction;
 use App\Services\Payment\KashierService;
-use App\Services\RankService;
 use App\Services\Store\CartService;
+use App\Services\Store\OrderNotifier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
 
 class KashierPaymentController extends Controller
 {
@@ -31,6 +30,45 @@ class KashierPaymentController extends Controller
      */
     public function callback(Request $request): RedirectResponse
     {
+        [$order, $outcome] = $this->settleFromRedirect($request);
+
+        if (! $order) {
+            return redirect()->route('store.home')->withErrors(['payment' => __('store.checkout.payment_declined')]);
+        }
+
+        $confirmation = redirect()->route('store.order.confirmation', ['orderNumber' => $order->order_number]);
+
+        return match ($outcome) {
+            'paid' => $confirmation->with('success', __('store.checkout.payment_success')),
+            // The signed server-to-server webhook is what settles the order
+            'pending' => $confirmation->with('info', __('store.checkout.payment_pending_confirmation')),
+            default => redirect()->route('store.checkout')
+                ->withErrors(['payment' => __('store.checkout.payment_declined')]),
+        };
+    }
+
+    /**
+     * The same return, for a payment made inside the mobile app. The app closes the page as soon
+     * as it loads; the page says so in case it does not, rather than dropping the customer into
+     * the website.
+     */
+    public function appCallback(Request $request): View
+    {
+        [$order, $outcome] = $this->settleFromRedirect($request);
+
+        return view('store.payment_return', [
+            'outcome' => $order ? $outcome : 'failed',
+            'orderNumber' => $order?->order_number,
+        ]);
+    }
+
+    /**
+     * Apply what the gateway's redirect says, when it can be trusted.
+     *
+     * @return array{0: ?Order, 1: 'paid'|'pending'|'failed'}
+     */
+    protected function settleFromRedirect(Request $request): array
+    {
         $params = $request->query();
         $orderNumber = $params['merchantOrderId'] ?? null;
 
@@ -39,33 +77,29 @@ class KashierPaymentController extends Controller
         $order = $orderNumber ? Order::where('order_number', $orderNumber)->first() : null;
 
         if (! $order) {
-            return redirect()->route('store.home')->withErrors(['payment' => __('store.checkout.payment_declined')]);
+            return [null, 'failed'];
         }
 
-        $confirmation = redirect()->route('store.order.confirmation', ['orderNumber' => $order->order_number]);
-
         if ($order->payment_status === 'paid') {
-            return $confirmation->with('success', __('store.checkout.payment_success'));
+            return [$order, 'paid'];
         }
 
         if (! $this->kashierService->validateRedirectSignature($params)) {
             Log::warning('Kashier: Invalid redirect signature, order left untouched', ['order' => $orderNumber]);
 
-            // The signed server-to-server webhook is what settles the order
-            return $confirmation->with('info', __('store.checkout.payment_pending_confirmation'));
+            return [$order, 'pending'];
         }
 
         if (strtoupper((string) ($params['paymentStatus'] ?? '')) === 'SUCCESS' && $this->amountMatches($order, $params['amount'] ?? null)) {
             $this->markPaid($order, $params['transactionId'] ?? null, $params);
             $this->cartService->clear();
 
-            return $confirmation->with('success', __('store.checkout.payment_success'));
+            return [$order, 'paid'];
         }
 
         $this->markFailed($order, $params);
 
-        return redirect()->route('store.checkout')
-            ->withErrors(['payment' => __('store.checkout.payment_declined')]);
+        return [$order, 'failed'];
     }
 
     /**
@@ -150,8 +184,6 @@ class KashierPaymentController extends Controller
             $payment
                 ? $payment->update($attributes)
                 : Payment::create($attributes + ['order_id' => $order->id, 'gateway' => 'kashier', 'amount' => $order->total_amount]);
-
-            $this->awardLoyaltyPoints($order);
         });
 
         // Once only, however many times the gateway reports the same payment
@@ -162,20 +194,28 @@ class KashierPaymentController extends Controller
 
     protected function markFailed(Order $order, array $gatewayResponse): void
     {
-        if ($order->payment_status === 'paid') {
-            return;
-        }
+        $failedNow = false;
 
-        $failedNow = $order->payment_status !== 'failed';
+        // Locked like markPaid, so the redirect and the webhook reporting the same failure
+        // together record it, and announce it, once
+        DB::transaction(function () use ($order, $gatewayResponse, &$failedNow) {
+            $order = Order::whereKey($order->id)->lockForUpdate()->first();
 
-        $order->update(['payment_status' => 'failed']);
-        $order->payments()->latest('id')->first()?->update([
-            'status' => 'failed',
-            'gateway_response' => $gatewayResponse,
-        ]);
+            if ($order->payment_status === 'paid' || $order->status === 'cancelled') {
+                return;
+            }
+
+            $failedNow = $order->payment_status !== 'failed';
+
+            $order->update(['payment_status' => 'failed']);
+            $order->payments()->latest('id')->first()?->update([
+                'status' => 'failed',
+                'gateway_response' => $gatewayResponse,
+            ]);
+        });
 
         if ($failedNow) {
-            app(OrderNotifier::class)->paymentFailed($order);
+            app(OrderNotifier::class)->paymentFailed($order->fresh());
         }
     }
 
@@ -185,32 +225,5 @@ class KashierPaymentController extends Controller
     protected function amountMatches(Order $order, mixed $amount): bool
     {
         return is_numeric($amount) && abs((float) $amount - (float) $order->total_amount) < 0.01;
-    }
-
-    /**
-     * Award loyalty points for paid orders.
-     */
-    protected function awardLoyaltyPoints(Order $order): void
-    {
-        $customer = $order->user?->customer;
-        if (! $customer) {
-            return;
-        }
-
-        // Award 1 point per 10 EGP spent
-        $points = (int) floor((float) $order->total_amount / 10);
-        if ($points > 0) {
-            $customer->increment('points_balance', $points);
-            $customer->increment('total_points_earned', $points);
-            app(RankService::class)->promoteIfEarned($customer);
-
-            PointsTransaction::create([
-                'customer_id' => $customer->id,
-                'type' => 'earn',
-                'amount' => $points,
-                'balance_after' => $customer->points_balance,
-                'description' => "Reward points for Order #{$order->order_number}",
-            ]);
-        }
     }
 }

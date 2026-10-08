@@ -10,12 +10,19 @@ use Illuminate\Support\Facades\Log;
 class KashierService
 {
     private string $mid;
+
     private string $paymentApiKey;
+
     private string $secretKey;
+
     private string $currency;
+
     private string $apiUrl;
+
     private string $checkoutUrl;
+
     private string $mode;
+
     private bool $sslVerify;
 
     public function __construct()
@@ -33,16 +40,21 @@ class KashierService
     /**
      * Create a Kashier Payment Session for hosted checkout.
      *
+     * @param  bool  $forApp  the payment is made inside the mobile app's web view
      * @return array{sessionId: string, sessionUrl: string, raw: array}
+     *
      * @throws Exception
      */
-    public function createPaymentSession(Order $order, string $locale = 'ar'): array
+    public function createPaymentSession(Order $order, string $locale = 'ar', bool $forApp = false): array
     {
         $amount = number_format((float) $order->total_amount, 2, '.', '');
         $customerRef = 'CUST-'.($order->user_id ?: 'GUEST-'.$order->id);
         $customerEmail = $order->user?->email ?: ($order->shippingAddress?->phone ? $order->shippingAddress->phone.'@customer.maqam-eg.com' : 'customer@maqam-eg.com');
 
-        $redirectUrl = (string) config('kashier.merchant_redirect') ?: route('payment.kashier.callback');
+        // The app gets a return page of its own instead of the website's order page
+        $redirectUrl = $forApp
+            ? route('payment.kashier.callback.app')
+            : ((string) config('kashier.merchant_redirect') ?: route('payment.kashier.callback'));
         $webhookUrl = (string) config('kashier.server_webhook') ?: route('payment.kashier.webhook');
 
         // Kashier schema validator rejects port numbers (e.g. :8000)

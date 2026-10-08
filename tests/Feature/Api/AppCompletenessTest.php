@@ -23,6 +23,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Testing\TestResponse;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -116,7 +117,7 @@ class AppCompletenessTest extends TestCase
         $this->assertSame('pending', $order->fresh()->payment_status);
     }
 
-    public function test_signed_callback_pays_once_and_never_awards_points_twice(): void
+    public function test_signed_callback_pays_once_and_buying_earns_no_points(): void
     {
         $user = $this->customerUser();
         $order = $this->kashierOrder($user, 150);
@@ -124,11 +125,12 @@ class AppCompletenessTest extends TestCase
 
         $this->get(route('payment.kashier.callback', $query))->assertRedirect();
         $this->assertSame('paid', $order->fresh()->payment_status);
-        $this->assertSame(15, (int) $user->customer->fresh()->points_balance);
+        $this->assertSame(0, (int) $user->customer->fresh()->points_balance);
 
-        // Reloading the success URL must not pay out again
+        // Points come from scanning the code inside the pack, never from paying.
+        // Reloading the success URL changes nothing either
         $this->get(route('payment.kashier.callback', $query))->assertRedirect();
-        $this->assertSame(15, (int) $user->customer->fresh()->points_balance);
+        $this->assertSame(0, (int) $user->customer->fresh()->points_balance);
     }
 
     public function test_signed_callback_with_wrong_amount_is_not_accepted(): void
@@ -138,6 +140,73 @@ class AppCompletenessTest extends TestCase
         $this->get(route('payment.kashier.callback', $this->signedCallbackQuery($order, 'SUCCESS', '1.00')));
 
         $this->assertNotSame('paid', $order->fresh()->payment_status);
+    }
+
+    protected function signedWebhook(Order $order, string $status = 'SUCCESS'): TestResponse
+    {
+        $data = [
+            'merchantOrderId' => $order->order_number, 'kashierOrderId' => 'K-1', 'transactionId' => 'TX-99',
+            'status' => $status, 'amount' => (float) $order->total_amount, 'currency' => 'EGP',
+            'signatureKeys' => ['amount', 'currency', 'kashierOrderId', 'merchantOrderId', 'status', 'transactionId'],
+        ];
+        $pairs = [];
+        foreach ($data['signatureKeys'] as $key) {
+            $pairs[$key] = $data[$key];
+        }
+        $signature = hash_hmac('sha256', http_build_query($pairs, '', '&', PHP_QUERY_RFC3986), 'test-payment-key');
+
+        return $this->postJson(route('payment.kashier.webhook'), ['event' => 'pay', 'data' => $data], ['x-kashier-signature' => $signature]);
+    }
+
+    public function test_app_payment_return_shows_a_page_and_settles_the_order_once(): void
+    {
+        $user = $this->customerUser();
+        $order = $this->kashierOrder($user, 150);
+        $query = $this->signedCallbackQuery($order);
+
+        // The app is told to watch for a prefix that the app's own return page starts with
+        $this->assertStringStartsWith(route('payment.kashier.callback'), route('payment.kashier.callback.app'));
+
+        // The gateway reports the same payment three ways: the redirect, the webhook, and a reload
+        $this->get(route('payment.kashier.callback.app', $query))
+            ->assertOk()
+            ->assertSee(__('api.payment_return.paid_title'))
+            ->assertSee(__('api.payment_return.back_to_app'))
+            ->assertSee($order->order_number);
+        $this->signedWebhook($order)->assertOk();
+        $this->get(route('payment.kashier.callback.app', $query))->assertOk()->assertSee(__('api.payment_return.paid_title'));
+
+        $this->assertSame('paid', $order->fresh()->payment_status);
+        $this->assertSame(1, Order::count());
+        $this->assertSame(1, Payment::where('order_id', $order->id)->count());
+        $this->assertSame('success', Payment::where('order_id', $order->id)->value('status'));
+        $this->assertSame(0, (int) $user->customer->fresh()->points_balance);
+        $this->assertSame(1, AppNotification::where('user_id', $user->id)->where('type', 'order_update')->count());
+    }
+
+    public function test_app_payment_return_reports_a_failure_once_and_never_trusts_an_unsigned_one(): void
+    {
+        $user = $this->customerUser();
+        $order = $this->kashierOrder($user, 150);
+
+        // Unsigned: the page can only say it is waiting, and the order is untouched
+        $this->get(route('payment.kashier.callback.app', ['merchantOrderId' => $order->order_number, 'paymentStatus' => 'SUCCESS', 'amount' => '150.00']))
+            ->assertOk()->assertSee(__('api.payment_return.pending_title'));
+        $this->assertSame('pending', $order->fresh()->payment_status);
+
+        $failed = $this->signedCallbackQuery($order, 'FAILED');
+        $this->get(route('payment.kashier.callback.app', $failed))->assertOk()
+            ->assertSee(__('api.payment_return.failed_title'))
+            ->assertSee(__('api.payment_return.back_to_app'));
+        $this->get(route('payment.kashier.callback.app', $failed))->assertOk();
+
+        $this->assertSame('failed', $order->fresh()->payment_status);
+        $this->assertSame(1, Payment::where('order_id', $order->id)->count());
+        $this->assertSame(1, AppNotification::where('user_id', $user->id)->where('type', 'order_update')->count());
+
+        // An order the app does not know is not an error page either
+        $this->get(route('payment.kashier.callback.app', ['merchantOrderId' => 'MQ-NOPE']))
+            ->assertOk()->assertSee(__('api.payment_return.failed_title'));
     }
 
     public function test_webhook_without_signature_is_rejected(): void

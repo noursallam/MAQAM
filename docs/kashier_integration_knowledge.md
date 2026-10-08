@@ -396,6 +396,12 @@ Kashier drives sandbox outcomes deterministically using card numbers, CVVs, and 
 | **Visa** | `4012000033330026` | Standard Visa |
 | **Mobile Wallet** | `01001001001` | Vodafone Cash sandbox number |
 
+> [!IMPORTANT]
+> Checked on the hosted payment page on 2026-10-08: its form rejects an expiry that is already in the
+> past, so `06/25` (still listed as APPROVED in Kashier's docs) cannot be typed there any more. The
+> page's own **"استخدم بيانات تجريبية" / "Use test data"** button fills `4508 7500 1574 1019`,
+> `06/27`, CVV `100`, `John Doe`. Use that button, or those values, for an approved test payment.
+
 ### Expiry Date Outcome Triggers (Test Mode Only)
 In test mode, the expiry date is an outcome selector, not an expiration date:
 

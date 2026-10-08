@@ -49,7 +49,7 @@ class OrderController extends ApiController
 
         if ($validated['payment_method'] === 'kashier') {
             try {
-                $session = $this->kashier->createPaymentSession($order, app()->getLocale());
+                $session = $this->kashier->createPaymentSession($order, app()->getLocale(), forApp: true);
             } catch (Throwable $e) {
                 report($e);
                 // The customer sees the error on screen; the order was never announced to them
