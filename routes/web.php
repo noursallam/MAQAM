@@ -32,6 +32,7 @@ use App\Http\Controllers\Store\CustomerAuthController;
 use App\Http\Controllers\Store\CustomerProfileController;
 use App\Http\Controllers\Store\KashierPaymentController;
 use App\Http\Controllers\Store\LocaleController as StoreLocaleController;
+use App\Http\Controllers\Store\SpinController;
 use App\Http\Controllers\Store\StorefrontController;
 use App\Http\Controllers\Store\VisitorPermissionController;
 use App\Http\Controllers\Store\WebPushController;
@@ -99,6 +100,9 @@ Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('store.l
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [CustomerProfileController::class, 'index'])->name('store.profile');
     Route::put('/profile', [CustomerProfileController::class, 'update'])->name('store.profile.update');
+    // TEMPORARY / EXPERIMENTAL (تجريبي مؤقت): website lucky wheel, see Store\SpinController
+    Route::get('/spin', [SpinController::class, 'show'])->name('store.spin');
+    Route::post('/spin', [SpinController::class, 'spin'])->middleware('throttle:20,1')->name('store.spin.play');
     Route::post('/account/permissions', [VisitorPermissionController::class, 'store'])->middleware('throttle:20,1')->name('store.permissions.store');
 });
 
