@@ -282,6 +282,9 @@ return [
         'limit_reached' => 'You have reached today\'s message limit. Try tomorrow or contact support.',
     ],
 
+    'spin' => [
+        'customers_only' => 'The lucky wheel is for customer accounts. You are signed in as staff; sign in with a customer account to try it.',
+    ],
     'permissions' => [
         'title' => 'Make MAQAM work better for you',
         'intro' => 'Allow these two so we can serve you better. You can change your mind any time in your browser settings.',

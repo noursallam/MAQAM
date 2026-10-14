@@ -30,7 +30,9 @@
 
         @if(! $enabled)
             <p class="mq-page-lead">{{ __('admin.wheel.disabled') }}</p>
-        @elseif(! $hasCustomer)
+        @elseif($isStaff)
+            <p class="mq-page-lead">{{ __('store.spin.customers_only') }}</p>
+        @elseif(! $hasCustomer || ! $hasRank)
             <p class="mq-page-lead">{{ __('admin.wheel.no_rank') }}</p>
         @else
             <div class="mq-spin-stats">

@@ -3,7 +3,11 @@
 namespace App\Http\Controllers\Store;
 
 use App\Http\Controllers\Controller;
+use App\Models\Customer;
+use App\Models\Rank;
+use App\Models\User;
 use App\Models\WheelPrize;
+use App\Services\RankService;
 use App\Services\WheelSpinService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,17 +21,23 @@ use RuntimeException;
  */
 class SpinController extends Controller
 {
-    public function __construct(protected WheelSpinService $wheel) {}
+    public function __construct(
+        protected WheelSpinService $wheel,
+        protected RankService $ranks,
+    ) {}
 
     public function show(Request $request): View
     {
-        $customer = $request->user()->customer?->loadMissing('rank');
+        $customer = $this->customer($request->user());
         $cost = (int) ($customer?->rank?->wheel_cost_points ?? 0);
 
         return view('store.spin', [
             'slices' => $this->slices(),
             'enabled' => $this->wheel->isEnabled(),
             'hasCustomer' => $customer !== null,
+            'isStaff' => $request->user()->role === 'admin',
+            // Still false only when no active rank exists at all
+            'hasRank' => $customer?->rank !== null,
             'cost' => $cost,
             'balance' => (int) ($customer?->points_balance ?? 0),
         ]);
@@ -35,10 +45,10 @@ class SpinController extends Controller
 
     public function spin(Request $request): JsonResponse
     {
-        $customer = $request->user()->customer;
+        $customer = $this->customer($request->user());
 
         if (! $customer) {
-            return response()->json(['message' => __('admin.wheel.no_rank')], 422);
+            return response()->json(['message' => __('store.spin.customers_only')], 422);
         }
 
         // Read the slices first so slice_index matches what the page is showing
@@ -60,6 +70,31 @@ class SpinController extends Controller
             'balance' => (int) $customer->fresh()->points_balance,
             'slice_index' => $index === false ? count($slices) - 1 : $index,
         ]);
+    }
+
+    /**
+     * The signed-in customer's loyalty profile, created with the starting rank when it's missing
+     * (accounts made by the admin or older sign-ups). Staff accounts don't get one.
+     */
+    private function customer(User $user): ?Customer
+    {
+        if ($user->role === 'admin') {
+            return null;
+        }
+
+        $customer = $user->customer()->firstOrCreate([], [
+            'rank_id' => Rank::where('is_active', true)->orderBy('min_points')->value('id'),
+            'points_balance' => 0,
+            'total_points_earned' => 0,
+            'total_points_spent' => 0,
+        ]);
+
+        if (! $customer->rank_id) {
+            // Picks the rank their lifetime points already qualify for
+            $this->ranks->promoteIfEarned($customer);
+        }
+
+        return $customer->loadMissing('rank');
     }
 
     /**
