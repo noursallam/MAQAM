@@ -20,7 +20,7 @@
             @csrf
             <input type="hidden" name="enabled" value="{{ $wheelEnabled ? 0 : 1 }}">
             <button class="ui-btn {{ $wheelEnabled ? 'border border-red-200 bg-red-50 text-red-700' : 'border border-emerald-200 bg-emerald-50 text-emerald-700' }}">
-                {{ $wheelEnabled ? __('admin.wheel.disabled') : __('admin.wheel.enabled') }}
+                {{ $wheelEnabled ? __('admin.wheel.turn_off') : __('admin.wheel.turn_on') }}
             </button>
         </form>
     </div>

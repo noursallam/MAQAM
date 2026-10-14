@@ -423,6 +423,8 @@ return [
         'subtitle' => 'Rank win settings and wheel prizes',
         'enabled' => 'Wheel enabled',
         'disabled' => 'Wheel disabled',
+        'turn_on' => 'Turn wheel on',
+        'turn_off' => 'Turn wheel off',
         'recent_spins' => 'Spin history',
         'win_rate' => 'Win rate',
         'is_win' => 'Congratulations',
