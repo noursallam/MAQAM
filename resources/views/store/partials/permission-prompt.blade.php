@@ -6,6 +6,8 @@
         'endpoint' => route('store.permissions.store'),
         // Right after sign-in, or a customer we have never asked
         'ask' => session('ask_permissions') === true || $permReportedAt === null,
+        // Every sign-in asks again until location is allowed, even after "Not now"
+        'justSignedIn' => session('ask_permissions') === true,
         // Silently refresh the saved position of customers who already allowed it
         'refresh' => $permReportedAt === null || $permReportedAt->lt(now()->subHours(12)),
         'push' => \App\Http\Controllers\Store\WebPushController::config(),
@@ -46,7 +48,8 @@
                 </div>
                 <div>
                     <strong>{{ __('store.permissions.location_title') }}</strong>
-                    <span>{{ __('store.permissions.location_text') }}</span>
+                    <span data-mq-perm-location-text>{{ __('store.permissions.location_text') }}</span>
+                    <span data-mq-perm-location-blocked hidden>{{ __('store.permissions.location_blocked') }}</span>
                 </div>
             </li>
             <li class="mq-perm-item" data-mq-perm-row="notification">
@@ -151,7 +154,11 @@
     }
 
     function open(location, notification) {
-        modal.querySelector('[data-mq-perm-row="location"]').hidden = location !== 'prompt';
+        var askLocation = location === 'prompt' || location === 'denied';
+        modal.querySelector('[data-mq-perm-row="location"]').hidden = !askLocation;
+        // Blocked in the browser: we can't show its dialog, so explain how to unblock
+        modal.querySelector('[data-mq-perm-location-text]').hidden = location === 'denied';
+        modal.querySelector('[data-mq-perm-location-blocked]').hidden = location !== 'denied';
         modal.querySelector('[data-mq-perm-row="notification"]').hidden = notification !== 'prompt';
         modal.hidden = false;
         modal.querySelector('[data-mq-perm-allow]').focus();
@@ -188,7 +195,8 @@
             : Promise.resolve(current.notification);
         var locationAsk = current.location === 'unsupported'
             ? Promise.resolve({ state: 'unsupported', coords: null })
-            : (current.location === 'denied' ? Promise.resolve({ state: 'denied', coords: null }) : position());
+            // Tried even when blocked: some browsers (Safari, Firefox) ask again in a new session
+            : position();
 
         Promise.all([locationAsk, notificationAsk]).then(function (r) {
             return (r[1] === 'granted' ? pushToken() : Promise.resolve(null)).then(function (token) {
@@ -202,7 +210,9 @@
         var undecided = current.location === 'prompt' || current.notification === 'prompt';
         var snoozed = Number(read(SNOOZE_KEY) || 0) > Date.now();
 
-        if (undecided && cfg.ask && !snoozed) {
+        var locationMissing = current.location === 'prompt' || current.location === 'denied';
+
+        if ((cfg.justSignedIn && locationMissing) || (undecided && cfg.ask && !snoozed)) {
             // Let the page settle first so the prompt doesn't feel like a wall
             setTimeout(function () { open(current.location, current.notification); }, 900);
         } else if (cfg.ask || cfg.refresh) {

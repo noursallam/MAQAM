@@ -62,7 +62,11 @@ class VisitorLocationTest extends TestCase
         $this->post(route('store.login.submit'), ['phone' => $user->phone_number, 'password' => 'secret123'])
             ->assertSessionHas('ask_permissions', true);
 
-        $this->get(route('store.faq'))->assertOk()->assertSee('mqPerm', false);
+        // Right after sign-in the page asks again even if the customer said "Not now" before
+        $this->get(route('store.faq'))->assertOk()->assertSee('mqPerm', false)->assertSee('"justSignedIn":true', false);
+
+        // Later pages in the same session don't force it
+        $this->get(route('store.faq'))->assertOk()->assertSee('"justSignedIn":false', false);
     }
 
     public function test_guests_do_not_get_the_prompt(): void
