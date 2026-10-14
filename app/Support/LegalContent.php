@@ -22,6 +22,8 @@ class LegalContent
                         <li>بيانات الحساب: الاسم ورقم الجوال والمدينة.</li>
                         <li>بيانات الطلبات والدفع (معالجة مشفرة وآمنة عبر بوابة Kashier).</li>
                         <li>سجل النقاط والمسح والموقع التقريبي عند الحاجة لمكافحة الاحتيال.</li>
+                        <li>موقعك من المتصفح (الدولة والمحافظة والمدينة) فقط إذا سمحت بذلك بعد تسجيل الدخول، لتقدير الشحن وتحسين خدمتنا في منطقتك.</li>
+                        <li>إذن الإشعارات ومعرّف الإشعارات لمتصفحك إذا فعّلتها، لإرسال تحديثات الطلبات والعروض.</li>
                     </ul>
                     <h3>لماذا نستخدم البيانات؟</h3>
                     <ul>
@@ -32,6 +34,7 @@ class LegalContent
                 HTML,
                 'en' => <<<'HTML'
                     <p>MAQAM respects your privacy. When using our store or app we collect data necessary to fulfill your orders and operate the loyalty rewards program.</p>
+                    <p>If you allow it after signing in, we also save your browser location (country, governorate and city) to estimate shipping and improve service in your area, and your browser's notification token to send order and offer updates. You can withdraw either permission at any time from your browser settings.</p>
                 HTML,
             ],
             'terms' => [

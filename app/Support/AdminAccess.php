@@ -66,6 +66,7 @@ class AdminAccess
             'admin.orders.' => 'orders',
             'admin.merchants.' => 'merchants',
             'admin.customers.' => 'customers',
+            'admin.audience.' => 'customers',
             'admin.qr-codes.' => 'qr',
             'admin.scans.' => 'qr',
             'admin.prize-categories.' => 'qr',

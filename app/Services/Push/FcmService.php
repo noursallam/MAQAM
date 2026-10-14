@@ -47,7 +47,7 @@ class FcmService
                     'data' => (object) array_map('strval', $data),
                     'android' => ['priority' => 'high'],
                     'apns' => ['payload' => ['aps' => ['sound' => 'default']]],
-                ],
+                ] + $this->webpush(),
             ]);
 
         if ($response->successful()) {
@@ -64,6 +64,18 @@ class FcmService
         Log::warning('FCM: send failed', ['http_status' => $response->status(), 'error' => $error]);
 
         return self::FAILED;
+    }
+
+    /**
+     * Browser pushes open the store when clicked. FCM only accepts an https link.
+     */
+    private function webpush(): array
+    {
+        $link = url('/');
+
+        return str_starts_with($link, 'https://')
+            ? ['webpush' => ['fcm_options' => ['link' => $link]]]
+            : [];
     }
 
     private function credentials(): ?array

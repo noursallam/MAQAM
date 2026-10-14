@@ -3,6 +3,8 @@
 use App\Models\Admin;
 use App\Models\Customer;
 use App\Models\User;
+use App\Models\UserLocation;
+use App\Services\Geo\ReverseGeocoder;
 use App\Services\RankService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -60,3 +62,33 @@ Artisan::command('admin:create-developer {email} {name=App Developer}', function
 
 // Sends queued push notifications on hosts without a permanent queue worker
 Schedule::command('queue:work --queue=push --stop-when-empty --max-time=50')->everyMinute()->withoutOverlapping();
+
+// Names the places of shared locations that could not be looked up right away (map service busy or down)
+Artisan::command('locations:geocode {--limit=50}', function (ReverseGeocoder $geocoder) {
+    $pending = UserLocation::whereNull('geocoded_at')
+        ->where('geocode_attempts', '<', ReverseGeocoder::MAX_ATTEMPTS)
+        ->oldest()
+        ->limit((int) $this->option('limit'))
+        ->get();
+
+    $done = 0;
+
+    foreach ($pending as $location) {
+        $attempts = $location->geocode_attempts;
+        $ok = $geocoder->geocode($location);
+
+        // Turned away by the one-request-per-second limit rather than failed: wait and go again
+        if (! $ok && $location->geocode_attempts === $attempts) {
+            usleep(1_100_000);
+            $ok = $geocoder->geocode($location);
+        }
+
+        $done += $ok ? 1 : 0;
+    }
+
+    $this->info("Geocoded {$done} of {$pending->count()} locations.");
+
+    return 0;
+})->purpose('Fill in country and governorate for saved visitor locations');
+
+Schedule::command('locations:geocode')->everyTenMinutes()->withoutOverlapping();

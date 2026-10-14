@@ -144,7 +144,9 @@ class CustomerAuthController extends Controller
         // Migrate guest cart
         $this->cartService->transferGuestCartToUser($user->id);
 
-        return redirect()->intended(route('store.profile'))->with('success', __('store.auth.welcome_back', ['name' => $user->full_name]));
+        return redirect()->intended(route('store.profile'))
+            ->with('success', __('store.auth.welcome_back', ['name' => $user->full_name]))
+            ->with('ask_permissions', true);
     }
 
     public function showRegister(): View|RedirectResponse
@@ -202,7 +204,8 @@ class CustomerAuthController extends Controller
         $this->cartService->transferGuestCartToUser($user->id);
 
         return redirect()->intended(route('store.profile'))
-            ->with('success', __('store.auth.registration_successful'));
+            ->with('success', __('store.auth.registration_successful'))
+            ->with('ask_permissions', true);
     }
 
     public function logout(Request $request): RedirectResponse

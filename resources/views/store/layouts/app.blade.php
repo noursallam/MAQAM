@@ -226,6 +226,9 @@
     </div>
 
     @include('store.partials.chat-widget')
+    @auth
+        @include('store.partials.permission-prompt')
+    @endauth
 
     <script src="{{ asset('store/js/app.js') }}"></script>
     @stack('scripts')

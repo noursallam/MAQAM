@@ -45,6 +45,22 @@ return [
     'firebase' => [
         // Service-account key (Firebase console > Project settings > Service accounts). Never place it under public/
         'credentials' => env('FIREBASE_CREDENTIALS', storage_path('app/private/firebase/service-account.json')),
+        // Web app config (Firebase console > Project settings > Your apps > Web). Public values, used by the browser
+        'web' => [
+            'api_key' => env('FIREBASE_WEB_API_KEY'),
+            'project_id' => env('FIREBASE_WEB_PROJECT_ID'),
+            'messaging_sender_id' => env('FIREBASE_WEB_MESSAGING_SENDER_ID'),
+            'app_id' => env('FIREBASE_WEB_APP_ID'),
+            // Cloud Messaging > Web Push certificates > Key pair
+            'vapid_key' => env('FIREBASE_WEB_VAPID_KEY'),
+        ],
+    ],
+
+    'geocoding' => [
+        // OpenStreetMap Nominatim, or a self-hosted copy with the same API
+        'url' => env('GEOCODING_URL', 'https://nominatim.openstreetmap.org'),
+        'user_agent' => env('GEOCODING_USER_AGENT', 'MAQAM/1.0 (+'.env('APP_URL', 'http://localhost').')'),
+        'email' => env('GEOCODING_EMAIL'),
     ],
 
     'senderbot' => [

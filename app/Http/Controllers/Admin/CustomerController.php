@@ -35,7 +35,7 @@ class CustomerController extends Controller
 
     public function show(Customer $customer): View
     {
-        $customer->load(['user', 'rank']);
+        $customer->load(['user.latestLocation', 'rank']);
         $ranks = Rank::where('is_active', true)->orderBy('min_points')->get();
         // Ranks follow lifetime earned points, not the spendable balance
         $nextRank = $ranks->first(fn ($r) => $r->min_points > ($customer->rank?->min_points ?? -1));

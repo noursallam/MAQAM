@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -49,6 +50,7 @@ class User extends Authenticatable
             'password_set_at' => 'datetime',
             'last_login_at' => 'datetime',
             'otp_expires_at' => 'datetime',
+            'permissions_reported_at' => 'datetime',
         ];
     }
 
@@ -75,6 +77,16 @@ class User extends Authenticatable
     public function deviceTokens(): HasMany
     {
         return $this->hasMany(DeviceToken::class);
+    }
+
+    public function locations(): HasMany
+    {
+        return $this->hasMany(UserLocation::class);
+    }
+
+    public function latestLocation(): BelongsTo
+    {
+        return $this->belongsTo(UserLocation::class, 'latest_location_id');
     }
 
     public function admin(): HasOne

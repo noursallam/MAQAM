@@ -60,6 +60,35 @@
             </div>
         </div>
 
+        @php
+            $loc = $customer->user?->latestLocation;
+            $locState = $customer->user?->location_permission ?? 'none';
+            $notifState = $customer->user?->notification_permission ?? 'none';
+            $stateBadge = ['granted' => 'ui-badge-ok', 'denied' => 'ui-badge-danger', 'prompt' => 'ui-badge-warn'];
+        @endphp
+        <div class="ui-card-static p-6">
+            <div class="flex items-center justify-between">
+                <h3 class="ui-section-title">{{ __('admin.audience.col_country') }} / {{ __('admin.audience.col_region') }}</h3>
+                @if($loc)
+                    <a href="{{ $loc->mapUrl() }}" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold text-maqam-gold-dark hover:underline">{{ __('admin.audience.open_map') }}</a>
+                @endif
+            </div>
+            <div class="mt-3 text-sm">
+                @if($loc?->country_code)
+                    <div class="font-medium">{{ \App\Support\GeoNames::flag($loc->country_code) }} {{ $loc->countryLabel() }} · {{ $loc->regionLabel() ?? '—' }}</div>
+                    <div class="ui-muted">{{ $loc->city ?? '—' }} · {{ $loc->updated_at->diffForHumans() }}</div>
+                @elseif($loc)
+                    <div class="ui-muted">{{ __('admin.audience.locating') }}</div>
+                @else
+                    <div class="ui-muted">{{ __('admin.audience.not_shared') }}</div>
+                @endif
+            </div>
+            <div class="mt-3 flex flex-wrap gap-2 text-xs">
+                <span class="ui-badge {{ $stateBadge[$locState] ?? 'ui-badge-muted' }}">{{ __('admin.audience.perm_kind_location') }}: {{ __('admin.audience.state_'.$locState) }}</span>
+                <span class="ui-badge {{ $stateBadge[$notifState] ?? 'ui-badge-muted' }}">{{ __('admin.audience.perm_kind_notification') }}: {{ __('admin.audience.state_'.$notifState) }}</span>
+            </div>
+        </div>
+
         <div class="ui-card-static space-y-4 p-6">
             <h3 class="ui-section-title">{{ __('admin.actions') }}</h3>
             <form method="POST" action="{{ route('admin.customers.adjust-points', $customer) }}" class="space-y-2">

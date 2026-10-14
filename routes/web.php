@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\ApiDocsController;
+use App\Http\Controllers\Admin\AudienceController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\CategoryController;
@@ -32,6 +33,8 @@ use App\Http\Controllers\Store\CustomerProfileController;
 use App\Http\Controllers\Store\KashierPaymentController;
 use App\Http\Controllers\Store\LocaleController as StoreLocaleController;
 use App\Http\Controllers\Store\StorefrontController;
+use App\Http\Controllers\Store\VisitorPermissionController;
+use App\Http\Controllers\Store\WebPushController;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use Illuminate\Support\Facades\Route;
 
@@ -96,7 +99,11 @@ Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('store.l
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [CustomerProfileController::class, 'index'])->name('store.profile');
     Route::put('/profile', [CustomerProfileController::class, 'update'])->name('store.profile.update');
+    Route::post('/account/permissions', [VisitorPermissionController::class, 'store'])->middleware('throttle:20,1')->name('store.permissions.store');
 });
+
+// Browser push: must be served from the site root so it can control every page
+Route::get('/firebase-messaging-sw.js', [WebPushController::class, 'serviceWorker'])->name('store.push.sw');
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('guest')->group(function () {
@@ -121,6 +128,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('customers/{customer}/adjust-points', [CustomerController::class, 'adjustPoints'])->name('customers.adjust-points');
         Route::post('customers/{customer}/freeze', [CustomerController::class, 'freeze'])->name('customers.freeze');
         Route::post('customers/{customer}/unfreeze', [CustomerController::class, 'unfreeze'])->name('customers.unfreeze');
+
+        Route::get('audience', [AudienceController::class, 'index'])->name('audience.index');
+        Route::get('audience/export', [AudienceController::class, 'export'])->name('audience.export');
 
         Route::get('merchants/inbox', [MerchantController::class, 'inbox'])->name('merchants.inbox');
         Route::resource('merchants', MerchantController::class)->except(['show']);

@@ -282,6 +282,17 @@ return [
         'limit_reached' => 'You have reached today\'s message limit. Try tomorrow or contact support.',
     ],
 
+    'permissions' => [
+        'title' => 'Make MAQAM work better for you',
+        'intro' => 'Allow these two so we can serve you better. You can change your mind any time in your browser settings.',
+        'location_title' => 'Your location',
+        'location_text' => 'We use your governorate to estimate shipping and delivery time and show offers available in your area.',
+        'notification_title' => 'Notifications',
+        'notification_text' => 'Get updates on your orders, points and new offers as they happen.',
+        'allow' => 'Allow',
+        'later' => 'Not now',
+        'privacy_note' => 'We use this data under our <a href=":url">privacy policy</a> and never share it.',
+    ],
     'auth' => [
         'login_title' => 'Sign in | MAQAM',
         'login_heading' => 'Sign in',
