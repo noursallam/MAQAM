@@ -9,9 +9,14 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use App\Models\SystemSetting;
 
 class SenderBotService
 {
+    /** Overrides the session name from `.env` once the panel has had to move to a fresh one. */
+    public const SESSION_SETTING = 'senderbot_session_id';
+
     private string $baseUrl;
     private string $token;
     private string $sessionId;
@@ -20,7 +25,43 @@ class SenderBotService
     {
         $this->baseUrl = rtrim((string) config('services.senderbot.url', ''), '/');
         $this->token = (string) config('services.senderbot.token', '');
-        $this->sessionId = (string) config('services.senderbot.session', 'maqam');
+        $this->sessionId = (string) ($this->savedSessionId() ?: config('services.senderbot.session', 'maqam'));
+    }
+
+    private function savedSessionId(): ?string
+    {
+        try {
+            return SystemSetting::getValue(self::SESSION_SETTING);
+        } catch (\Throwable) {
+            // No settings table yet (fresh install, some tests): use the name from .env
+            return null;
+        }
+    }
+
+    public function sessionId(): string
+    {
+        return $this->sessionId;
+    }
+
+    /**
+     * Moves to a brand-new session name. Senderbot can only delete a session it has
+     * loaded in memory; one kept on its disk but not loaded cannot be reached through
+     * its API and makes every new pairing fail with "Session already exists". A new
+     * name sidesteps it (the old one stays inert on Senderbot's side).
+     */
+    public function resetSession(): string
+    {
+        // Gone already or not loaded: either way the new name takes over
+        $this->client()->delete("{$this->baseUrl}/sessions/delete/{$this->sessionId}");
+
+        $base = (string) config('services.senderbot.session', 'maqam');
+        $this->sessionId = $base.'-'.Str::lower(Str::random(6));
+        SystemSetting::updateOrCreate(
+            ['key' => self::SESSION_SETTING],
+            ['value' => $this->sessionId, 'group' => 'whatsapp', 'description' => 'Senderbot session in use', 'is_public' => false],
+        );
+
+        return $this->sessionId;
     }
 
     public function isConfigured(): bool
@@ -74,6 +115,15 @@ class SenderBotService
             'id' => $this->sessionId,
             'isLegacy' => false,
         ]);
+
+        // A session stuck on Senderbot's disk that its API cannot delete: start a fresh one
+        if (str_contains(strtolower((string) $response->json('message')), 'already exists')) {
+            $this->resetSession();
+            $response = $this->client()->timeout(40)->post("{$this->baseUrl}/sessions/add", [
+                'id' => $this->sessionId,
+                'isLegacy' => false,
+            ]);
+        }
 
         $data = $this->data($response, 'add session');
         $qr = (string) ($data['qr'] ?? $data['qrcode'] ?? $data['qr_code'] ?? '');

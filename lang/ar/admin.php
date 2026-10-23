@@ -779,6 +779,9 @@ return [
     ],
 
     'whatsapp' => [
+        'reset' => 'إلغاء الجلسة العالقة وبدء جلسة جديدة',
+        'reset_hint' => 'استخدمه إذا ظهرت رسالة «Session already exists» والجلسة غير ظاهرة هنا.',
+        'reset_confirm' => 'سيتم ترك الجلسة الحالية وإنشاء جلسة جديدة بكود QR جديد. متابعة؟',
         'title' => 'ربط واتساب',
         'subtitle' => 'اربط رقم واتساب الذي يرسل أكواد التحقق',
         'not_configured' => 'خدمة Senderbot غير مهيأة. أضف SENDER_BOT_URL و SENDER_BOT في ملف .env.',

@@ -772,6 +772,9 @@ return [
     ],
 
     'whatsapp' => [
+        'reset' => 'Drop the stuck session and start a new one',
+        'reset_hint' => 'Use it when you see "Session already exists" but no session shows here.',
+        'reset_confirm' => 'The current session will be dropped and a new one created with a new QR code. Continue?',
         'title' => 'WhatsApp Connection',
         'subtitle' => 'Link the WhatsApp number that sends OTP codes',
         'not_configured' => 'Senderbot is not configured. Set SENDER_BOT_URL and SENDER_BOT in the .env file.',

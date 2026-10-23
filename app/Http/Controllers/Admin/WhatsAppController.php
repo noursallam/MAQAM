@@ -52,6 +52,22 @@ class WhatsAppController extends Controller
         }
     }
 
+    /**
+     * Drops the current session for a fresh one, for a session Senderbot keeps but
+     * the panel cannot see or delete.
+     */
+    public function reset(): JsonResponse
+    {
+        try {
+            $this->senderBot->resetSession();
+            Cache::forget('senderbot.linked_phone');
+
+            return response()->json(['ok' => true, 'qr' => $this->senderBot->startPairing()]);
+        } catch (Throwable $e) {
+            return $this->unreachable($e);
+        }
+    }
+
     private function unreachable(Throwable $e): JsonResponse
     {
         report($e);

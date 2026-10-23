@@ -34,10 +34,12 @@
                 <img :src="qr" alt="QR" class="h-72 w-72 rounded-xl border border-[#E6E6EA] bg-white p-2">
                 <p class="ui-muted">{{ __('admin.whatsapp.waiting_scan') }}</p>
             </div>
-            <div class="mt-4 flex justify-center">
+            <div class="mt-4 flex flex-wrap justify-center gap-2">
                 <button type="button" class="ui-btn ui-btn-primary" @click="connect()" :disabled="busy"
                         x-text="busy ? @js(__('admin.whatsapp.generating')) : (qr ? @js(__('admin.whatsapp.refresh_qr')) : @js(__('admin.whatsapp.generate_qr')))"></button>
+                <button type="button" class="ui-btn ui-btn-ghost text-red-700" @click="reset()" :disabled="busy">{{ __('admin.whatsapp.reset') }}</button>
             </div>
+            <p class="ui-muted mt-3 text-center">{{ __('admin.whatsapp.reset_hint') }}</p>
         </div>
     </div>
 
@@ -104,6 +106,21 @@ function whatsappLink() {
             this.error = '';
             try {
                 const r = await this.call(@js(route('admin.whatsapp.connect')), 'POST');
+                this.qr = r.qr;
+                this.startPolling();
+            } catch (e) {
+                this.error = e.message;
+            } finally {
+                this.busy = false;
+            }
+        },
+
+        async reset() {
+            if (!confirm(@js(__('admin.whatsapp.reset_confirm')))) return;
+            this.busy = true;
+            this.error = '';
+            try {
+                const r = await this.call(@js(route('admin.whatsapp.reset')), 'POST');
                 this.qr = r.qr;
                 this.startPolling();
             } catch (e) {

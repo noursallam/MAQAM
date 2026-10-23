@@ -224,6 +224,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('whatsapp/status', [WhatsAppController::class, 'status'])->name('whatsapp.status');
         Route::post('whatsapp/connect', [WhatsAppController::class, 'connect'])->name('whatsapp.connect');
         Route::delete('whatsapp/disconnect', [WhatsAppController::class, 'disconnect'])->name('whatsapp.disconnect');
+        Route::post('whatsapp/reset', [WhatsAppController::class, 'reset'])->name('whatsapp.reset');
     });
 });
 
