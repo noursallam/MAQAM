@@ -3,9 +3,12 @@
 namespace App\Services\Push;
 
 use Exception;
+use Illuminate\Http\Client\Pool;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 /**
  * Firebase Cloud Messaging (HTTP v1) sender, authenticated with a service-account key.
@@ -24,6 +27,13 @@ class FcmService
     }
 
     /**
+     * Requests to FCM in flight at once. FCM has no multicast in HTTP v1, so a
+     * broadcast is one request per device; running them side by side keeps a
+     * large audience to seconds instead of minutes.
+     */
+    public const CONCURRENCY = 25;
+
+    /**
      * Send one notification to one device.
      *
      * @param  array<string, scalar>  $data  extra key/values delivered to the app
@@ -31,39 +41,57 @@ class FcmService
      */
     public function send(string $deviceToken, string $title, string $body, array $data = []): string
     {
+        return $this->sendMany([$deviceToken], $title, $body, $data)[$deviceToken];
+    }
+
+    /**
+     * Send the same notification to many devices, several at a time.
+     *
+     * @param  list<string>  $deviceTokens
+     * @param  array<string, scalar>  $data
+     * @return array<string, self::SENT|self::INVALID_TOKEN|self::FAILED>  keyed by token
+     */
+    public function sendMany(array $deviceTokens, string $title, string $body, array $data = []): array
+    {
+        $deviceTokens = array_values(array_unique($deviceTokens));
         $credentials = $this->credentials();
 
         if (! $credentials) {
-            return self::FAILED;
+            return array_fill_keys($deviceTokens, self::FAILED);
         }
 
-        $response = Http::withToken($this->accessToken($credentials))
-            ->timeout(15)
-            ->post("https://fcm.googleapis.com/v1/projects/{$credentials['project_id']}/messages:send", [
-                'message' => [
-                    'token' => $deviceToken,
-                    'notification' => ['title' => $title, 'body' => $body],
-                    // FCM data values must all be strings
-                    'data' => (object) array_map('strval', $data),
-                    'android' => ['priority' => 'high'],
-                    'apns' => ['payload' => ['aps' => ['sound' => 'default']]],
-                ] + $this->webpush(),
-            ]);
+        $url = "https://fcm.googleapis.com/v1/projects/{$credentials['project_id']}/messages:send";
+        $accessToken = $this->accessToken($credentials);
+        $results = [];
 
-        if ($response->successful()) {
-            return self::SENT;
+        foreach (array_chunk($deviceTokens, self::CONCURRENCY) as $batch) {
+            $responses = Http::pool(fn (Pool $pool) => array_map(
+                fn (string $token) => $pool->as($token)->withToken($accessToken)->timeout(15)
+                    ->post($url, ['message' => $this->message($token, $title, $body, $data)]),
+                $batch,
+            ));
+
+            foreach ($batch as $token) {
+                $results[$token] = $this->outcome($responses[$token] ?? null);
+            }
         }
 
-        $error = $response->json('error.details.0.errorCode') ?? $response->json('error.status');
+        return $results;
+    }
 
-        // The app was uninstalled or the token rotated
-        if ($response->status() === 404 || $error === 'UNREGISTERED') {
-            return self::INVALID_TOKEN;
-        }
-
-        Log::warning('FCM: send failed', ['http_status' => $response->status(), 'error' => $error]);
-
-        return self::FAILED;
+    /**
+     * @param  array<string, scalar>  $data
+     */
+    private function message(string $token, string $title, string $body, array $data): array
+    {
+        return [
+            'token' => $token,
+            'notification' => ['title' => $title, 'body' => $body],
+            // FCM data values must all be strings
+            'data' => (object) array_map('strval', $data),
+            'android' => ['priority' => 'high'],
+            'apns' => ['payload' => ['aps' => ['sound' => 'default']]],
+        ] + $this->webpush();
     }
 
     /**
@@ -76,6 +104,44 @@ class FcmService
         return str_starts_with($link, 'https://')
             ? ['webpush' => ['fcm_options' => ['link' => $link]]]
             : [];
+    }
+
+    /**
+     * @return self::SENT|self::INVALID_TOKEN|self::FAILED
+     */
+    private function outcome(mixed $response): string
+    {
+        // A connection error comes back as an exception instead of a response
+        if (! $response instanceof Response) {
+            Log::warning('FCM: send failed', ['error' => $response instanceof Throwable ? $response->getMessage() : 'no response']);
+
+            return self::FAILED;
+        }
+
+        if ($response->successful()) {
+            return self::SENT;
+        }
+
+        $error = $response->json('error.details.0.errorCode') ?? $response->json('error.status');
+
+        if ($this->tokenIsDead($response->status(), (string) $error, (string) $response->json('error.message'))) {
+            return self::INVALID_TOKEN;
+        }
+
+        Log::warning('FCM: send failed', ['http_status' => $response->status(), 'error' => $error]);
+
+        return self::FAILED;
+    }
+
+    /**
+     * The token will never work again: the app was uninstalled, the token
+     * rotated, it belongs to another Firebase project, or it is not a token.
+     */
+    private function tokenIsDead(int $status, string $error, string $message): bool
+    {
+        return $status === 404
+            || in_array($error, ['UNREGISTERED', 'SENDER_ID_MISMATCH'], true)
+            || ($error === 'INVALID_ARGUMENT' && str_contains(strtolower($message), 'registration token'));
     }
 
     private function credentials(): ?array

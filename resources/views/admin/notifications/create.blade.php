@@ -35,7 +35,7 @@
         </div>
         <div>
             <label class="mb-1 block text-sm font-medium">{{ __('admin.notifications.audience') }}</label>
-            <select name="segment" id="segment" class="ui-select" onchange="document.getElementById('rankBox').classList.toggle('hidden', this.value!=='rank')">
+            <select name="segment" id="segment" class="ui-select" onchange="document.getElementById('rankBox').classList.toggle('hidden', this.value!=='rank'); document.getElementById('phoneBox').classList.toggle('hidden', this.value!=='phone')">
                 <option value="all">{{ __('admin.notifications.all_users') }}</option>
                 <option value="customers">{{ __('admin.notifications.all_customers') }}</option>
                 <option value="merchants">{{ __('admin.notifications.all_merchants') }}</option>
@@ -43,6 +43,7 @@
                 <option value="inactive">{{ __('admin.notifications.inactive') }}</option>
                 <option value="new">{{ __('admin.notifications.new_users') }}</option>
                 <option value="active">{{ __('admin.notifications.active_users') }}</option>
+                <option value="phone">{{ __('admin.notifications.by_phone') }}</option>
             </select>
         </div>
         <div id="rankBox" class="hidden">
@@ -52,6 +53,12 @@
                     <option value="{{ $rank->id }}">{{ $rank->name_ar }}</option>
                 @endforeach
             </select>
+        </div>
+        <div id="phoneBox" class="hidden">
+            <label class="mb-1 block text-sm font-medium">{{ __('admin.notifications.phone') }}</label>
+            <input name="phone" value="{{ old('phone') }}" class="ui-input" dir="ltr" inputmode="tel" placeholder="010 1234 5678">
+            <p class="ui-muted mt-1 text-xs">{{ __('admin.notifications.phone_hint') }}</p>
+            @error('phone')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
         </div>
         <button class="ui-btn ui-btn-primary">{{ __('admin.notifications.send') }}</button>
     </div>
@@ -68,4 +75,14 @@
         <p class="ui-muted mt-6">{{ __('admin.notifications.composer_subtitle') }}</p>
     </div>
 </form>
+@push('scripts')
+<script>
+    (function () {
+        const segment = document.getElementById('segment');
+        const old = @json(old('segment'));
+        if (old) segment.value = old;
+        segment.dispatchEvent(new Event('change'));
+    })();
+</script>
+@endpush
 @endsection
