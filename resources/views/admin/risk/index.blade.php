@@ -16,7 +16,7 @@
     <div class="ui-card-static p-6 xl:col-span-1">
         <h2 class="mb-4 ui-section-title">{{ __('admin.risk.flagged') }}</h2>
         @forelse($frozen as $row)
-            <div class="mb-3 rounded-xl border border-[#D8D4CB] bg-[#F3F1EB] p-4 text-sm">
+            <div class="mb-3 rounded-xl border border-[#E6E6EA] bg-[#F4F4F5] p-4 text-sm">
                 <div class="flex items-start justify-between gap-2">
                     <div>
                         <div class="font-medium">{{ $row['user']->full_name }}</div>
@@ -38,7 +38,7 @@
     <div class="ui-card-static p-6 xl:col-span-1">
         <h2 class="mb-4 ui-section-title">{{ __('admin.risk.geo_velocity') }}</h2>
         @forelse($geoAnomalies as $inc)
-            <div class="mb-3 rounded-xl border border-[#D8D4CB] bg-[#F3F1EB] p-4 text-sm">
+            <div class="mb-3 rounded-xl border border-[#E6E6EA] bg-[#F4F4F5] p-4 text-sm">
                 <div class="flex justify-between">
                     <div class="font-medium">{{ $inc['customer']?->user?->full_name }}</div>
                     <span class="ui-badge {{ $sev[$inc['severity']] }}">{{ __('admin.risk.'.$inc['severity']) }}</span>
@@ -62,7 +62,7 @@
     <div class="ui-card-static p-6 xl:col-span-1">
         <h2 class="mb-4 ui-section-title">{{ __('admin.qr.sync_failed') }}</h2>
         @forelse($failedSync as $scan)
-            <div class="mb-3 rounded-xl border border-[#D8D4CB] bg-[#F3F1EB] p-4 text-sm">
+            <div class="mb-3 rounded-xl border border-[#E6E6EA] bg-[#F4F4F5] p-4 text-sm">
                 <div class="font-medium">{{ $scan->customer?->user?->full_name }}</div>
                 <div class="font-mono text-xs ui-muted" dir="ltr">{{ $scan->qrCode?->serial_code }}</div>
                 <div class="mt-1 text-[10px] text-red-700">{{ $scan->scanned_at?->diffForHumans() }}</div>

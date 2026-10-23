@@ -35,7 +35,7 @@
         <input type="file" name="image" accept="image/*" class="ui-input">
         @if($category->hasImage())
             <div class="mt-2 flex items-center gap-3">
-                <img src="{{ $category->image_url }}" alt="{{ $category->name_ar }}" class="h-20 w-20 rounded-lg object-cover border border-[#D8D4CB]">
+                <img src="{{ $category->image_url }}" alt="{{ $category->name_ar }}" class="h-20 w-20 rounded-lg object-cover border border-[#E6E6EA]">
                 <label class="flex items-center gap-2 text-sm text-red-600">
                     <input type="checkbox" name="delete_image" value="1">
                     حذف الصورة الحالية

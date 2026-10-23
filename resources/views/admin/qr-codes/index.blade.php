@@ -54,9 +54,9 @@
                     </span>
                 </div>
                 <div class="mt-4 grid grid-cols-3 gap-2 text-center text-sm">
-                    <div class="rounded-xl border border-[#D8D4CB] bg-[#F3F1EB] py-2"><div class="ui-muted">{{ __('admin.qr.count') }}</div><div class="font-semibold">{{ $batch->total }}</div></div>
-                    <div class="rounded-xl border border-[#D8D4CB] bg-[#F3F1EB] py-2"><div class="ui-muted">{{ __('admin.active') }}</div><div class="font-semibold text-emerald-700">{{ $batch->active_count }}</div></div>
-                    <div class="rounded-xl border border-[#D8D4CB] bg-[#F3F1EB] py-2"><div class="ui-muted">مستخدم</div><div class="font-semibold">{{ $batch->used_count }}</div></div>
+                    <div class="rounded-xl border border-[#E6E6EA] bg-[#F4F4F5] py-2"><div class="ui-muted">{{ __('admin.qr.count') }}</div><div class="font-semibold">{{ $batch->total }}</div></div>
+                    <div class="rounded-xl border border-[#E6E6EA] bg-[#F4F4F5] py-2"><div class="ui-muted">{{ __('admin.active') }}</div><div class="font-semibold text-emerald-700">{{ $batch->active_count }}</div></div>
+                    <div class="rounded-xl border border-[#E6E6EA] bg-[#F4F4F5] py-2"><div class="ui-muted">مستخدم</div><div class="font-semibold">{{ $batch->used_count }}</div></div>
                 </div>
                 <div class="mt-3 flex flex-wrap items-center gap-2 ui-muted">
                     <span>{{ __('admin.qr.created_at') }}: {{ \Illuminate\Support\Carbon::parse($batch->generated_at)->diffForHumans() }}</span>
@@ -102,7 +102,7 @@
 @endif
 
 <div class="ui-table-wrap">
-    <div class="border-b border-[#D8D4CB] px-5 py-4 font-semibold">{{ __('admin.qr.serial') }}</div>
+    <div class="border-b border-[#E6E6EA] px-5 py-4 font-semibold">{{ __('admin.qr.serial') }}</div>
     <div class="overflow-x-auto">
         <table class="ui-table">
             <thead>

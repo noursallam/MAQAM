@@ -22,7 +22,7 @@
         'expired' => __('admin.qr.life_expired'),
     ] as $key => $label)
         <a href="{{ route('admin.qr-codes.tracker', $key === 'total' ? [] : ['lifecycle' => $key]) }}"
-           class="rounded-xl border px-3 py-3 text-center transition {{ request('lifecycle', 'total') === $key || ($key === 'total' && !request('lifecycle')) ? 'border-maqam-gold bg-[#F8F4EC]' : 'border-[#D8D4CB] bg-white hover:border-maqam-gold' }}">
+           class="rounded-xl border px-3 py-3 text-center transition {{ request('lifecycle', 'total') === $key || ($key === 'total' && !request('lifecycle')) ? 'border-maqam-gold bg-[#F8F4EC]' : 'border-[#E6E6EA] bg-white hover:border-maqam-gold' }}">
             <div class="text-lg font-bold text-maqam-ink">{{ $summary[$key] ?? 0 }}</div>
             <div class="ui-muted text-xs">{{ $label }}</div>
         </a>

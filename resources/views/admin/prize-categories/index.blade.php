@@ -23,11 +23,11 @@
     <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
         @foreach($categories as $category)
             <div class="ui-card overflow-hidden">
-                <div class="relative flex h-36 items-center justify-center border-b border-[#D8D4CB]" style="background: {{ $category->background_color }}">
+                <div class="relative flex h-36 items-center justify-center border-b border-[#E6E6EA]" style="background: {{ $category->background_color }}">
                     @if($category->hasImage())
                         <img src="{{ $category->image_url }}" alt="{{ $category->name_ar }}" class="h-full w-full object-cover">
                     @else
-                        <div class="rounded-lg border border-[#D8D4CB] bg-white p-5">
+                        <div class="rounded-lg border border-[#E6E6EA] bg-white p-5">
                             <div class="grid grid-cols-5 gap-0.5">
                                 @for($i=0;$i<25;$i++)
                                     <span class="h-1.5 w-1.5 rounded-[1px] {{ $i % 3 === 0 ? 'bg-maqam-ink' : 'bg-maqam-ink/20' }}"></span>
@@ -53,7 +53,7 @@
                             <span class="font-bold text-maqam-gold-dark">{{ $category->points_value }}</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="h-6 w-6 rounded border border-[#D8D4CB]" style="background:{{ $category->background_color }}"></span>
+                            <span class="h-6 w-6 rounded border border-[#E6E6EA]" style="background:{{ $category->background_color }}"></span>
                             <span class="ui-muted">{{ __('admin.qr.print_color') }}</span>
                         </div>
                     </div>

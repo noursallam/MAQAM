@@ -45,7 +45,7 @@
 {{-- Customer spin simulation --}}
 @php
     $activePrizes = $prizes->where('is_active', true)->values();
-    $wheelColors = ['#C5A059', '#161b29', '#dcb479', '#2a3144', '#a98e48', '#0B0F19', '#EAE7DF', '#5F6368'];
+    $wheelColors = ['#C5A059', '#161b29', '#dcb479', '#2a3144', '#a98e48', '#0B0F19', '#F1F1F3', '#5F6368'];
     $wheelSegments = $activePrizes->map(function ($p, $i) use ($wheelColors) {
         return [
             'id' => $p->id,
@@ -432,7 +432,7 @@
 
     <div class="xl:col-span-3">
         <div class="ui-table-wrap">
-            <div class="flex items-center justify-between border-b border-[#C9C4B8] px-5 py-4">
+            <div class="flex items-center justify-between border-b border-[#E6E6EA] px-5 py-4">
                 <div class="font-semibold">{{ __('admin.wheel.prize_pool') }}</div>
             </div>
             <table class="ui-table">
@@ -495,7 +495,7 @@
 
 {{-- Spin history --}}
 <div class="ui-table-wrap">
-    <div class="border-b border-[#C9C4B8] px-5 py-4 font-semibold">{{ __('admin.wheel.recent_spins') }}</div>
+    <div class="border-b border-[#E6E6EA] px-5 py-4 font-semibold">{{ __('admin.wheel.recent_spins') }}</div>
     <table class="ui-table">
         <thead>
         <tr>

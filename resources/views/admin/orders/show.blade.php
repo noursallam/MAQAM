@@ -36,7 +36,7 @@
 <div class="mb-6 ui-panel">
     <div class="flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-4">
-            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-[#EAE7DF]">
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-[#F1F1F3]">
                 <svg class="h-6 w-6 text-maqam-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                 </svg>
@@ -49,7 +49,7 @@
                         <span>{{ $order->payment_method }}</span>
                     </span>
                     <span class="text-xs text-maqam-muted">{{ $order->payment_status }}</span>
-                    <span class="text-[#D8D4CB]">·</span>
+                    <span class="text-[#E6E6EA]">·</span>
                     <span class="text-xs text-maqam-muted">{{ $order->created_at?->format('M d, Y') }}</span>
                 </div>
             </div>
@@ -67,9 +67,9 @@
     <div class="flex flex-wrap items-center gap-2">
         @foreach($flow as $i => $st)
             <div class="flex items-center gap-2">
-                <span class="flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold {{ $idx !== false && $i <= $idx ? 'bg-maqam-gold text-maqam-navy' : 'border border-[#D8D4CB] bg-[#F3F1EB] text-maqam-muted' }}">{{ $i+1 }}</span>
+                <span class="flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold {{ $idx !== false && $i <= $idx ? 'bg-maqam-gold text-maqam-navy' : 'border border-[#E6E6EA] bg-[#F4F4F5] text-maqam-muted' }}">{{ $i+1 }}</span>
                 <span class="text-sm {{ $order->status === $st ? 'font-semibold' : 'ui-muted' }}">{{ $statusLabels[$st] }}</span>
-                @if($i < count($flow)-1)<span class="mx-1 h-px w-8 bg-[#D8D4CB]"></span>@endif
+                @if($i < count($flow)-1)<span class="mx-1 h-px w-8 bg-[#E6E6EA]"></span>@endif
             </div>
         @endforeach
         @if(in_array($order->status, ['cancelled','refunded'], true))

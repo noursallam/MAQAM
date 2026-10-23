@@ -217,6 +217,8 @@ tags:
     description: Version check, static content and the support assistant.
   - name: Merchant
     description: Applying to become a merchant and merchant statistics.
+  - name: Seminars
+    description: Live events with a prize draw among the customers who sign up.
 
 security:
   - bearerAuth: []
@@ -762,6 +764,135 @@ paths:
                   - type: object
                     properties:
                       data: { type: array, items: { $ref: '#/components/schemas/Rank' } }
+
+  /seminars/current:
+    get:
+      tags: [Seminars]
+      summary: The seminar running now, for the home page
+      description: |
+        `data` is null when no seminar is running. Public; send the token when there is one so
+        `is_registered` and `is_mine` describe this customer.
+      security: []
+      responses:
+        "200":
+          description: The live seminar, or null.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Seminar' }
+
+  /seminars/{id}:
+    get:
+      tags: [Seminars]
+      summary: One seminar with its prizes and winners
+      description: Live or ended seminars only; 404 before it starts. Other winners show by first name and the last 3 phone digits.
+      security: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: The seminar.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Seminar' }
+        "404": { description: Not found or not started yet., content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+
+  /seminars/{id}/register:
+    post:
+      tags: [Seminars]
+      summary: Join the seminar's prize draw
+      description: Only while the seminar runs (`SEMINAR_NOT_OPEN` otherwise). Joining twice is harmless. Each person wins one prize at most.
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: The seminar, now with `is_registered` true.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Seminar' }
+        "422": { description: "`SEMINAR_NOT_OPEN`", content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+
+  /auth/quick-login:
+    post:
+      tags: [Auth]
+      summary: Sign in with this phone's quick sign-in secret
+      description: |
+        For a phone the customer locked with fingerprint, Face ID or the app PIN. Confirm the person on the
+        phone first, then send the secret from `POST /auth/quick-login/enable` with the same `device_name`.
+        `QUICK_LOGIN_INVALID` means the secret no longer works (signed out everywhere, password changed on
+        another phone, account deleted): forget it and sign in normally.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [device_name, secret]
+              properties:
+                device_name: { type: string }
+                secret: { type: string, minLength: 64, maxLength: 64 }
+                device_token: { type: string, nullable: true }
+                platform: { type: string, enum: [android, ios], nullable: true }
+      responses:
+        "200": { description: Signed in; the same body as a password sign-in. }
+        "422": { description: "`QUICK_LOGIN_INVALID`", content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+
+  /auth/quick-login/enable:
+    post:
+      tags: [Auth]
+      summary: Let this phone sign back in without the password
+      description: Call once the customer has turned on the app lock. Keep `secret` in secure storage only. Asking again replaces it.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [device_name]
+              properties:
+                device_name: { type: string }
+      responses:
+        "200":
+          description: The secret.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data: { type: object, properties: { secret: { type: string } } }
+
+  /auth/quick-login/disable:
+    post:
+      tags: [Auth]
+      summary: Stop this phone signing back in on its own
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [device_name]
+              properties:
+                device_name: { type: string }
+      responses:
+        "200": { $ref: '#/components/responses/Done' }
 
   /customer/rewards:
     get:
@@ -1840,6 +1971,32 @@ components:
         preferred_language: { type: string, enum: [ar, en] }
         phone_verified_at: { type: string, format: date-time, nullable: true }
         has_password: { type: boolean, description: "False until the customer has chosen a password; show the complete-profile form." }
+    Seminar:
+      type: object
+      nullable: true
+      properties:
+        id: { type: integer, example: 3 }
+        title: { type: string, example: سيمينار القاهرة }
+        description: { type: string, nullable: true }
+        location: { type: string, nullable: true, example: فندق النيل }
+        image_url: { type: string, nullable: true }
+        starts_at: { type: string, format: date-time }
+        ends_at: { type: string, format: date-time }
+        status: { type: string, enum: [live, ended], description: "Signing up is open only while `live`." }
+        registrations_count: { type: integer, example: 128 }
+        is_registered: { type: boolean }
+        draws:
+          type: array
+          description: One per prize, in draw order.
+          items:
+            type: object
+            properties:
+              position: { type: integer, example: 1 }
+              prize: { type: string, example: تليفزيون }
+              is_drawn: { type: boolean }
+              winner_name: { type: string, nullable: true, example: "أحمد •••678" }
+              is_mine: { type: boolean, description: "Won by the signed-in customer." }
+              drawn_at: { type: string, format: date-time, nullable: true }
     Rank:
       type: object
       properties:

@@ -12,9 +12,12 @@ use App\Models\Order;
 use App\Models\PointsTransaction;
 use App\Models\Product;
 use App\Models\Rank;
+use App\Models\Seminar;
+use App\Models\SeminarDraw;
 use App\Models\ShippingAddress;
 use App\Models\User;
 use App\Services\MediaService;
+use App\Services\SeminarDrawService;
 use App\Services\Store\OrderPlacementService;
 
 /**
@@ -279,6 +282,38 @@ class ApiPresenter
             'is_read' => (bool) $notification->is_read,
             'read_at' => $notification->read_at?->toIso8601String(),
             'created_at' => $notification->created_at?->toIso8601String(),
+        ];
+    }
+
+    /**
+     * A seminar and its draw as one customer sees it. Other winners appear by
+     * first name and the end of their number only.
+     */
+    public static function seminar(Seminar $seminar, ?User $viewer): array
+    {
+        $seminar->loadMissing('draws.winner')->loadCount('registrations');
+
+        return [
+            'id' => $seminar->id,
+            'title' => $seminar->title,
+            'description' => $seminar->description,
+            'location' => $seminar->location,
+            'image_url' => $seminar->imageUrl(),
+            'starts_at' => $seminar->starts_at->toIso8601String(),
+            'ends_at' => $seminar->ends_at->toIso8601String(),
+            // upcoming | live | ended; signing up is open only while live
+            'status' => $seminar->status(),
+            'registrations_count' => (int) $seminar->registrations_count,
+            'is_registered' => $viewer !== null
+                && $seminar->registrations()->where('user_id', $viewer->id)->exists(),
+            'draws' => $seminar->draws->map(fn (SeminarDraw $draw) => [
+                'position' => $draw->position,
+                'prize' => $draw->prize,
+                'is_drawn' => $draw->drawn_at !== null,
+                'winner_name' => $draw->drawn_at ? SeminarDrawService::publicName($draw->winner) : null,
+                'is_mine' => $viewer !== null && $draw->winner_user_id === $viewer->id,
+                'drawn_at' => $draw->drawn_at?->toIso8601String(),
+            ])->values(),
         ];
     }
 

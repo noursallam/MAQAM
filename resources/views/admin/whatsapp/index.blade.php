@@ -22,7 +22,7 @@
         <p class="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700" x-show="error" x-text="error" x-cloak></p>
 
         <div class="mt-6" x-show="connected" x-cloak>
-            <div class="rounded-xl border border-[#D8D4CB] bg-[#F3F1EB] p-4 text-sm">
+            <div class="rounded-xl border border-[#E6E6EA] bg-[#F4F4F5] p-4 text-sm">
                 <div class="font-medium" x-text="name || '—'"></div>
                 <div class="ui-muted" dir="ltr" x-text="phone ? '+' + phone : ''"></div>
             </div>
@@ -31,7 +31,7 @@
 
         <div class="mt-6" x-show="!loading && !connected" x-cloak>
             <div class="flex flex-col items-center gap-3" x-show="qr">
-                <img :src="qr" alt="QR" class="h-72 w-72 rounded-xl border border-[#D8D4CB] bg-white p-2">
+                <img :src="qr" alt="QR" class="h-72 w-72 rounded-xl border border-[#E6E6EA] bg-white p-2">
                 <p class="ui-muted">{{ __('admin.whatsapp.waiting_scan') }}</p>
             </div>
             <div class="mt-4 flex justify-center">

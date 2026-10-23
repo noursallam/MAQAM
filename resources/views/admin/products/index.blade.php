@@ -32,8 +32,8 @@
             $thumb = $product->thumbnailUrl();
         @endphp
         <a href="{{ route('admin.products.edit', $product) }}" class="group block">
-            <article class="overflow-hidden rounded-xl border border-[#D8D4CB] bg-white transition-all hover:border-maqam-gold hover:shadow-md">
-                <div class="relative aspect-square overflow-hidden bg-[#EAE7DF]">
+            <article class="overflow-hidden rounded-xl border border-[#E6E6EA] bg-white transition-all hover:border-maqam-gold hover:shadow-md">
+                <div class="relative aspect-square overflow-hidden bg-[#F1F1F3]">
                     @if($thumb)
                         <img src="{{ $thumb }}" alt="{{ $product->name_ar ?: $product->name_en }}" 
                              class="h-full w-full object-cover transition-transform group-hover:scale-105">
@@ -59,7 +59,7 @@
                     <div class="truncate font-semibold text-maqam-ink">{{ $product->name_ar ?: $product->name_en }}</div>
                     <div class="mt-1 flex items-center gap-1 text-xs text-maqam-muted">
                         <span>{{ $product->category?->name_ar ?? '—' }}</span>
-                        <span class="text-[#D8D4CB]">·</span>
+                        <span class="text-[#E6E6EA]">·</span>
                         <span dir="ltr" class="font-mono">{{ $product->sku }}</span>
                     </div>
                     <div class="mt-3 flex items-end justify-between">
@@ -73,7 +73,7 @@
         </a>
     @empty
         <div class="ui-empty col-span-full">
-            <div class="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-[#EAE7DF]">
+            <div class="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-[#F1F1F3]">
                 <svg class="h-10 w-10 text-maqam-muted/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                 </svg>

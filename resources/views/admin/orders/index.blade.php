@@ -4,7 +4,7 @@
 @section('subtitle', __('admin.orders.subtitle'))
 
 @section('actions')
-<div class="flex overflow-hidden rounded-[0.625rem] border border-[#D8D4CB] bg-white text-sm font-semibold">
+<div class="flex overflow-hidden rounded-[0.625rem] border border-[#E6E6EA] bg-white text-sm font-semibold">
     <a href="{{ route('admin.orders.index', ['view' => 'kanban']) }}" class="px-4 py-2 {{ ($viewMode ?? 'kanban') === 'kanban' ? 'bg-maqam-gold text-maqam-navy' : 'ui-muted' }}">{{ __('admin.orders.kanban') }}</a>
     <a href="{{ route('admin.orders.index', ['view' => 'table']) }}" class="px-4 py-2 {{ ($viewMode ?? '') === 'table' ? 'bg-maqam-gold text-maqam-navy' : 'ui-muted' }}">{{ __('admin.orders.table') }}</a>
 </div>
@@ -53,7 +53,7 @@
                             $paymentIcon = $paymentMethodIcons[$paymentMethod] ?? $paymentMethodIcons['credit'];
                             $paymentColor = $paymentMethodColors[$paymentMethod] ?? $paymentMethodColors['credit'];
                         @endphp
-                        <a href="{{ route('admin.orders.show', $order) }}" class="block rounded-xl border border-[#D8D4CB] bg-white p-3 transition hover:border-maqam-gold hover:shadow-sm">
+                        <a href="{{ route('admin.orders.show', $order) }}" class="block rounded-xl border border-[#E6E6EA] bg-white p-3 transition hover:border-maqam-gold hover:shadow-sm">
                             <div class="flex justify-between text-sm font-semibold">
                                 <span>{{ $order->order_number }}</span>
                                 <span>{{ number_format($order->total_amount, 0) }} ج.م</span>

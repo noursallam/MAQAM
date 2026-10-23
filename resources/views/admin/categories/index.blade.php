@@ -11,9 +11,9 @@
 @endif
 <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
     @forelse($categories as $category)
-        <article class="overflow-hidden rounded-xl border border-[#D8D4CB] bg-white transition-all hover:border-maqam-gold hover:shadow-md">
+        <article class="overflow-hidden rounded-xl border border-[#E6E6EA] bg-white transition-all hover:border-maqam-gold hover:shadow-md">
             <a href="{{ route('admin.categories.edit', $category) }}" class="group block">
-                <div class="relative aspect-square overflow-hidden bg-[#EAE7DF]">
+                <div class="relative aspect-square overflow-hidden bg-[#F1F1F3]">
                     @if($category->hasImage())
                         <img src="{{ $category->image_url }}" alt="{{ $category->name_ar }}"
                              class="h-full w-full object-cover transition-transform group-hover:scale-105">
@@ -33,7 +33,7 @@
                 <a href="{{ route('admin.categories.edit', $category) }}" class="block truncate font-semibold text-maqam-ink hover:text-maqam-gold-dark">{{ $category->name_ar }}</a>
                 <div class="mt-1 flex items-center gap-1 text-xs text-maqam-muted">
                     <span>{{ $category->name_en }}</span>
-                    <span class="text-[#D8D4CB]">·</span>
+                    <span class="text-[#E6E6EA]">·</span>
                     <span dir="ltr" class="font-mono">{{ $category->slug }}</span>
                 </div>
                 @if($category->parent)
@@ -54,7 +54,7 @@
         </article>
     @empty
         <div class="ui-empty col-span-full">
-            <div class="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-[#EAE7DF]">
+            <div class="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-[#F1F1F3]">
                 <svg class="h-10 w-10 text-maqam-muted/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                 </svg>

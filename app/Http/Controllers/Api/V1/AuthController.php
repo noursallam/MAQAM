@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Exceptions\ApiException;
 use App\Models\Customer;
+use App\Models\DeviceLogin;
 use App\Models\DeviceToken;
 use App\Models\Rank;
 use App\Models\User;
@@ -233,6 +234,8 @@ class AuthController extends ApiController
 
         // Whoever knew the old password is signed out everywhere else
         $user->tokens()->where('id', '!=', $user->currentAccessToken()->id)->delete();
+        // Other phones must prove themselves again with the new password
+        DeviceLogin::where('user_id', $user->id)->where('device_name', '!=', $user->currentAccessToken()->name)->delete();
 
         return $this->ok(null, __('api.auth.password_updated'));
     }
@@ -254,9 +257,64 @@ class AuthController extends ApiController
     public function logoutAll(Request $request): JsonResponse
     {
         DeviceToken::where('user_id', $request->user()->id)->delete();
+        // Signing out everywhere also stops every phone signing back in on its own
+        DeviceLogin::where('user_id', $request->user()->id)->delete();
         $request->user()->tokens()->delete();
 
         return $this->ok(null, __('api.auth.signed_out'));
+    }
+
+    /**
+     * Let this phone sign back in without the password, once the customer has locked the
+     * app with fingerprint, Face ID or the app PIN. Returns a secret the phone keeps in its
+     * encrypted storage; asking again replaces it.
+     */
+    public function enableQuickLogin(Request $request): JsonResponse
+    {
+        $validated = $request->validate(['device_name' => ['required', 'string', 'max:100']]);
+        $secret = Str::random(64);
+
+        // A device name belongs to one install, so a new account on it replaces the old one
+        DeviceLogin::updateOrCreate(
+            ['device_name' => $validated['device_name']],
+            ['user_id' => $request->user()->id, 'secret_hash' => DeviceLogin::hash($secret), 'last_used_at' => null],
+        );
+
+        return $this->ok(['secret' => $secret]);
+    }
+
+    /**
+     * Sign in with the phone's secret instead of the password. The app only sends it after
+     * the customer has confirmed themselves on the phone.
+     */
+    public function quickLogin(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'device_name' => ['required', 'string', 'max:100'],
+            'secret' => ['required', 'string', 'size:64'],
+            'device_token' => ['nullable', 'string', 'max:512'],
+            'platform' => ['nullable', Rule::in(['android', 'ios'])],
+        ]);
+
+        $login = DeviceLogin::with('user')->where('device_name', $validated['device_name'])->first();
+
+        if (! $login || ! hash_equals($login->secret_hash, DeviceLogin::hash($validated['secret'])) || ! $login->user) {
+            throw new ApiException('QUICK_LOGIN_INVALID', __('api.auth.quick_login_invalid'), 422);
+        }
+
+        $this->ensureMaySignIn($login->user);
+        $login->forceFill(['last_used_at' => now()])->save();
+
+        return $this->issueSession($login->user, $validated, [self::ABILITY_APP]);
+    }
+
+    public function disableQuickLogin(Request $request): JsonResponse
+    {
+        $validated = $request->validate(['device_name' => ['required', 'string', 'max:100']]);
+
+        DeviceLogin::where('user_id', $request->user()->id)->where('device_name', $validated['device_name'])->delete();
+
+        return $this->ok(null, __('api.saved'));
     }
 
     public function profile(Request $request): JsonResponse

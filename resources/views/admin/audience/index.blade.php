@@ -15,7 +15,7 @@
         'denied' => '#DC2626',
         'prompt' => '#C4A574',
         'unsupported' => '#9CA3AF',
-        'none' => '#E4E0D7',
+        'none' => '#ECECEF',
     ];
     $permBadge = [
         'granted' => 'ui-badge-ok',
@@ -60,12 +60,12 @@
         <h2 class="ui-section-title">{{ __('admin.audience.by_country') }}</h2>
         <div class="mt-4 space-y-3">
             @forelse($countries->take(10) as $row)
-                <a href="{{ route('admin.audience.index', ['country' => $row['code']]) }}" class="block rounded-lg px-1 py-0.5 transition hover:bg-[#F9F8F5]">
+                <a href="{{ route('admin.audience.index', ['country' => $row['code']]) }}" class="block rounded-lg px-1 py-0.5 transition hover:bg-[#F7F7F8]">
                     <div class="flex items-center justify-between text-sm">
                         <span class="font-medium">{{ $row['flag'] }} {{ $row['label'] }}</span>
                         <span class="text-maqam-muted">{{ number_format($row['total']) }} · {{ $stats['located'] ? round($row['total'] * 100 / $stats['located']) : 0 }}%</span>
                     </div>
-                    <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-[#F3F1EB]">
+                    <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-[#F4F4F5]">
                         <div class="h-full rounded-full bg-maqam-navy" style="width: {{ max(2, $row['total'] * 100 / $maxCountry) }}%"></div>
                     </div>
                 </a>
@@ -80,12 +80,12 @@
         <div class="mt-4 grid gap-x-6 gap-y-3 sm:grid-cols-2">
             @forelse($regions as $row)
                 @php $regionLink = $row['code'] ? route('admin.audience.index', ['country' => $regionCountry, 'region' => $row['code']]) : null; @endphp
-                <a @if($regionLink) href="{{ $regionLink }}" @endif class="block rounded-lg px-1 py-0.5 transition hover:bg-[#F9F8F5]">
+                <a @if($regionLink) href="{{ $regionLink }}" @endif class="block rounded-lg px-1 py-0.5 transition hover:bg-[#F7F7F8]">
                     <div class="flex items-center justify-between text-sm">
                         <span class="font-medium">{{ $row['label'] }}</span>
                         <span class="text-maqam-muted">{{ number_format($row['total']) }}</span>
                     </div>
-                    <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-[#F3F1EB]">
+                    <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-[#F4F4F5]">
                         <div class="h-full rounded-full bg-maqam-gold" style="width: {{ max(2, $row['total'] * 100 / $maxRegion) }}%"></div>
                     </div>
                 </a>
@@ -104,7 +104,7 @@
             @php $sum = max(1, array_sum($counts)); @endphp
             <div class="mt-5">
                 <div class="mb-2 text-sm font-medium">{{ __('admin.audience.perm_kind_'.$kind) }}</div>
-                <div class="flex h-3 overflow-hidden rounded-full bg-[#F3F1EB]" role="img"
+                <div class="flex h-3 overflow-hidden rounded-full bg-[#F4F4F5]" role="img"
                      aria-label="{{ collect($counts)->map(fn ($n, $s) => __('admin.audience.state_'.$s).': '.$n)->implode(', ') }}">
                     @foreach($counts as $state => $n)
                         @if($n > 0)

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\ApiDocsController;
 use App\Http\Controllers\Admin\AudienceController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\Admin\LocaleController;
 use App\Http\Controllers\Admin\LoyaltyController;
 use App\Http\Controllers\Admin\MerchantController;
 use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\Admin\SeminarController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PrizeCategoryController;
 use App\Http\Controllers\Admin\ProductController;
@@ -188,6 +190,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('notifications/create', [NotificationController::class, 'create'])->name('notifications.create');
         Route::post('notifications', [NotificationController::class, 'store'])->name('notifications.store');
 
+        Route::resource('seminars', SeminarController::class);
+        Route::post('seminars/{seminar}/draw', [SeminarController::class, 'draw'])->name('seminars.draw');
+        Route::post('seminars/{seminar}/draw-all', [SeminarController::class, 'drawAll'])->name('seminars.draw-all');
+
         Route::get('loyalty/transactions', [LoyaltyController::class, 'transactions'])->name('loyalty.transactions');
         Route::get('loyalty/spins', [LoyaltyController::class, 'spins'])->name('loyalty.spins');
         Route::post('loyalty/wheel-toggle', [LoyaltyController::class, 'toggleWheel'])->name('loyalty.wheel-toggle');
@@ -204,7 +210,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('risk/{user}/freeze', [RiskController::class, 'freeze'])->name('risk.freeze');
         Route::post('risk/{user}/unfreeze', [RiskController::class, 'unfreeze'])->name('risk.unfreeze');
 
-        Route::get('admins', [AdminUserController::class, 'index'])->name('admins.index');
+        Route::resource('admins', AdminUserController::class)->except(['show', 'destroy']);
+        Route::resource('admin-roles', AdminRoleController::class)->except(['index', 'show'])
+            ->parameters(['admin-roles' => 'adminRole']);
 
         Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
         Route::put('settings', [SettingController::class, 'update'])->name('settings.update');

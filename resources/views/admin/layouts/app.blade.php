@@ -74,6 +74,7 @@
             'items' => [
                 ['module' => 'notifications', 'route' => 'admin.notifications.create', 'label' => __('admin.nav.notifications_composer'), 'match' => 'admin.notifications.create', 'badge' => null],
                 ['module' => 'notifications', 'route' => 'admin.notifications.index', 'label' => __('admin.nav.notifications_history'), 'match' => 'admin.notifications.index', 'badge' => null],
+                ['module' => 'notifications', 'route' => 'admin.seminars.index', 'label' => __('admin.nav.seminars'), 'match' => 'admin.seminars.*', 'badge' => null],
             ],
         ],
         [
@@ -84,7 +85,7 @@
                 ['module' => 'risk', 'route' => 'admin.risk.index', 'label' => __('admin.nav.risk_desk'), 'match' => 'admin.risk.*', 'badge' => $riskAlertCount ?: null],
                 ['module' => 'settings', 'route' => 'admin.settings.index', 'label' => __('admin.nav.settings'), 'match' => 'admin.settings.*', 'badge' => null],
                 ['module' => 'settings', 'route' => 'admin.whatsapp.index', 'label' => __('admin.nav.whatsapp'), 'match' => 'admin.whatsapp.*', 'badge' => null],
-                ['module' => 'admins', 'route' => 'admin.admins.index', 'label' => __('admin.nav.admins_rbac'), 'match' => 'admin.admins.*', 'badge' => null],
+                ['module' => 'admins', 'route' => 'admin.admins.index', 'label' => __('admin.nav.admins_rbac'), 'match' => 'admin.admins.*', 'badge' => null, 'also' => ['admin.admin-roles.*']],
                 ['module' => 'api_docs', 'route' => 'admin.api-docs.index', 'label' => __('admin.nav.api_docs'), 'match' => 'admin.api-docs.*', 'badge' => null],
             ],
         ],
@@ -112,114 +113,131 @@
 @endphp
 <body class="min-h-screen bg-maqam-bg text-maqam-ink antialiased" style="font-family:'IBM Plex Sans Arabic', Inter, 'DM Sans', ui-sans-serif, system-ui, sans-serif">
 <div class="flex min-h-screen">
-    {{-- Sidebar --}}
-    <aside class="fixed inset-y-0 {{ $isRtl ? 'right-0' : 'left-0' }} z-30 flex w-72 flex-col bg-maqam-navy text-white shadow-xl">
-        <div class="border-b border-white/10 px-6 py-5">
-            <div class="text-2xl font-bold tracking-wide text-maqam-gold-light">MAQAM</div>
-            <div class="mt-1 text-xs text-white/50">{{ __('admin.admin_panel') }}</div>
-            <div class="mt-0.5 text-[11px] text-white/35">{{ __('admin.store_console') }}</div>
+    {{-- Sidebar: light, quiet, grouped (inspired by modern store panels) --}}
+    <aside class="fixed inset-y-0 {{ $isRtl ? 'right-0 border-l' : 'left-0 border-r' }} z-30 flex w-72 flex-col border-[#ECECEF] bg-maqam-sidebar">
+        <div class="flex items-center gap-2.5 px-5 pb-4 pt-6">
+            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-maqam-gold text-sm font-bold text-maqam-navy shadow-sm">M</span>
+            <span class="text-lg font-bold tracking-[0.18em] text-maqam-ink">MAQAM</span>
         </div>
 
-        <nav class="sidebar-scroll flex-1 overflow-y-auto px-3 py-4 text-sm" x-data="sidebarNav()">
-            <div class="mb-3 flex items-center justify-between border-b border-white/10 px-2 pb-2.5">
-                <span class="text-[10px] font-semibold uppercase tracking-wider text-white/40">{{ $isRtl ? 'أقسام النظام' : 'SYSTEM SECTIONS' }}</span>
-                <button type="button" @click="toggleAll()" 
-                        class="flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-white/60 hover:bg-white/10 hover:text-white transition-colors">
-                    <svg class="h-3 w-3 transition-transform duration-200" :class="expanded.length > 0 ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                    </svg>
-                    <span x-text="expanded.length > 0 ? '{{ $isRtl ? 'طي الكل' : 'Collapse All' }}' : '{{ $isRtl ? 'توسيع الكل' : 'Expand All' }}'"></span>
-                </button>
-            </div>
+        <div class="px-4">
+            <a href="{{ url('/') }}" target="_blank" rel="noopener"
+               class="flex items-center gap-3 rounded-xl bg-[#EEEEF0] px-3 py-2.5 transition hover:bg-[#E8E8EB]">
+                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-maqam-gold-dark shadow-sm">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M3 9l1.5-5h15L21 9M3 9h18M3 9v11h18V9M9 20v-6h6v6"/></svg>
+                </span>
+                <span class="min-w-0 flex-1">
+                    <span class="block truncate text-sm font-semibold">{{ __('admin.store_console') }}</span>
+                    <span class="block truncate text-[11px] text-maqam-muted">{{ __('admin.admin_panel') }}</span>
+                </span>
+                <svg class="h-4 w-4 text-maqam-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M8 9l4-4 4 4M16 15l-4 4-4-4"/></svg>
+            </a>
+        </div>
 
+        <nav class="sidebar-scroll mt-4 flex-1 overflow-y-auto border-t border-[#ECECEF] px-4 py-4" x-data="sidebarNav()">
             @php $dashboardActive = request()->routeIs('admin.dashboard'); @endphp
-            <a href="{{ route('admin.dashboard') }}"
-               class="mb-2.5 flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-xs font-semibold transition-all {{ $dashboardActive ? 'border-maqam-gold bg-maqam-gold text-maqam-navy shadow-sm' : 'border-white/[0.06] bg-white/[0.03] text-white/80 hover:bg-white/10 hover:text-white' }}">
-                <svg class="h-4 w-4 {{ $dashboardActive ? 'text-maqam-navy' : 'text-maqam-gold-light' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z"/>
-                </svg>
+            <a href="{{ route('admin.dashboard') }}" class="ui-nav-item {{ $dashboardActive ? 'is-active' : '' }}">
+                <svg class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M4 5a1 1 0 011-1h5v7H4V5zm10-1h5a1 1 0 011 1v4h-6V4zm0 9h6v6a1 1 0 01-1 1h-5v-7zM4 15h6v5H5a1 1 0 01-1-1v-4z"/></svg>
                 <span>{{ __('admin.nav.command_center') }}</span>
             </a>
 
-            @foreach($navGroups as $groupKey => $group)
-                <div class="mb-2.5 rounded-xl bg-white/[0.03] p-1.5 border border-white/[0.06] transition-all">
-                    <button type="button" 
-                            @click="toggle('{{ $groupKey }}')" 
-                            class="flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-xs font-semibold tracking-wide text-white/80 hover:bg-white/10 hover:text-white transition-colors">
-                        <div class="flex items-center gap-2.5">
-                            <span class="text-maqam-gold-light">{!! $group['icon'] !!}</span>
-                            <span>{{ $group['label'] }}</span>
-                        </div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="rounded-full bg-white/10 px-1.5 py-0.2 text-[10px] font-mono text-white/50">{{ count($group['items']) }}</span>
-                            <svg class="h-3.5 w-3.5 transition-transform duration-200" 
-                                 :class="isOpen('{{ $groupKey }}') ? 'rotate-180 text-maqam-gold-light' : 'rotate-0 text-white/40'" 
-                                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                    </button>
-                    <ul x-show="isOpen('{{ $groupKey }}')" x-collapse class="space-y-0.5 mt-1 px-0.5 pb-0.5">
-                        @foreach($group['items'] as $link)
-                            @php $active = request()->routeIs($link['match']) || (!empty($link['also']) && request()->routeIs(...$link['also'])); @endphp
-                            <li>
-                                <a href="{{ route($link['route']) }}" 
-                                   class="flex items-center justify-between rounded-lg px-3 py-2 text-xs transition-all {{ $active ? 'bg-maqam-gold text-maqam-navy font-bold shadow-sm' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
-                                    <span>{{ $link['label'] }}</span>
-                                    @if(!empty($link['badge']))
-                                        <span class="rounded-full px-2 py-0.5 text-[10px] font-bold {{ $active ? 'bg-maqam-navy text-white' : 'bg-maqam-gold text-maqam-navy' }}">{{ $link['badge'] }}</span>
-                                    @endif
-                                </a>
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endforeach
+            <div class="my-3 border-t border-[#ECECEF]"></div>
+
+            <div class="space-y-1">
+                @foreach($navGroups as $groupKey => $group)
+                    @php
+                        $groupBadge = collect($group['items'])->sum(fn ($item) => (int) ($item['badge'] ?? 0));
+                        $groupActive = (string) $groupKey === $activeGroupKey;
+                    @endphp
+                    <div>
+                        <button type="button" @click="toggle('{{ $groupKey }}')"
+                                class="ui-nav-item {{ $groupActive ? 'font-semibold' : '' }}">
+                            <span class="{{ $groupActive ? 'text-maqam-gold-dark' : '' }}">{!! str_replace('h-4 w-4', 'h-[18px] w-[18px]', $group['icon']) !!}</span>
+                            <span class="flex-1 text-start">{{ $group['label'] }}</span>
+                            @if($groupBadge > 0)
+                                <span class="ui-nav-badge">{{ $groupBadge }}</span>
+                            @endif
+                            <svg class="h-4 w-4 text-maqam-muted transition-transform duration-200" :class="isOpen('{{ $groupKey }}') ? 'rotate-180' : ''"
+                                 fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <ul x-show="isOpen('{{ $groupKey }}')" x-collapse class="mt-0.5 space-y-0.5 {{ $isRtl ? 'pr-8' : 'pl-8' }}">
+                            @foreach($group['items'] as $link)
+                                @php $active = request()->routeIs($link['match']) || (!empty($link['also']) && request()->routeIs(...$link['also'])); @endphp
+                                <li>
+                                    <a href="{{ route($link['route']) }}" class="ui-nav-sub {{ $active ? 'is-active' : '' }}">
+                                        <span class="truncate">{{ $link['label'] }}</span>
+                                        @if(!empty($link['badge']))
+                                            <span class="ui-nav-badge">{{ $link['badge'] }}</span>
+                                        @endif
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endforeach
+            </div>
         </nav>
 
-        <div class="border-t border-white/10 p-4">
-            <div class="mb-3 rounded-lg border border-white/10 bg-white/5 p-3 text-xs text-white/60">
-                <div class="font-medium text-white">{{ auth()->user()->full_name }}</div>
-                <div class="mt-0.5">{{ auth()->user()->admin?->role }}</div>
+        <div class="space-y-1 px-4 pb-5 pt-3">
+            <div class="flex items-center gap-3 rounded-2xl border border-[#ECECEF] bg-white px-3 py-2.5 shadow-[0_1px_2px_rgba(18,19,23,0.04)]">
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-maqam-tint text-sm font-bold text-maqam-gold-dark">
+                    {{ mb_substr(auth()->user()->full_name ?? 'A', 0, 1) }}
+                </span>
+                <span class="min-w-0 flex-1">
+                    <span class="block truncate text-sm font-semibold">{{ auth()->user()->full_name }}</span>
+                    <span class="block truncate text-[11px] text-maqam-muted">{{ auth()->user()->admin?->role }}</span>
+                </span>
             </div>
+            @if($can('settings'))
+                <a href="{{ route('admin.settings.index') }}" class="ui-nav-item {{ request()->routeIs('admin.settings.*') ? 'is-active' : '' }}">
+                    <svg class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span>{{ __('admin.nav.settings') }}</span>
+                </a>
+            @endif
             <form method="POST" action="{{ route('admin.logout') }}">
                 @csrf
-                <button class="w-full rounded-lg border border-white/15 px-3 py-2 text-sm text-white/70 hover:bg-white/5">{{ __('admin.logout') }}</button>
+                <button class="ui-nav-item">
+                    <svg class="h-[18px] w-[18px] {{ $isRtl ? 'rotate-180' : '' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M15 12H3m0 0l4-4m-4 4l4 4m6-12h5a2 2 0 012 2v12a2 2 0 01-2 2h-5"/></svg>
+                    <span>{{ __('admin.logout') }}</span>
+                </button>
             </form>
         </div>
     </aside>
 
     {{-- Main --}}
-    <main class="flex-1 {{ $isRtl ? 'mr-72' : 'ml-72' }}">
-        <header class="sticky top-0 z-20 border-b border-[#D8D4CB] bg-[#F3F1EB]/95 px-6 py-4 backdrop-blur lg:px-8">
-            <div class="flex flex-wrap items-center justify-between gap-4">
+    <main class="min-w-0 flex-1 {{ $isRtl ? 'mr-72' : 'ml-72' }}">
+        <header class="sticky top-0 z-20 bg-maqam-bg/90 px-6 pb-4 pt-6 backdrop-blur lg:px-10">
+            <div class="flex flex-wrap items-end justify-between gap-4">
                 <div class="min-w-0">
                     @hasSection('breadcrumbs')
                         <div class="mb-1 text-xs text-maqam-muted">@yield('breadcrumbs')</div>
                     @endif
-                    <h1 class="truncate text-xl font-semibold text-maqam-ink">@yield('title', __('admin.home.title'))</h1>
+                    <h1 class="truncate text-[1.75rem] font-semibold leading-tight tracking-tight text-maqam-ink">@yield('title', __('admin.home.title'))</h1>
                     @hasSection('subtitle')
-                        <p class="mt-0.5 text-sm text-maqam-muted">@yield('subtitle')</p>
+                        <p class="mt-1 text-sm text-maqam-muted">@yield('subtitle')</p>
                     @endif
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
                     <form action="{{ route('admin.search') }}" method="GET" class="hidden md:block">
-                        <input type="search" name="q" value="{{ request('q') }}"
-                               placeholder="{{ __('admin.search_global') }}"
-                               class="ui-input w-64">
+                        <label class="relative block">
+                            <svg class="pointer-events-none absolute top-1/2 h-4 w-4 -translate-y-1/2 text-maqam-muted {{ $isRtl ? 'right-3' : 'left-3' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z"/></svg>
+                            <input type="search" name="q" value="{{ request('q') }}"
+                                   placeholder="{{ __('admin.search_global') }}"
+                                   class="ui-input w-64 rounded-full {{ $isRtl ? 'pr-9' : 'pl-9' }}">
+                        </label>
                     </form>
 
-                    <a href="{{ route('admin.merchants.inbox') }}" class="ui-header-icon relative" title="{{ __('admin.nav.merchant_inbox') }}">
+                    <a href="{{ route('admin.merchants.inbox') }}" class="ui-header-icon relative rounded-full" title="{{ __('admin.nav.merchant_inbox') }}">
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                         @if($badgeTotal > 0)
                             <span class="absolute -top-1 {{ $isRtl ? '-left-1' : '-right-1' }} flex h-5 min-w-5 items-center justify-center rounded-full bg-maqam-gold px-1 text-[10px] font-bold text-maqam-navy">{{ $badgeTotal }}</span>
                         @endif
                     </a>
 
-                    <form method="POST" action="{{ route('admin.locale') }}" class="flex overflow-hidden rounded-lg border border-[#D8D4CB] bg-white text-xs font-semibold">
+                    <form method="POST" action="{{ route('admin.locale') }}" class="flex overflow-hidden rounded-full border border-[#E6E6EA] bg-white p-0.5 text-xs font-semibold">
                         @csrf
-                        <button name="locale" value="ar" class="px-3 py-2 {{ $locale === 'ar' ? 'bg-maqam-gold text-maqam-navy' : 'text-maqam-muted hover:text-maqam-ink' }}">ع</button>
-                        <button name="locale" value="en" class="px-3 py-2 {{ $locale === 'en' ? 'bg-maqam-gold text-maqam-navy' : 'text-maqam-muted hover:text-maqam-ink' }}">EN</button>
+                        <button name="locale" value="ar" class="rounded-full px-3 py-1.5 {{ $locale === 'ar' ? 'bg-maqam-ink text-white' : 'text-maqam-muted hover:text-maqam-ink' }}">ع</button>
+                        <button name="locale" value="en" class="rounded-full px-3 py-1.5 {{ $locale === 'en' ? 'bg-maqam-ink text-white' : 'text-maqam-muted hover:text-maqam-ink' }}">EN</button>
                     </form>
 
                     @yield('actions')
@@ -227,7 +245,7 @@
             </div>
         </header>
 
-        <div class="p-6 lg:p-8">
+        <div class="px-6 pb-10 pt-2 lg:px-10">
             @if(session('success'))
                 <div class="maqam-toast ui-toast-ok mb-6">
                     {{ session('success') }}

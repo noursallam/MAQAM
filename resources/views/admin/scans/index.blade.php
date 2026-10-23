@@ -120,7 +120,7 @@
             <button type="submit" id="scanSimSubmit" class="ui-btn ui-btn-primary w-full">{{ __('admin.qr.scan_try') }}</button>
         </form>
 
-        <div id="scanSimResult" class="mt-4 hidden rounded-xl border border-[#E4E0D7] bg-[#F9F8F5] p-4 text-sm"></div>
+        <div id="scanSimResult" class="mt-4 hidden rounded-xl border border-[#ECECEF] bg-[#F7F7F8] p-4 text-sm"></div>
     </div>
 </div>
 @endsection

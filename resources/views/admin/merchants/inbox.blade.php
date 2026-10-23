@@ -37,7 +37,7 @@
                 <h2 class="text-xl font-semibold">{{ $selected->business_name }}</h2>
                 <div class="mt-6 space-y-4 text-sm">
                     <div class="flex items-center gap-4">
-                        <div class="flex h-16 w-16 items-center justify-center rounded-xl border border-[#D8D4CB] bg-[#F3F1EB] text-2xl text-maqam-gold">
+                        <div class="flex h-16 w-16 items-center justify-center rounded-xl border border-[#E6E6EA] bg-[#F4F4F5] text-2xl text-maqam-gold">
                             @if($selected->logo_url)
                                 <img src="{{ $selected->logo_url }}" alt="" class="h-16 w-16 rounded-xl object-cover">
                             @else
@@ -50,11 +50,11 @@
                             <div class="ui-muted">{{ $selected->user?->phone_number }}</div>
                         </div>
                     </div>
-                    <div class="rounded-xl border border-[#D8D4CB] bg-[#F3F1EB] p-4">
+                    <div class="rounded-xl border border-[#E6E6EA] bg-[#F4F4F5] p-4">
                         <div class="ui-muted">{{ __('admin.merchants.address') }}</div>
                         <div class="mt-1">{{ $selected->business_address ?: '—' }}</div>
                     </div>
-                    <div class="rounded-xl border border-[#D8D4CB] bg-[#F3F1EB] p-4">
+                    <div class="rounded-xl border border-[#E6E6EA] bg-[#F4F4F5] p-4">
                         <div class="ui-muted">{{ __('admin.merchants.merchant_code') }}</div>
                         <div class="mt-1 flex items-center justify-between gap-2">
                             <code class="text-lg font-semibold" dir="ltr">{{ $selected->merchant_code }}</code>

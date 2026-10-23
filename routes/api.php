@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\MerchantController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\ScanController;
+use App\Http\Controllers\Api\V1\SeminarController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,6 +22,8 @@ use Illuminate\Support\Facades\Route;
 // Sign-in: the customer messages our WhatsApp first, then receives an OTP
 Route::post('auth/methods', [AuthController::class, 'methods'])->middleware('throttle:password-login');
 Route::post('auth/login', [AuthController::class, 'login'])->middleware('throttle:password-login');
+// Sign back in on a phone locked with fingerprint, Face ID or the app PIN
+Route::post('auth/quick-login', [AuthController::class, 'quickLogin'])->middleware('throttle:password-login');
 
 Route::prefix('auth/whatsapp')->group(function () {
     Route::post('start', [AuthController::class, 'start'])->middleware('throttle:otp-start');
@@ -43,9 +46,15 @@ Route::get('content/faq', [AppController::class, 'faq']);
 Route::get('content/pages/{slug}', [AppController::class, 'page']);
 Route::get('ranks', [LoyaltyController::class, 'ranks']);
 
+// Seminars with a prize draw: public to read, an account to sign up
+Route::get('seminars/current', [SeminarController::class, 'current']);
+Route::get('seminars/{id}', [SeminarController::class, 'show'])->whereNumber('id');
+
 Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::post('auth/logout', [AuthController::class, 'logout']);
     Route::post('auth/logout-all', [AuthController::class, 'logoutAll']);
+    Route::post('auth/quick-login/enable', [AuthController::class, 'enableQuickLogin'])->middleware('throttle:10,1');
+    Route::post('auth/quick-login/disable', [AuthController::class, 'disableQuickLogin']);
     Route::post('user/complete-profile', [AuthController::class, 'completeProfile'])->middleware('throttle:10,1');
     Route::put('user/password', [AuthController::class, 'updatePassword'])->middleware('throttle:10,1');
 
@@ -62,6 +71,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::post('sync-batch', [ScanController::class, 'syncBatch'])->middleware('throttle:10,1');
     });
     Route::get('merchants/my-recent', [ScanController::class, 'recentMerchants']);
+    Route::post('seminars/{id}/register', [SeminarController::class, 'register'])->whereNumber('id')->middleware('throttle:20,1');
 
     // Loyalty wallet and lucky wheel
     Route::get('wallet', [LoyaltyController::class, 'wallet']);

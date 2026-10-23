@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Exceptions\ApiException;
 use App\Models\AppNotification;
 use App\Models\Cart;
+use App\Models\DeviceLogin;
 use App\Models\DeviceToken;
 use App\Models\ShippingAddress;
 use App\Models\User;
@@ -39,6 +40,7 @@ class AccountController extends ApiController
         DB::transaction(function () use ($user) {
             $user->tokens()->delete();
             DeviceToken::where('user_id', $user->id)->delete();
+            DeviceLogin::where('user_id', $user->id)->delete();
             AppNotification::where('user_id', $user->id)->delete();
             Cart::where('user_id', $user->id)->get()->each(function (Cart $cart) {
                 $cart->items()->delete();

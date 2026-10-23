@@ -126,7 +126,7 @@
             {{ __('admin.commerce.visible_in_store') }}
         </label>
 
-        <div class="flex justify-end gap-3 border-t border-[#E4E0D7] pt-5">
+        <div class="flex justify-end gap-3 border-t border-[#ECECEF] pt-5">
             <button type="button" onclick="goProductStep(2)" class="ui-btn ui-btn-primary" @disabled($categories->isEmpty())>{{ __('admin.commerce.next') }}</button>
         </div>
     </div>
@@ -156,7 +156,7 @@
             <p class="ui-muted mt-1 text-xs">{{ __('admin.commerce.sku_hint') }}</p>
         </div>
 
-        <div class="rounded-xl border border-[#E4E0D7] bg-[#F7F5F0] p-6 text-center">
+        <div class="rounded-xl border border-[#ECECEF] bg-[#F7F5F0] p-6 text-center">
             <img id="skuBarcodePreview"
                  src="{{ $product->exists && $product->sku ? route('admin.products.barcode', $product) : '' }}"
                  alt="barcode"
@@ -182,7 +182,7 @@
             </div>
         </div>
 
-        <div class="flex justify-between gap-3 border-t border-[#E4E0D7] pt-5">
+        <div class="flex justify-between gap-3 border-t border-[#ECECEF] pt-5">
             <button type="button" onclick="goProductStep(1)" class="ui-btn ui-btn-ghost">{{ __('admin.commerce.prev') }}</button>
             <button type="button" onclick="goProductStep(3)" class="ui-btn ui-btn-primary">{{ __('admin.commerce.next') }}</button>
         </div>
@@ -195,7 +195,7 @@
             <p class="ui-muted mt-1 text-sm">{{ __('admin.commerce.step_variants_hint') }}</p>
         </div>
 
-        <div class="rounded-xl border border-[#E4E0D7] p-4" x-data="productRows(@js($oldColors))">
+        <div class="rounded-xl border border-[#ECECEF] p-4" x-data="productRows(@js($oldColors))">
             <div class="mb-3 flex items-center justify-between gap-2">
                 <div>
                     <h3 class="text-sm font-semibold">{{ __('admin.commerce.colors') }}</h3>
@@ -207,14 +207,14 @@
                 <template x-for="(row, index) in rows" :key="index">
                     <div class="grid grid-cols-[1fr_auto_auto] items-center gap-2">
                         <input type="text" :name="`colors[${index}][name]`" x-model="row.name" class="ui-input" placeholder="{{ __('admin.commerce.color_name') }}" dir="rtl">
-                        <input type="color" :name="`colors[${index}][hex]`" x-model="row.hex" class="h-10 w-12 cursor-pointer rounded border border-[#D8D4CB] bg-white p-1">
+                        <input type="color" :name="`colors[${index}][hex]`" x-model="row.hex" class="h-10 w-12 cursor-pointer rounded border border-[#E6E6EA] bg-white p-1">
                         <button type="button" class="ui-btn ui-btn-ghost text-xs text-red-700" @click="remove(index)" x-show="rows.length > 1">{{ __('admin.delete') }}</button>
                     </div>
                 </template>
             </div>
         </div>
 
-        <div class="rounded-xl border border-[#E4E0D7] p-4" x-data="productRows(@js($oldOptions))">
+        <div class="rounded-xl border border-[#ECECEF] p-4" x-data="productRows(@js($oldOptions))">
             <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
                 <div>
                     <h3 class="text-sm font-semibold">{{ __('admin.commerce.options') }}</h3>
@@ -240,7 +240,7 @@
             </div>
         </div>
 
-        <div class="flex justify-between gap-3 border-t border-[#E4E0D7] pt-5">
+        <div class="flex justify-between gap-3 border-t border-[#ECECEF] pt-5">
             <button type="button" onclick="goProductStep(2)" class="ui-btn ui-btn-ghost">{{ __('admin.commerce.prev') }}</button>
             <button type="button" onclick="goProductStep(4)" class="ui-btn ui-btn-primary">{{ __('admin.commerce.next') }}</button>
         </div>
@@ -258,7 +258,7 @@
             <input type="file" name="image" accept="image/*" class="ui-input">
             @if($product->image_path)
                 <div class="mt-2 flex items-center gap-3">
-                    <img src="{{ $product->image_url }}" alt="{{ $product->name_ar }}" class="h-20 w-20 rounded-lg border border-[#D8D4CB] object-cover">
+                    <img src="{{ $product->image_url }}" alt="{{ $product->name_ar }}" class="h-20 w-20 rounded-lg border border-[#E6E6EA] object-cover">
                     <label class="flex items-center gap-2 text-sm text-red-600">
                         <input type="checkbox" name="delete_image" value="1">
                         {{ __('admin.commerce.delete_current_image') }}
@@ -308,7 +308,7 @@
             <div id="newPreviews" class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3"></div>
         </div>
 
-        <div class="flex flex-wrap justify-between gap-3 border-t border-[#E4E0D7] pt-5">
+        <div class="flex flex-wrap justify-between gap-3 border-t border-[#ECECEF] pt-5">
             <button type="button" onclick="goProductStep(3)" class="ui-btn ui-btn-ghost">{{ __('admin.commerce.prev') }}</button>
             <div class="flex gap-3">
                 <a href="{{ route('admin.products.index') }}" class="ui-btn ui-btn-ghost">{{ __('admin.cancel') }}</a>

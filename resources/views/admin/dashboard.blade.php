@@ -26,10 +26,10 @@
 
 @if(\App\Support\AdminAccess::can(auth()->user(), 'risk'))
     <a href="{{ route('admin.risk.index') }}"
-       class="mb-5 block overflow-hidden rounded-2xl border {{ $fraudHot ? 'border-red-300 bg-red-50 shadow-[0_0_0_1px_rgba(220,38,38,0.08)]' : 'border-[#E4E0D7] bg-white' }} transition hover:opacity-95">
-        <div class="flex flex-wrap items-start justify-between gap-3 px-5 py-4 {{ $fraudHot ? 'bg-red-600 text-white' : 'bg-[#F9F8F5] text-maqam-ink' }}">
+       class="mb-5 block overflow-hidden rounded-2xl border {{ $fraudHot ? 'border-red-300 bg-red-50 shadow-[0_0_0_1px_rgba(220,38,38,0.08)]' : 'border-[#ECECEF] bg-white' }} transition hover:opacity-95">
+        <div class="flex flex-wrap items-start justify-between gap-3 px-5 py-4 {{ $fraudHot ? 'bg-red-600 text-white' : 'bg-[#F7F7F8] text-maqam-ink' }}">
             <div class="flex items-center gap-3">
-                <div class="flex h-10 w-10 items-center justify-center rounded-xl {{ $fraudHot ? 'bg-white/15' : 'bg-white border border-[#E4E0D7]' }}">
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl {{ $fraudHot ? 'bg-white/15' : 'bg-white border border-[#ECECEF]' }}">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
                     </svg>
@@ -42,9 +42,9 @@
                 </div>
             </div>
             <div class="flex flex-wrap gap-2 text-xs font-semibold">
-                <span class="rounded-full px-2.5 py-1 {{ $fraudHot ? 'bg-white/15' : 'bg-white border border-[#E4E0D7]' }}">{{ __('admin.home.high_risk') }}: {{ $fraudAlerts['frozen'] }}</span>
-                <span class="rounded-full px-2.5 py-1 {{ $fraudHot ? 'bg-white/15' : 'bg-white border border-[#E4E0D7]' }}">{{ __('admin.risk.geo_velocity') }}: {{ $fraudAlerts['geo'] }}</span>
-                <span class="rounded-full px-2.5 py-1 {{ $fraudHot ? 'bg-white/15' : 'bg-white border border-[#E4E0D7]' }}">{{ __('admin.home.failed_sync') }}: {{ $fraudAlerts['failed_sync'] }}</span>
+                <span class="rounded-full px-2.5 py-1 {{ $fraudHot ? 'bg-white/15' : 'bg-white border border-[#ECECEF]' }}">{{ __('admin.home.high_risk') }}: {{ $fraudAlerts['frozen'] }}</span>
+                <span class="rounded-full px-2.5 py-1 {{ $fraudHot ? 'bg-white/15' : 'bg-white border border-[#ECECEF]' }}">{{ __('admin.risk.geo_velocity') }}: {{ $fraudAlerts['geo'] }}</span>
+                <span class="rounded-full px-2.5 py-1 {{ $fraudHot ? 'bg-white/15' : 'bg-white border border-[#ECECEF]' }}">{{ __('admin.home.failed_sync') }}: {{ $fraudAlerts['failed_sync'] }}</span>
             </div>
         </div>
         @if($fraudHot && !empty($fraudAlerts['items']))
@@ -67,167 +67,166 @@
 
 {{-- Period glance --}}
 <div class="mb-5 grid gap-3 sm:grid-cols-3">
-    <div class="rounded-xl border border-[#E4E0D7] bg-white px-4 py-3">
+    <div class="rounded-xl border border-[#ECECEF] bg-white px-4 py-3">
         <div class="ui-muted text-xs">{{ __('admin.home.period_today') }}</div>
         <div class="mt-1 text-xl font-bold">{{ number_format($stats['revenue_today'], 0) }} <span class="text-sm font-medium text-maqam-muted">ج.م</span></div>
         <div class="mt-1 text-xs text-maqam-muted">{{ $stats['orders_today'] }} {{ __('admin.home.orders_today') }}</div>
     </div>
-    <div class="rounded-xl border border-[#E4E0D7] bg-white px-4 py-3">
+    <div class="rounded-xl border border-[#ECECEF] bg-white px-4 py-3">
         <div class="ui-muted text-xs">{{ __('admin.home.period_week') }}</div>
         <div class="mt-1 text-xl font-bold">{{ number_format($stats['revenue_week'], 0) }} <span class="text-sm font-medium text-maqam-muted">ج.م</span></div>
         <div class="mt-1 text-xs text-maqam-muted">{{ $stats['orders_week'] }} {{ __('admin.home.orders_7d') }}</div>
     </div>
-    <div class="rounded-xl border border-[#E4E0D7] bg-white px-4 py-3">
+    <div class="rounded-xl border border-[#ECECEF] bg-white px-4 py-3">
         <div class="ui-muted text-xs">{{ __('admin.home.period_month') }}</div>
         <div class="mt-1 text-xl font-bold">{{ number_format($stats['revenue_month'], 0) }} <span class="text-sm font-medium text-maqam-muted">ج.م</span></div>
         <div class="mt-1 text-xs text-maqam-muted">{{ $stats['orders_month'] }} {{ __('admin.home.orders_month') }}</div>
     </div>
 </div>
 
-{{-- KPI row --}}
+{{-- KPI row: tinted icon, big figure, change against yesterday and a dot-matrix of the last 7 days --}}
+@php
+    $series = [
+        'orders' => $ordersPerDay->pluck('value')->map(fn ($v) => (int) $v)->all(),
+        'revenue' => $revenuePerDay->pluck('value')->map(fn ($v) => (float) $v)->all(),
+        'scans' => $scansPerDay->pluck('value')->map(fn ($v) => (int) $v)->all(),
+    ];
+    // Today against yesterday, from the last two days of each series
+    $change = function (array $values): ?float {
+        $today = (float) ($values[count($values) - 1] ?? 0);
+        $yesterday = (float) ($values[count($values) - 2] ?? 0);
+
+        return $yesterday > 0 ? round(($today - $yesterday) / $yesterday * 100, 1) : null;
+    };
+    $kpis = [
+        [
+            'label' => __('admin.home.revenue'), 'route' => route('admin.orders.index'),
+            'value' => number_format($stats['revenue'], 0), 'unit' => 'ج.م',
+            'series' => $series['revenue'], 'color' => '#C5A059', 'tile' => 'bg-[#FBF5EA] text-[#9A7B3A]',
+            'icon' => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+        ],
+        [
+            'label' => __('admin.home.new_orders'), 'route' => route('admin.orders.index', ['view' => 'kanban']),
+            'value' => number_format($stats['orders_new']), 'unit' => null,
+            'series' => $series['orders'], 'color' => '#7C5CFA', 'tile' => 'bg-[#F3EFFF] text-[#6D4AE8]',
+            'icon' => 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z',
+        ],
+        [
+            'label' => __('admin.home.scans_today'), 'route' => route('admin.scans.index'),
+            'value' => number_format($stats['scans_today']), 'unit' => null,
+            'series' => $series['scans'], 'color' => '#F97316', 'tile' => 'bg-[#FFF3EA] text-[#EA6A0C]',
+            'icon' => 'M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 3h2m4 0h0m-6 3h6m-3-6h3',
+        ],
+        [
+            'label' => __('admin.home.customers'), 'route' => route('admin.customers.index'),
+            'value' => number_format($stats['customers']), 'unit' => null,
+            'series' => null, 'color' => null, 'tile' => 'bg-[#ECFDF3] text-[#15803D]',
+            'icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
+            'hint' => $stats['pending_merchants'].' '.__('admin.home.pending_merchants_short'),
+        ],
+    ];
+@endphp
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-    <a href="{{ route('admin.orders.index') }}" class="ui-kpi group">
-        <div class="flex items-start justify-between">
-            <div class="ui-kpi-label">{{ __('admin.home.revenue') }}</div>
-            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#EAE7DF] text-maqam-navy">
-                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
+    @foreach($kpis as $kpi)
+        @php $delta = $kpi['series'] ? $change($kpi['series']) : null; @endphp
+        <a href="{{ $kpi['route'] }}" class="ui-kpi group">
+            <div class="flex items-center gap-3">
+                <span class="ui-icon-tile {{ $kpi['tile'] }}">
+                    <svg class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="{{ $kpi['icon'] }}"/></svg>
+                </span>
+                <span class="ui-kpi-label flex-1">{{ $kpi['label'] }}</span>
+                <svg class="h-4 w-4 text-maqam-muted transition group-hover:text-maqam-ink {{ $isRtl ?? (app()->getLocale() === 'ar') ? '-scale-x-100' : '' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 17L17 7M9 7h8v8"/></svg>
             </div>
-        </div>
-        <div class="ui-kpi-value">{{ number_format($stats['revenue'], 0) }} <span class="text-base font-medium text-maqam-muted">ج.م</span></div>
-        <div class="ui-kpi-hint">{{ $stats['orders_today'] }} {{ __('admin.home.orders_today') }}</div>
-    </a>
-    <a href="{{ route('admin.orders.index', ['view' => 'kanban']) }}" class="ui-kpi group">
-        <div class="flex items-start justify-between">
-            <div class="ui-kpi-label">{{ __('admin.home.new_orders') }}</div>
-            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#EAE7DF] text-maqam-navy">
-                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                </svg>
+            <div class="mt-4 flex items-end justify-between gap-3">
+                <div class="min-w-0">
+                    <div class="ui-kpi-value !mt-0 truncate">{{ $kpi['value'] }}@if($kpi['unit'])<span class="text-base font-medium text-maqam-muted"> {{ $kpi['unit'] }}</span>@endif</div>
+                    <div class="mt-1.5 text-xs text-maqam-muted">
+                        @if($delta !== null)
+                            <span class="font-semibold {{ $delta >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]' }}">{{ $delta >= 0 ? '▲' : '▼' }} {{ abs($delta) }}%</span>
+                            {{ __('admin.home.vs_yesterday') }}
+                        @elseif(!empty($kpi['hint']))
+                            {{ $kpi['hint'] }}
+                        @else
+                            {{ __('admin.home.chart_last_7_days') }}
+                        @endif
+                    </div>
+                </div>
+                @if($kpi['series'])
+                    @include('admin.components.dots', ['values' => $kpi['series'], 'color' => $kpi['color'], 'rows' => 9, 'size' => 4])
+                @endif
             </div>
-        </div>
-        <div class="ui-kpi-value">{{ $stats['orders_new'] }}</div>
-        <div class="mt-1 text-xs text-maqam-muted">{{ __('admin.home.from_total') }} {{ $stats['orders_total'] }}</div>
-    </a>
-    <a href="{{ route('admin.products.index') }}" class="ui-kpi group">
-        <div class="flex items-start justify-between">
-            <div class="ui-kpi-label">{{ __('admin.nav.products') }}</div>
-            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#EAE7DF] text-maqam-navy">
-                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                </svg>
-            </div>
-        </div>
-        <div class="ui-kpi-value">{{ $stats['products'] }}</div>
-        <div class="mt-1 text-xs {{ $stats['low_stock'] ? 'text-amber-700' : 'text-maqam-muted' }}">
-            {{ $stats['low_stock'] }} {{ __('admin.home.low_stock') }}
-        </div>
-    </a>
-    <a href="{{ route('admin.customers.index') }}" class="ui-kpi group">
-        <div class="flex items-start justify-between">
-            <div class="ui-kpi-label">{{ __('admin.home.customers') }}</div>
-            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#EAE7DF] text-maqam-navy">
-                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                </svg>
-            </div>
-        </div>
-        <div class="ui-kpi-value">{{ $stats['customers'] }}</div>
-        <div class="mt-1 text-xs text-maqam-muted">
-            {{ $stats['pending_merchants'] }} {{ __('admin.home.pending_merchants_short') }}
-        </div>
-    </a>
+        </a>
+    @endforeach
 </div>
 
-{{-- 7-day charts --}}
+{{-- The week at a glance, drawn as a dot matrix: one cluster per day (orders, revenue, scans) --}}
 @php
-    $chartRows = $ordersPerDay->values()->map(function ($orderPoint, $i) use ($revenuePerDay, $scansPerDay) {
-        return [
-            'label' => $orderPoint['label'],
-            'orders' => (int) $orderPoint['value'],
-            'revenue' => (float) ($revenuePerDay->values()[$i]['value'] ?? 0),
-            'scans' => (int) ($scansPerDay->values()[$i]['value'] ?? 0),
-        ];
-    });
-    $chartHasData = $chartRows->sum(fn ($r) => $r['orders'] + $r['revenue'] + $r['scans']) > 0;
-    $chartH = 200;
-    $chartPadTop = 16;
-    $chartPadBottom = 36;
-    $plotH = $chartH - $chartPadTop - $chartPadBottom;
-    $dayCount = max(1, $chartRows->count());
-    $groupW = 100 / $dayCount;
+    $chartHasData = array_sum($series['orders']) + array_sum($series['revenue']) + array_sum($series['scans']) > 0;
+    $dayLabels = $ordersPerDay->pluck('label')->all();
+    $chartRows = 14;
+    $norm = fn (array $values) => array_map(fn ($v) => $v > 0 ? max(1, (int) round($v / max(1, max($values)) * $chartRows)) : 0, $values);
+    $lit = ['orders' => $norm($series['orders']), 'revenue' => $norm($series['revenue']), 'scans' => $norm($series['scans'])];
+    $colors = ['orders' => '#7C5CFA', 'revenue' => '#C5A059', 'scans' => '#F97316'];
 @endphp
 <div class="ui-panel mt-5">
-    <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+    <div class="mb-5 flex flex-wrap items-start justify-between gap-4">
         <div>
             <h2 class="ui-section-title">{{ __('admin.home.chart_last_7_days') }}</h2>
-            <p class="ui-muted text-sm">{{ __('admin.home.chart_overview_hint') }}</p>
-        </div>
-        <div class="flex flex-wrap gap-4 text-xs font-medium">
-            <span class="inline-flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5 rounded-sm" style="background:#1B2A4A"></span>{{ __('admin.home.chart_legend_orders') }}</span>
-            <span class="inline-flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5 rounded-sm" style="background:#C4A574"></span>{{ __('admin.home.chart_legend_revenue') }}</span>
-            <span class="inline-flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5 rounded-sm" style="background:#059669"></span>{{ __('admin.home.chart_legend_scans') }}</span>
-        </div>
-    </div>
-
-    <div class="relative overflow-hidden rounded-xl border border-[#E8E4DA] bg-white p-3 sm:p-4">
-        @if(! $chartHasData)
-            <div class="flex min-h-[220px] flex-col items-center justify-center gap-2 py-10 text-center">
-                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-[#F3F1EB] text-maqam-muted">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3v18h18M7 16l4-5 3 3 5-7"/></svg>
-                </div>
-                <p class="font-medium text-maqam-ink">{{ __('admin.home.chart_no_data') }}</p>
-                <p class="max-w-sm text-sm text-maqam-muted">{{ __('admin.home.chart_no_data_hint') }}</p>
+            <div class="mt-3 text-[2.25rem] font-semibold leading-none tracking-tight">
+                {{ number_format(array_sum($series['revenue']), 0) }} <span class="text-base font-medium text-maqam-muted">ج.م</span>
             </div>
-        @else
-            <svg viewBox="0 0 700 {{ $chartH }}" class="h-auto w-full" style="min-height:220px" role="img" aria-label="{{ __('admin.home.chart_last_7_days') }}" preserveAspectRatio="xMidYMid meet">
-                {{-- grid --}}
-                @for($g = 0; $g <= 4; $g++)
-                    @php $gy = $chartPadTop + ($plotH * $g / 4); @endphp
-                    <line x1="0" y1="{{ $gy }}" x2="700" y2="{{ $gy }}" stroke="#EDEAE3" stroke-width="1"/>
-                @endfor
-                <line x1="0" y1="{{ $chartPadTop + $plotH }}" x2="700" y2="{{ $chartPadTop + $plotH }}" stroke="#D8D4CB" stroke-width="1.5"/>
-
-                @foreach($chartRows as $i => $row)
-                    @php
-                        $cx = (($i + 0.5) * $groupW / 100) * 700;
-                        $barW = 14;
-                        $gap = 4;
-                        $hO = $row['orders'] > 0 ? max(8, ($row['orders'] / $maxOrders) * $plotH) : 0;
-                        $hR = $row['revenue'] > 0 ? max(8, ($row['revenue'] / $maxRevenue) * $plotH) : 0;
-                        $hS = $row['scans'] > 0 ? max(8, ($row['scans'] / $maxScans) * $plotH) : 0;
-                        $base = $chartPadTop + $plotH;
-                        $x0 = $cx - ($barW * 1.5) - $gap;
-                    @endphp
-                    <rect x="{{ $x0 }}" y="{{ $base - $hO }}" width="{{ $barW }}" height="{{ $hO }}" rx="3" fill="#1B2A4A">
-                        <title>{{ $row['label'] }} — {{ __('admin.home.chart_legend_orders') }}: {{ $row['orders'] }}</title>
-                    </rect>
-                    <rect x="{{ $x0 + $barW + $gap }}" y="{{ $base - $hR }}" width="{{ $barW }}" height="{{ $hR }}" rx="3" fill="#C4A574">
-                        <title>{{ $row['label'] }} — {{ __('admin.home.chart_legend_revenue') }}: {{ number_format($row['revenue'], 0) }}</title>
-                    </rect>
-                    <rect x="{{ $x0 + ($barW + $gap) * 2 }}" y="{{ $base - $hS }}" width="{{ $barW }}" height="{{ $hS }}" rx="3" fill="#059669">
-                        <title>{{ $row['label'] }} — {{ __('admin.home.chart_legend_scans') }}: {{ $row['scans'] }}</title>
-                    </rect>
-                    <text x="{{ $cx }}" y="{{ $chartH - 12 }}" text-anchor="middle" fill="#7A756A" font-size="12" font-family="'IBM Plex Sans Arabic', Inter, 'DM Sans', sans-serif">{{ $row['label'] }}</text>
-                @endforeach
-            </svg>
-        @endif
+            <p class="ui-muted mt-2 !text-sm">{{ __('admin.home.chart_overview_hint') }}</p>
+        </div>
+        <div class="flex flex-wrap gap-4 text-xs font-medium text-maqam-muted">
+            @foreach(['orders', 'revenue', 'scans'] as $key)
+                <span class="inline-flex items-center gap-1.5">
+                    <span class="inline-block h-2 w-2 rounded-full" style="background: {{ $colors[$key] }}"></span>
+                    {{ __('admin.home.chart_legend_'.$key) }}
+                </span>
+            @endforeach
+        </div>
     </div>
 
-    <div class="mt-4 grid gap-3 sm:grid-cols-3">
-        <div class="rounded-xl border border-[#E8E4DA] bg-[#F9F8F5] px-4 py-3 text-center sm:text-start">
-            <div class="text-xs text-maqam-muted">{{ __('admin.home.chart_legend_orders') }} · {{ __('admin.home.chart_last_7_days') }}</div>
-            <div class="mt-1 text-2xl font-bold tracking-tight">{{ (int) $ordersPerDay->sum('value') }}</div>
+    @if(! $chartHasData)
+        <div class="flex min-h-[220px] flex-col items-center justify-center gap-2 rounded-2xl bg-[#FAFAFB] py-10 text-center">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-white text-maqam-muted shadow-sm">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3v18h18M7 16l4-5 3 3 5-7"/></svg>
+            </div>
+            <p class="font-medium text-maqam-ink">{{ __('admin.home.chart_no_data') }}</p>
+            <p class="max-w-sm text-sm text-maqam-muted">{{ __('admin.home.chart_no_data_hint') }}</p>
         </div>
-        <div class="rounded-xl border border-[#E8E4DA] bg-[#F9F8F5] px-4 py-3 text-center sm:text-start">
-            <div class="text-xs text-maqam-muted">{{ __('admin.home.chart_legend_revenue') }} · {{ __('admin.home.chart_last_7_days') }}</div>
-            <div class="mt-1 text-2xl font-bold tracking-tight">{{ number_format($revenuePerDay->sum('value'), 0) }} <span class="text-sm font-medium text-maqam-muted">ج.م</span></div>
+    @else
+        <div class="overflow-x-auto">
+            <div class="flex min-w-[560px] items-end justify-between gap-2" role="img" aria-label="{{ __('admin.home.chart_last_7_days') }}">
+                @foreach($dayLabels as $i => $label)
+                    <div class="flex flex-1 flex-col items-center gap-2"
+                         title="{{ $label }} — {{ __('admin.home.chart_legend_orders') }}: {{ $series['orders'][$i] }} · {{ __('admin.home.chart_legend_revenue') }}: {{ number_format($series['revenue'][$i], 0) }} · {{ __('admin.home.chart_legend_scans') }}: {{ $series['scans'][$i] }}">
+                        <div class="flex items-end gap-[3px]">
+                            @foreach(['orders', 'revenue', 'scans'] as $key)
+                                <div class="ui-dots-col" style="--dot: {{ $colors[$key] }}">
+                                    @for($r = 0; $r < $chartRows; $r++)
+                                        <i @class(['on' => $r < $lit[$key][$i]]) style="width:6px;height:6px"></i>
+                                    @endfor
+                                </div>
+                            @endforeach
+                        </div>
+                        <span class="text-xs {{ $loop->last ? 'font-semibold text-maqam-ink' : 'text-maqam-muted' }}">{{ $label }}</span>
+                    </div>
+                @endforeach
+            </div>
         </div>
-        <div class="rounded-xl border border-[#E8E4DA] bg-[#F9F8F5] px-4 py-3 text-center sm:text-start">
-            <div class="text-xs text-maqam-muted">{{ __('admin.home.chart_legend_scans') }} · {{ __('admin.home.chart_last_7_days') }}</div>
-            <div class="mt-1 text-2xl font-bold tracking-tight">{{ (int) $scansPerDay->sum('value') }}</div>
-        </div>
+    @endif
+
+    <div class="mt-5 grid gap-3 border-t border-[#F1F1F3] pt-4 sm:grid-cols-3">
+        @foreach(['orders' => (int) array_sum($series['orders']), 'revenue' => number_format(array_sum($series['revenue']), 0).' ج.م', 'scans' => (int) array_sum($series['scans'])] as $key => $total)
+            <div class="flex items-center gap-3">
+                <span class="inline-block h-8 w-1 rounded-full" style="background: {{ $colors[$key] }}"></span>
+                <div>
+                    <div class="text-xs text-maqam-muted">{{ __('admin.home.chart_legend_'.$key) }}</div>
+                    <div class="text-lg font-semibold tracking-tight">{{ $total }}</div>
+                </div>
+            </div>
+        @endforeach
     </div>
 </div>
 
@@ -244,10 +243,10 @@
         @endif
     </div>
     @if(\App\Support\AdminAccess::can(auth()->user(), 'orders'))
-    <div class="mt-4 grid gap-3 border-t border-[#E4E0D7] pt-4 sm:grid-cols-4">
+    <div class="mt-4 grid gap-3 border-t border-[#ECECEF] pt-4 sm:grid-cols-4">
         @foreach($orderStatusCounts as $st => $count)
             <a href="{{ route('admin.orders.index', ['view' => 'table', 'status' => $st]) }}"
-               class="rounded-lg bg-[#F9F8F5] px-3 py-3 text-center transition hover:bg-[#F3F1EB]">
+               class="rounded-lg bg-[#F7F7F8] px-3 py-3 text-center transition hover:bg-[#F4F4F5]">
                 <div class="text-lg font-bold text-maqam-ink">{{ $count }}</div>
                 <div class="ui-muted">{{ $statusLabels[$st] }}</div>
             </a>
@@ -259,9 +258,9 @@
 {{-- Gemini summary: light card (no heavy navy strip) --}}
 <div class="ui-panel mt-5 !p-0 overflow-hidden" x-data="{ open: false }">
     <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
-         :class="open ? 'border-b border-[#E4E0D7]' : ''">
+         :class="open ? 'border-b border-[#ECECEF]' : ''">
         <button type="button" @click="open = !open" class="flex min-w-0 flex-1 items-center gap-3 text-start">
-            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#EAE7DF] text-maqam-gold-dark">
+            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#F1F1F3] text-maqam-gold-dark">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path d="M12 2l1.2 4.2L17.5 7.5l-4.3 1.3L12 13l-1.2-4.2L6.5 7.5l4.3-1.3L12 2zm7 9l.8 2.8L23 15l-3.2.9L19 19l-.8-3.1L15 15l3.2-.9L19 11zM5 14l.7 2.4L8 17l-2.3.7L5 20l-.7-2.3L2 17l2.3-.6L5 14z"/>
                 </svg>
@@ -269,7 +268,7 @@
             <div class="min-w-0">
                 <div class="flex flex-wrap items-center gap-2">
                     <h2 class="ui-section-title">{{ __('admin.home.chart_overview') }}</h2>
-                    <span class="rounded-md bg-[#EAE7DF] px-2 py-0.5 text-[10px] font-semibold text-maqam-gold-dark">Gemini AI</span>
+                    <span class="rounded-md bg-[#F1F1F3] px-2 py-0.5 text-[10px] font-semibold text-maqam-gold-dark">Gemini AI</span>
                 </div>
                 <p class="mt-0.5 text-xs text-maqam-muted">{{ __('admin.home.ai_summary_hint') }}</p>
             </div>
@@ -290,7 +289,7 @@
         </div>
     </div>
 
-    <div x-show="open" x-collapse x-cloak class="bg-[#FBFBF9] px-5 py-5">
+    <div x-show="open" x-collapse x-cloak class="bg-[#FAFAFB] px-5 py-5">
         @if(! ($aiSummaryOk ?? false))
             <div class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-7 text-amber-900">
                 {{ $aiSummary }}
@@ -305,7 +304,7 @@
                         $title = $isTitle ? $first : null;
                         $body = $isTitle ? trim(implode("\n", array_slice($lines, 1))) : trim($block);
                     @endphp
-                    <div class="rounded-lg border border-[#E4E0D7] bg-white px-4 py-3">
+                    <div class="rounded-lg border border-[#ECECEF] bg-white px-4 py-3">
                         @if($title)
                             <div class="mb-1.5 text-xs font-semibold text-maqam-gold-dark">{{ $title }}</div>
                         @endif
@@ -328,7 +327,7 @@
         <div class="grid grid-cols-2 gap-3">
             @forelse($topProducts as $product)
                 <a href="{{ route('admin.products.edit', $product) }}" class="group">
-                    <div class="aspect-square overflow-hidden rounded-lg border border-[#E4E0D7] bg-[#EAE7DF]">
+                    <div class="aspect-square overflow-hidden rounded-lg border border-[#ECECEF] bg-[#F1F1F3]">
                         @if($product->thumbnailUrl())
                             <img src="{{ $product->thumbnailUrl() }}" alt="{{ $product->name_ar ?: $product->name_en }}" class="h-full w-full object-cover transition-transform group-hover:scale-105">
                         @else
@@ -356,7 +355,7 @@
         @forelse($lowStock as $product)
             <a href="{{ route('admin.products.edit', $product) }}" class="ui-row mb-2">
                 <div class="flex min-w-0 items-center gap-3">
-                    <div class="h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-[#E4E0D7] bg-[#EAE7DF]">
+                    <div class="h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-[#ECECEF] bg-[#F1F1F3]">
                         @if($product->thumbnailUrl())
                             <img src="{{ $product->thumbnailUrl() }}" alt="" class="h-full w-full object-cover">
                         @endif
@@ -401,36 +400,36 @@
             <a href="{{ route('admin.customers.index') }}" class="ui-btn ui-btn-ghost text-xs">{{ __('admin.nav.customers') }}</a>
         </div>
         <div class="grid gap-3 sm:grid-cols-3">
-            <div class="rounded-lg bg-[#F9F8F5] px-3 py-3">
+            <div class="rounded-lg bg-[#F7F7F8] px-3 py-3">
                 <div class="ui-muted text-xs">{{ __('admin.home.technicians_total') }}</div>
                 <div class="mt-1 text-xl font-bold">{{ number_format($stats['technicians_total']) }}</div>
             </div>
-            <div class="rounded-lg bg-[#F9F8F5] px-3 py-3">
+            <div class="rounded-lg bg-[#F7F7F8] px-3 py-3">
                 <div class="ui-muted text-xs">{{ __('admin.home.technicians_active') }}</div>
                 <div class="mt-1 text-xl font-bold">{{ number_format($stats['technicians_active']) }}</div>
             </div>
-            <div class="rounded-lg bg-[#F9F8F5] px-3 py-3">
+            <div class="rounded-lg bg-[#F7F7F8] px-3 py-3">
                 <div class="ui-muted text-xs">{{ __('admin.home.technicians_new_month') }}</div>
                 <div class="mt-1 text-xl font-bold">{{ number_format($stats['technicians_new_month']) }}</div>
             </div>
-            <div class="rounded-lg bg-[#F9F8F5] px-3 py-3">
+            <div class="rounded-lg bg-[#F7F7F8] px-3 py-3">
                 <div class="ui-muted text-xs">{{ __('admin.home.points_balance_total') }}</div>
                 <div class="mt-1 text-xl font-bold">{{ number_format($stats['points_balance_total']) }}</div>
             </div>
-            <div class="rounded-lg bg-[#F9F8F5] px-3 py-3">
+            <div class="rounded-lg bg-[#F7F7F8] px-3 py-3">
                 <div class="ui-muted text-xs">{{ __('admin.home.points_earned_month') }}</div>
                 <div class="mt-1 text-xl font-bold text-emerald-700">{{ number_format($stats['points_earned_month']) }}</div>
             </div>
-            <div class="rounded-lg bg-[#F9F8F5] px-3 py-3">
+            <div class="rounded-lg bg-[#F7F7F8] px-3 py-3">
                 <div class="ui-muted text-xs">{{ __('admin.home.points_spent_month') }}</div>
                 <div class="mt-1 text-xl font-bold text-amber-700">{{ number_format($stats['points_spent_month']) }}</div>
             </div>
         </div>
-        <div class="mt-4 border-t border-[#E4E0D7] pt-4">
+        <div class="mt-4 border-t border-[#ECECEF] pt-4">
             <div class="mb-2 text-sm font-medium">{{ __('admin.home.top_technicians') }}</div>
             <div class="space-y-2">
                 @forelse($topTechnicians as $tech)
-                    <a href="{{ route('admin.customers.show', $tech) }}" class="flex items-center justify-between rounded-lg bg-[#F9F8F5] px-3 py-2 text-sm transition hover:bg-[#F3F1EB]">
+                    <a href="{{ route('admin.customers.show', $tech) }}" class="flex items-center justify-between rounded-lg bg-[#F7F7F8] px-3 py-2 text-sm transition hover:bg-[#F4F4F5]">
                         <span class="font-medium">{{ $tech->user?->full_name ?: '—' }}</span>
                         <span class="ui-muted">{{ $tech->scans_month }} {{ __('admin.home.scans_month') }} · {{ number_format($tech->points_balance) }} pts</span>
                     </a>
@@ -447,19 +446,19 @@
             <a href="{{ route('admin.qr-codes.tracker') }}" class="ui-btn ui-btn-ghost text-xs">{{ __('admin.nav.qr_tracker') }}</a>
         </div>
         <div class="grid gap-3 sm:grid-cols-2">
-            <div class="rounded-lg bg-[#F9F8F5] px-3 py-3">
+            <div class="rounded-lg bg-[#F7F7F8] px-3 py-3">
                 <div class="ui-muted text-xs">{{ __('admin.qr.life_generated') }}</div>
                 <div class="mt-1 text-xl font-bold">{{ number_format($stats['qr_generated']) }}</div>
             </div>
-            <div class="rounded-lg bg-[#F9F8F5] px-3 py-3">
+            <div class="rounded-lg bg-[#F7F7F8] px-3 py-3">
                 <div class="ui-muted text-xs">{{ __('admin.qr.life_printed') }}</div>
                 <div class="mt-1 text-xl font-bold">{{ number_format($stats['qr_printed']) }}</div>
             </div>
-            <div class="rounded-lg bg-[#F9F8F5] px-3 py-3">
+            <div class="rounded-lg bg-[#F7F7F8] px-3 py-3">
                 <div class="ui-muted text-xs">{{ __('admin.qr.life_sold') }}</div>
                 <div class="mt-1 text-xl font-bold">{{ number_format($stats['qr_sold']) }}</div>
             </div>
-            <div class="rounded-lg bg-[#F9F8F5] px-3 py-3">
+            <div class="rounded-lg bg-[#F7F7F8] px-3 py-3">
                 <div class="ui-muted text-xs">{{ __('admin.qr.life_scanned') }}</div>
                 <div class="mt-1 text-xl font-bold">{{ number_format($stats['qr_scanned']) }}</div>
             </div>
@@ -481,27 +480,27 @@
         </div>
     </div>
     <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <div class="rounded-lg bg-[#F9F8F5] px-4 py-3">
+        <div class="rounded-lg bg-[#F7F7F8] px-4 py-3">
             <div class="ui-muted">{{ __('admin.home.scans_today') }}</div>
             <div class="mt-1 text-xl font-bold">{{ $stats['scans_today'] }}</div>
         </div>
-        <div class="rounded-lg bg-[#F9F8F5] px-4 py-3">
+        <div class="rounded-lg bg-[#F7F7F8] px-4 py-3">
             <div class="ui-muted">{{ __('admin.home.points_today') }}</div>
             <div class="mt-1 text-xl font-bold">{{ number_format($stats['points_today']) }}</div>
         </div>
-        <div class="rounded-lg bg-[#F9F8F5] px-4 py-3">
+        <div class="rounded-lg bg-[#F7F7F8] px-4 py-3">
             <div class="ui-muted">{{ __('admin.home.active_qr') }}</div>
             <div class="mt-1 text-xl font-bold">{{ number_format($stats['qr_active']) }}</div>
         </div>
-        <a href="{{ route('admin.rewards.index', ['status' => 'available']) }}" class="rounded-lg bg-[#F9F8F5] px-4 py-3 transition hover:bg-[#F3F1EB]">
+        <a href="{{ route('admin.rewards.index', ['status' => 'available']) }}" class="rounded-lg bg-[#F7F7F8] px-4 py-3 transition hover:bg-[#F4F4F5]">
             <div class="ui-muted">{{ __('admin.home.rewards_available') }}</div>
             <div class="mt-1 text-xl font-bold">{{ number_format($stats['rewards_available']) }}</div>
         </a>
-        <a href="{{ route('admin.rewards.index', ['status' => 'used']) }}" class="rounded-lg bg-[#F9F8F5] px-4 py-3 transition hover:bg-[#F3F1EB]">
+        <a href="{{ route('admin.rewards.index', ['status' => 'used']) }}" class="rounded-lg bg-[#F7F7F8] px-4 py-3 transition hover:bg-[#F4F4F5]">
             <div class="ui-muted">{{ __('admin.home.rewards_used') }}</div>
             <div class="mt-1 text-xl font-bold">{{ number_format($stats['rewards_used']) }}</div>
         </a>
-        <a href="{{ route('admin.rewards.index') }}" class="rounded-lg bg-[#F9F8F5] px-4 py-3 transition hover:bg-[#F3F1EB]">
+        <a href="{{ route('admin.rewards.index') }}" class="rounded-lg bg-[#F7F7F8] px-4 py-3 transition hover:bg-[#F4F4F5]">
             <div class="ui-muted">{{ __('admin.home.rewards_today') }}</div>
             <div class="mt-1 text-xl font-bold">{{ number_format($stats['rewards_today']) }}</div>
         </a>

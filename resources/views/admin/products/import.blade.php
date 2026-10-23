@@ -132,7 +132,7 @@
         @if($categories->isNotEmpty())
             <div class="max-h-72 space-y-2 overflow-y-auto pe-1">
                 @foreach($categories as $cat)
-                    <div class="rounded-lg border border-[#E8E4DA] bg-[#FAF8F3] px-3 py-2 text-xs">
+                    <div class="rounded-lg border border-[#ECECEF] bg-[#FAF8F3] px-3 py-2 text-xs">
                         <div class="font-medium text-maqam-ink">{{ $cat->name_ar ?: $cat->name_en }}</div>
                         <div class="mt-0.5 font-mono text-maqam-muted" dir="ltr">id: {{ $cat->id }} · slug: {{ $cat->slug ?: '—' }}</div>
                     </div>

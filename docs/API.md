@@ -627,3 +627,28 @@
 ### لوجو التاجر: `POST /merchant/logo` — محمي، multipart
 
 حقل `logo` (JPG / PNG / WebP حتى 2MB). و`POST /merchant/apply` يقبل `logo` اختيارياً عند الإرسال كـ multipart. قرار الإدارة يصل كإشعار `merchant_update`.
+
+### السيمينار والسحب على الجوائز
+
+السيمينار فعالية لها وقت بداية ونهاية وقائمة جوائز بترتيب السحب. العميل يسجل من التطبيق أثناء السيمينار، والإدارة تسحب من لوحة التحكم: كل سحبة تختار مسجلاً عشوائياً (لا يفوز أحد مرتين) ويصل للفائز إشعار من النوع `seminar` ومعه `seminar_id`.
+
+| المسار | الوصف |
+|---|---|
+| `GET /seminars/current` — عام | السيمينار الجاري الآن، أو `null`. يُعرض في الصفحة الرئيسية للتطبيق. |
+| `GET /seminars/{id}` — عام | سيمينار بجوائزه وفائزيه (جارٍ أو منتهٍ؛ `404` قبل بدايته) |
+| `POST /seminars/{id}/register` — محمي | تسجيل العميل في السحب. التكرار آمن. خارج وقت السيمينار ← `422 SEMINAR_NOT_OPEN` |
+
+```json
+{
+  "id": 3, "title": "سيمينار القاهرة", "description": "…", "location": "فندق …", "image_url": "https://…",
+  "starts_at": "2026-11-01T16:00:00+00:00", "ends_at": "2026-11-01T19:00:00+00:00",
+  "status": "live", "registrations_count": 128, "is_registered": true,
+  "draws": [
+    { "position": 1, "prize": "تليفزيون", "is_drawn": true, "winner_name": "أحمد •••678", "is_mine": false, "drawn_at": "…" },
+    { "position": 2, "prize": "شنيور", "is_drawn": false, "winner_name": null, "is_mine": false, "drawn_at": null }
+  ]
+}
+```
+
+- `status`: `live` (التسجيل مفتوح) أو `ended`. أرسل التوكن إن وُجد ليصل `is_registered` و`is_mine` صحيحين.
+- اسم الفائز يظهر للآخرين بالاسم الأول وآخر 3 أرقام من الجوال فقط.

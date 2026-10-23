@@ -49,7 +49,7 @@
             <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 @foreach($banners as $banner)
                     <article class="ui-card-static overflow-hidden p-0">
-                        <div class="aspect-[16/9] bg-[#EAE7DF]">
+                        <div class="aspect-[16/9] bg-[#F1F1F3]">
                             @if($banner->imageUrl())
                                 <img src="{{ $banner->imageUrl() }}" alt="{{ $banner->title_ar ?: $banner->title_en ?: 'banner' }}" class="h-full w-full object-cover">
                             @endif

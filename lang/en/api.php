@@ -30,6 +30,7 @@ return [
     ],
 
     'auth' => [
+        'quick_login_invalid' => 'Quick sign-in is no longer available on this phone. Sign in with your number.',
         'challenge_created' => 'Send the code to our WhatsApp number to receive your sign-in code.',
         'signed_in' => 'Signed in successfully.',
         'signed_out' => 'Signed out.',
@@ -123,6 +124,12 @@ return [
         'not_cancellable' => 'This order cannot be cancelled from the app. Please contact support.',
     ],
 
+    'seminar' => [
+        'not_open' => 'Signing up for this seminar is not open now.',
+        'registered' => 'You are in the draw. Good luck!',
+        'won_title' => 'Congratulations! You won in the :seminar draw',
+        'won_body' => 'You won :prize. Contact the MAQAM team to collect your prize.',
+    ],
     'merchant' => [
         'already_applied' => 'You already have a merchant application.',
         'applied' => 'Your application was received and is under review.',
