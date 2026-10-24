@@ -142,6 +142,7 @@ class AdminAccess
             'admin.banners.' => 'commerce',
             'admin.notifications.' => 'notifications',
             'admin.seminars.' => 'notifications',
+            'admin.links.' => 'notifications',
             'admin.risk.' => 'risk',
             'admin.settings.' => 'settings',
             'admin.whatsapp.' => 'settings',

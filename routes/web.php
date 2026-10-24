@@ -46,6 +46,8 @@ Route::get('/', [StorefrontController::class, 'home'])->name('store.home');
 Route::get('/shop', [StorefrontController::class, 'shop'])->name('store.shop');
 Route::get('/product/{product}', [StorefrontController::class, 'product'])->name('store.product');
 Route::get('/about', [StorefrontController::class, 'about'])->name('store.about');
+Route::get('/links', [\App\Http\Controllers\Store\LinkPageController::class, 'show'])->name('store.links');
+Route::get('/links/go/{item}', [\App\Http\Controllers\Store\LinkPageController::class, 'go'])->name('store.links.go');
 Route::get('/contact', [StorefrontController::class, 'contact'])->name('store.contact');
 Route::post('/contact', [StorefrontController::class, 'submitContact'])->name('store.contact.submit');
 Route::get('/blog', [StorefrontController::class, 'blog'])->name('store.blog');
@@ -191,6 +193,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('notifications', [NotificationController::class, 'store'])->name('notifications.store');
 
         Route::resource('seminars', SeminarController::class);
+        Route::get('links', [\App\Http\Controllers\Admin\LinkPageController::class, 'index'])->name('links.index');
+        Route::post('links', [\App\Http\Controllers\Admin\LinkPageController::class, 'store'])->name('links.store');
+        Route::post('links/bio', [\App\Http\Controllers\Admin\LinkPageController::class, 'bio'])->name('links.bio');
+        Route::put('links/{link}', [\App\Http\Controllers\Admin\LinkPageController::class, 'update'])->name('links.update');
+        Route::delete('links/{link}', [\App\Http\Controllers\Admin\LinkPageController::class, 'destroy'])->name('links.destroy');
         Route::post('seminars/{seminar}/draw', [SeminarController::class, 'draw'])->name('seminars.draw');
         Route::post('seminars/{seminar}/draw-all', [SeminarController::class, 'drawAll'])->name('seminars.draw-all');
 

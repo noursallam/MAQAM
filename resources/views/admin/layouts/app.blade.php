@@ -75,6 +75,7 @@
                 ['module' => 'notifications', 'route' => 'admin.notifications.create', 'label' => __('admin.nav.notifications_composer'), 'match' => 'admin.notifications.create', 'badge' => null],
                 ['module' => 'notifications', 'route' => 'admin.notifications.index', 'label' => __('admin.nav.notifications_history'), 'match' => 'admin.notifications.index', 'badge' => null],
                 ['module' => 'notifications', 'route' => 'admin.seminars.index', 'label' => __('admin.nav.seminars'), 'match' => 'admin.seminars.*', 'badge' => null],
+                ['module' => 'notifications', 'route' => 'admin.links.index', 'label' => __('admin.nav.links_page'), 'match' => 'admin.links.*', 'badge' => null],
             ],
         ],
         [
