@@ -192,6 +192,7 @@ return [
         'mark_processing' => 'Mark processing',
         'mark_shipped' => 'Mark shipped',
         'mark_delivered' => 'Mark delivered',
+        'invalid_transition' => 'An order cannot go back to an earlier step, and a closed order cannot change.',
         'cancel' => 'Cancel order',
         'refund' => 'Refund',
         'empty' => 'No orders in this stage',

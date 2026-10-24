@@ -225,7 +225,7 @@
                 'shipped' => __('admin.orders.mark_shipped'),
                 'delivered' => __('admin.orders.mark_delivered'),
             ] as $st => $label)
-                @if($order->status !== $st && !in_array($order->status, ['cancelled','refunded','delivered'], true))
+                @if($order->status !== $st && \App\Http\Controllers\Admin\OrderController::canMove($order->status, $st))
                     <form method="POST" action="{{ route('admin.orders.status', $order) }}">
                         @csrf @method('PATCH')
                         <input type="hidden" name="status" value="{{ $st }}">
@@ -234,15 +234,19 @@
                 @endif
             @endforeach
 
+            @if(!in_array($order->status, ['cancelled','refunded'], true))
             <form method="POST" action="{{ route('admin.orders.status', $order) }}" class="space-y-2 ui-divider pt-3" onsubmit="return confirm(@json(__('admin.confirm')))">
                 @csrf @method('PATCH')
                 <select name="status" class="ui-select">
-                    <option value="cancelled">{{ __('admin.orders.cancel') }}</option>
+                    @if($order->status !== 'delivered')
+                        <option value="cancelled">{{ __('admin.orders.cancel') }}</option>
+                    @endif
                     <option value="refunded">{{ __('admin.orders.refund') }}</option>
                 </select>
                 <textarea name="cancellation_reason" rows="2" placeholder="{{ __('admin.orders.cancel_reason') }}" class="ui-textarea">{{ $order->cancellation_reason }}</textarea>
                 <button class="ui-btn ui-btn-block border border-red-200 bg-red-50 text-red-700 hover:bg-red-100">{{ __('admin.confirm') }}</button>
             </form>
+            @endif
         </div>
     </div>
 </div>

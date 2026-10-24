@@ -78,7 +78,9 @@ class CheckoutController extends Controller
         }
 
         try {
-            $user = Auth::user() ?? DB::transaction(fn () => $this->findOrCreateCustomer($cleanPhone, $validated['full_name']));
+            // Staff share the store's session; an order they place belongs to the phone they typed, not to them
+            $signedIn = Auth::user()?->role === 'admin' ? null : Auth::user();
+            $user = $signedIn ?? DB::transaction(fn () => $this->findOrCreateCustomer($cleanPhone, $validated['full_name']));
 
             $order = $this->orders->place($user, $cart, [
                 'full_name' => $validated['full_name'],

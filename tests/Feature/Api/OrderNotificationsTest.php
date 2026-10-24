@@ -167,6 +167,50 @@ class OrderNotificationsTest extends TestCase
         $this->assertSame(4, AppNotification::where('user_id', $user->id)->count());
     }
 
+    public function test_staff_cannot_move_an_order_back_to_an_earlier_step(): void
+    {
+        $user = $this->customer();
+        $order = $this->placeOrder($user);
+
+        $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+        Admin::create(['user_id' => $admin->id, 'role' => 'super_admin']);
+
+        $this->actingAs($admin)->from('/admin/orders')->patch(route('admin.orders.status', $order), ['status' => 'shipped']);
+        $this->actingAs($admin)->get(route('admin.orders.show', $order))
+            ->assertOk()
+            ->assertDontSee(__('admin.orders.mark_processing'))
+            ->assertSee(__('admin.orders.mark_delivered'));
+
+        $this->actingAs($admin)->from('/admin/orders')
+            ->patch(route('admin.orders.status', $order), ['status' => 'processing'])
+            ->assertSessionHas('error');
+
+        $this->assertSame('shipped', $order->fresh()->status);
+        // Placed, then shipped; the rejected move says nothing
+        $this->assertSame(2, AppNotification::where('user_id', $user->id)->count());
+    }
+
+    public function test_an_order_staff_place_on_the_website_belongs_to_the_phone_they_typed(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'is_active' => true, 'phone_number' => 'admin-abc']);
+        $category = Category::firstOrCreate(['slug' => 'switches'], ['name_en' => 'Switches', 'name_ar' => 'مفاتيح', 'is_active' => true]);
+        $product = Product::create([
+            'category_id' => $category->id, 'name_en' => 'Switch', 'name_ar' => 'مفتاح',
+            'price' => 100, 'stock_quantity' => 5, 'sku' => 'SKU-WEB', 'is_active' => true,
+        ]);
+
+        $this->actingAs($admin)->post(route('store.cart.add'), ['product_id' => $product->id, 'quantity' => 1]);
+        $this->actingAs($admin)->post(route('store.checkout.process'), [
+            'full_name' => 'أحمد', 'phone' => '01098765432', 'governorate' => 'القاهرة', 'city' => 'مدينة نصر',
+            'address' => 'شارع الطيران', 'payment_method' => 'cod',
+        ])->assertRedirect();
+
+        $order = Order::latest('id')->firstOrFail();
+        $this->assertSame('01098765432', $order->user->phone_number);
+        $this->assertSame(1, AppNotification::where('user_id', $order->user_id)->count());
+        Http::assertSent(fn (Request $r) => str_contains($r->url(), '/chats/send') && $r['receiver'] === '201098765432');
+    }
+
     public function test_cancelling_an_order_is_confirmed_to_the_customer(): void
     {
         $user = $this->customer();

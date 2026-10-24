@@ -61,6 +61,10 @@ class OrderController extends Controller
             'cancellation_reason' => ['nullable', 'string'],
         ]);
 
+        if (! $this->canMove($order->status, $data['status'])) {
+            return back()->with('error', __('admin.orders.invalid_transition'));
+        }
+
         $updates = ['status' => $data['status']];
 
         if ($data['status'] === 'shipped') {
@@ -82,5 +86,28 @@ class OrderController extends Controller
         }
 
         return back()->with('success', __('admin.orders.update_status').': '.__('admin.orders.'.$data['status']));
+    }
+
+    /**
+     * Orders only move forward through new → processing → shipped → delivered. Cancelling or refunding
+     * is allowed from any of those, and a cancelled or refunded order is closed for good.
+     */
+    public static function canMove(string $from, string $to): bool
+    {
+        if ($from === $to) {
+            return true;
+        }
+
+        if (in_array($from, ['cancelled', 'refunded'], true)) {
+            return false;
+        }
+
+        if (in_array($to, ['cancelled', 'refunded'], true)) {
+            return $to === 'refunded' || $from !== 'delivered';
+        }
+
+        $flow = ['new', 'processing', 'shipped', 'delivered'];
+
+        return array_search($to, $flow, true) > array_search($from, $flow, true);
     }
 }

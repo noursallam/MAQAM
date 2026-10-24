@@ -89,7 +89,16 @@ class OrderNotifier
             $phone = $order?->user?->phone_number;
 
             // Only real mobile numbers; staff and developer accounts have none
-            if (! $order || ! $this->whatsApp->isConfigured() || ! preg_match('/^01[0125]\d{8}$/', (string) $phone)) {
+            $skip = match (true) {
+                ! $order => 'order not found',
+                ! $this->whatsApp->isConfigured() => 'Senderbot not configured',
+                ! preg_match('/^01[0125]\d{8}$/', (string) $phone) => 'customer has no Egyptian mobile number',
+                default => null,
+            };
+
+            if ($skip) {
+                Log::info('Order WhatsApp message skipped', ['order_id' => $orderId, 'event' => $event, 'reason' => $skip]);
+
                 return;
             }
 
