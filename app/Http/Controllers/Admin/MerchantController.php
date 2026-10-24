@@ -99,6 +99,37 @@ class MerchantController extends Controller
         return redirect()->route('admin.merchants.index')->with('success', __('admin.success'));
     }
 
+    /**
+     * Everything about one merchant: the account, what the code earned, and every scan credited to it.
+     */
+    public function show(Merchant $merchant): View
+    {
+        $merchant->load(['user.customer.rank', 'approvedBy.user']);
+
+        $topCustomers = $merchant->qrScans()
+            ->select('customer_id', DB::raw('count(*) as scans'), DB::raw('sum(points_awarded_merchant) as points'), DB::raw('max(scanned_at) as last_scan'))
+            ->groupBy('customer_id')
+            ->orderByDesc('scans')
+            ->with('customer.user')
+            ->take(8)
+            ->get();
+
+        // Six months, oldest first, including months with no scans
+        $since = now()->startOfMonth()->subMonths(5);
+        $counts = $merchant->qrScans()->where('scanned_at', '>=', $since)->get(['scanned_at'])
+            ->countBy(fn ($scan) => $scan->scanned_at->format('Y-m'));
+        $months = collect(range(0, 5))->map(fn ($i) => $since->copy()->addMonths($i))
+            ->map(fn ($month) => ['label' => $month->translatedFormat('M Y'), 'count' => $counts[$month->format('Y-m')] ?? 0]);
+
+        return view('admin.merchants.show', [
+            'merchant' => $merchant,
+            'stats' => $merchant->stats(),
+            'months' => $months,
+            'topCustomers' => $topCustomers,
+            'scans' => $merchant->qrScans()->with(['customer.user', 'qrCode.categoryPrize'])->latest('scanned_at')->paginate(20),
+        ]);
+    }
+
     public function edit(Merchant $merchant): View
     {
         $merchant->load('user');
@@ -137,7 +168,7 @@ class MerchantController extends Controller
             'approved_by' => $isApproved ? ($merchant->approved_by ?? $request->user()->admin?->id) : null,
         ]);
 
-        return redirect()->route('admin.merchants.index')->with('success', __('admin.success'));
+        return redirect()->route('admin.merchants.show', $merchant)->with('success', __('admin.success'));
     }
 
     public function approve(Merchant $merchant, Request $request): RedirectResponse

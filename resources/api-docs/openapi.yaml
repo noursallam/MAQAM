@@ -1398,13 +1398,45 @@ paths:
                           - $ref: '#/components/schemas/Merchant'
                           - type: object
                             properties:
+                              owner_name: { type: string, nullable: true }
+                              created_at: { type: string, format: date-time, nullable: true }
                               stats:
                                 type: object
                                 properties:
                                   total_scans: { type: integer, example: 120 }
                                   total_points: { type: integer, example: 600 }
                                   scans_this_month: { type: integer, example: 18 }
+                                  points_this_month: { type: integer, example: 90 }
                                   unique_customers: { type: integer, example: 37 }
+                                  last_scan_at: { type: string, format: date-time, nullable: true }
+                              recent_scans:
+                                type: array
+                                description: The last 10 scans credited to the code, newest first.
+                                items: { $ref: '#/components/schemas/MerchantScan' }
+        "401": { $ref: '#/components/responses/Unauthenticated' }
+        "404":
+          description: The user never applied (`NOT_FOUND`).
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+
+  /merchant/scans:
+    get:
+      tags: [Merchant]
+      summary: Every scan credited to the merchant's code
+      description: Newest first. Customers' numbers arrive partly hidden.
+      parameters:
+        - { $ref: '#/components/parameters/Page' }
+        - { $ref: '#/components/parameters/PerPage' }
+      responses:
+        "200":
+          description: Scans with the merchant code.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Paginated'
+                  - type: object
+                    properties:
+                      data: { type: array, items: { $ref: '#/components/schemas/MerchantScan' } }
         "401": { $ref: '#/components/responses/Unauthenticated' }
         "404":
           description: The user never applied (`NOT_FOUND`).
@@ -1645,6 +1677,34 @@ paths:
                           latest_version: { type: string, example: 1.5.0 }
                           store_url: { type: string, nullable: true }
         "422": { $ref: '#/components/responses/ValidationError' }
+
+  /app/texts:
+    get:
+      tags: [App]
+      summary: Wording changed from the dashboard — call at launch and on returning to the app
+      description: |
+        Only texts the admin changed are listed, per language, keyed like the app's translation files.
+        Anything missing keeps the app's built-in wording. `{name}` placeholders match the built-in text's.
+      security: []
+      responses:
+        "200":
+          description: Changed texts.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          version: { type: integer, description: Unix time of the last change; 0 when none., example: 1792850400 }
+                          texts:
+                            type: object
+                            properties:
+                              ar: { type: object, additionalProperties: { type: string }, example: { accountHelp: "اتصل بنا" } }
+                              en: { type: object, additionalProperties: { type: string } }
 
   /content/faq:
     get:
@@ -2038,6 +2098,15 @@ components:
         logo_url: { type: string, nullable: true }
         is_approved: { type: boolean }
         approved_at: { type: string, format: date-time, nullable: true }
+    MerchantScan:
+      type: object
+      properties:
+        id: { type: integer, example: 312 }
+        customer_name: { type: string, nullable: true, example: منى علي }
+        customer_phone: { type: string, nullable: true, description: Partly hidden., example: "011****432" }
+        prize: { type: string, nullable: true, description: The pack's prize type in the request locale., example: عبوة ذهبية }
+        points: { type: integer, description: Points the merchant earned from this scan., example: 5 }
+        scanned_at: { type: string, format: date-time, nullable: true }
     Transaction:
       type: object
       properties:

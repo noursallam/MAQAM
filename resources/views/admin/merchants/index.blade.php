@@ -18,7 +18,7 @@
         <div class="ui-card p-5">
             <div class="flex items-start justify-between gap-2">
                 <div>
-                    <div class="font-semibold">{{ $merchant->business_name }}</div>
+                    <a href="{{ route('admin.merchants.show', $merchant) }}" class="font-semibold hover:underline">{{ $merchant->business_name }}</a>
                     <div class="ui-muted mt-1">{{ $merchant->user?->full_name }}</div>
                 </div>
                 <span class="ui-badge {{ $merchant->is_approved ? 'ui-badge-ok' : 'ui-badge-warn' }}">
@@ -33,6 +33,7 @@
                 @unless($merchant->is_approved)
                     <form method="POST" action="{{ route('admin.merchants.approve', $merchant) }}">@csrf<button class="ui-btn ui-btn-primary text-xs">{{ __('admin.merchants.approve') }}</button></form>
                 @endunless
+                <a href="{{ route('admin.merchants.show', $merchant) }}" class="ui-btn ui-btn-dark text-xs">{{ __('admin.merchants.view_profile') }}</a>
                 <a href="{{ route('admin.merchants.edit', $merchant) }}" class="ui-btn ui-btn-ghost text-xs">{{ __('admin.edit') }}</a>
             </div>
         </div>

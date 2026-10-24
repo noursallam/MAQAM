@@ -145,6 +145,7 @@ class AdminAccess
             'admin.links.' => 'notifications',
             'admin.risk.' => 'risk',
             'admin.settings.' => 'settings',
+            'admin.app-texts.' => 'settings',
             'admin.whatsapp.' => 'settings',
             'admin.admins.' => 'admins',
             'admin.admin-roles.' => 'admins',

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Exceptions\ApiException;
+use App\Models\AppText;
 use App\Models\SystemSetting;
 use App\Services\ChatbotService;
 use App\Support\LegalContent;
@@ -37,6 +38,14 @@ class AppController extends ApiController
             'latest_version' => $latest,
             'store_url' => (string) SystemSetting::getValue("app_store_url_{$platform}", '') ?: null,
         ]);
+    }
+
+    /**
+     * The app's wording as changed from the dashboard; anything missing keeps the app's own text.
+     */
+    public function texts(): JsonResponse
+    {
+        return $this->ok(AppText::payload());
     }
 
     public function faq(): JsonResponse

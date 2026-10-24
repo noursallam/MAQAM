@@ -4,11 +4,12 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Exceptions\ApiException;
 use App\Models\Merchant;
-use App\Models\QrScan;
 use App\Services\MediaService;
 use App\Support\ApiPresenter;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 class MerchantController extends ApiController
@@ -78,21 +79,37 @@ class MerchantController extends ApiController
      */
     public function show(Request $request): JsonResponse
     {
-        $merchant = $request->user()->merchant()->first();
+        $merchant = $this->merchant($request);
 
-        if (! $merchant) {
-            throw new ApiException('NOT_FOUND', __('api.not_found'), 404);
-        }
-
-        $scans = QrScan::where('merchant_id', $merchant->id);
+        $stats = $merchant->stats();
+        $stats['last_scan_at'] = $stats['last_scan_at'] ? Carbon::parse($stats['last_scan_at'])->toIso8601String() : null;
 
         return $this->ok(ApiPresenter::merchant($merchant) + [
-            'stats' => [
-                'total_scans' => (clone $scans)->count(),
-                'total_points' => (int) (clone $scans)->sum('points_awarded_merchant'),
-                'scans_this_month' => (clone $scans)->where('scanned_at', '>=', now()->startOfMonth())->count(),
-                'unique_customers' => (clone $scans)->distinct()->count('customer_id'),
-            ],
+            'owner_name' => $merchant->user?->full_name,
+            'created_at' => $merchant->created_at?->toIso8601String(),
+            'stats' => $stats,
+            'recent_scans' => $this->scanQuery($merchant)->take(10)->get()->map(ApiPresenter::merchantScan(...))->values(),
         ]);
+    }
+
+    /**
+     * Every scan credited to the merchant's code, newest first.
+     */
+    public function scans(Request $request): JsonResponse
+    {
+        $page = $this->scanQuery($this->merchant($request))->paginate($this->perPage($request));
+
+        return $this->paginated($page, ApiPresenter::merchantScan(...));
+    }
+
+    private function merchant(Request $request): Merchant
+    {
+        return $request->user()->merchant()->first()
+            ?? throw new ApiException('NOT_FOUND', __('api.not_found'), 404);
+    }
+
+    private function scanQuery(Merchant $merchant): HasMany
+    {
+        return $merchant->qrScans()->with(['customer.user', 'qrCode.categoryPrize'])->latest('scanned_at')->latest('id');
     }
 }

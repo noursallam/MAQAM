@@ -42,6 +42,7 @@ Route::get('settings', [CatalogController::class, 'settings']);
 
 // App bootstrap and static content
 Route::get('app/config', [AppController::class, 'config']);
+Route::get('app/texts', [AppController::class, 'texts']);
 Route::get('content/faq', [AppController::class, 'faq']);
 Route::get('content/pages/{slug}', [AppController::class, 'page']);
 Route::get('ranks', [LoyaltyController::class, 'ranks']);
@@ -110,6 +111,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::post('merchant/apply', [MerchantController::class, 'apply'])->middleware('throttle:5,1');
     Route::post('merchant/logo', [MerchantController::class, 'logo'])->middleware('throttle:10,1');
     Route::get('merchant', [MerchantController::class, 'show']);
+    Route::get('merchant/scans', [MerchantController::class, 'scans']);
 
     // Support assistant
     Route::post('chat', [AppController::class, 'chat'])->middleware('throttle:10,1');

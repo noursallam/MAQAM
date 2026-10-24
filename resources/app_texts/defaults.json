@@ -1,0 +1,3284 @@
+{
+    "accountAddresses": {
+        "ar": "عناويني",
+        "en": "My addresses",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountAppLock": {
+        "ar": "قفل التطبيق",
+        "en": "App lock",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountBiometricsOff": {
+        "ar": "غير مفعّل",
+        "en": "Off",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountChangePhone": {
+        "ar": "تغيير رقم الجوال",
+        "en": "Change mobile number",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountCopyCode": {
+        "ar": "نسخ الكود",
+        "en": "Copy code",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountDelete": {
+        "ar": "حذف الحساب",
+        "en": "Delete account",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountEdit": {
+        "ar": "تعديل",
+        "en": "Edit",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountEditName": {
+        "ar": "تعديل الاسم",
+        "en": "Edit name",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountGuest": {
+        "ar": "سجّل الدخول لإدارة حسابك وطلباتك.",
+        "en": "Sign in to manage your account and orders.",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountHelp": {
+        "ar": "المساعد والأسئلة الشائعة",
+        "en": "Assistant and FAQ",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountLanguage": {
+        "ar": "اللغة",
+        "en": "Language",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountLegal": {
+        "ar": "الشروط وسياسة الخصوصية",
+        "en": "Terms and privacy policy",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountLockBiometrics": {
+        "ar": "بصمة أو وجه",
+        "en": "Fingerprint or face",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountLockPin": {
+        "ar": "رمز PIN",
+        "en": "PIN",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountMerchantBody": {
+        "ar": "اكسب نقاطاً مع كل مسح بكودك",
+        "en": "Earn points on every scan made with your code",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountMerchantOpen": {
+        "ar": "لوحة التاجر",
+        "en": "Merchant dashboard",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountMerchantPendingTitle": {
+        "ar": "طلب التاجر قيد المراجعة",
+        "en": "Your merchant request is under review",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountMerchantTitle": {
+        "ar": "الانضمام كتاجر معتمد",
+        "en": "Become an approved merchant",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountNameLabel": {
+        "ar": "الاسم الكامل",
+        "en": "Full name",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountNameRequired": {
+        "ar": "اكتب اسمك (حرفان على الأقل).",
+        "en": "Enter your name (at least two letters).",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountNameSaved": {
+        "ar": "تم حفظ الاسم.",
+        "en": "Your name was saved.",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountNewCount": {
+        "ar": "{count} جديدة",
+        "en": "{count} new",
+        "placeholders": [
+            "count"
+        ],
+        "plural": false
+    },
+    "accountNoName": {
+        "ar": "عميل مقام",
+        "en": "MAQAM customer",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountPendingScans": {
+        "ar": "مسحات في انتظار الرفع",
+        "en": "Scans waiting to upload",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountPointsBalance": {
+        "ar": "رصيد النقاط",
+        "en": "Points balance",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountRank": {
+        "ar": "المستوى",
+        "en": "Rank",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountToNextRank": {
+        "ar": "{points} نقطة للوصول إلى {rank}",
+        "en": "{points} points to reach {rank}",
+        "placeholders": [
+            "points",
+            "rank"
+        ],
+        "plural": false
+    },
+    "accountTopRank": {
+        "ar": "وصلت لأعلى مستوى",
+        "en": "You reached the top rank",
+        "placeholders": [],
+        "plural": false
+    },
+    "accountVersion": {
+        "ar": "الإصدار {version}",
+        "en": "Version {version}",
+        "placeholders": [
+            "version"
+        ],
+        "plural": false
+    },
+    "actionOrders": {
+        "ar": "طلباتي",
+        "en": "My orders",
+        "placeholders": [],
+        "plural": false
+    },
+    "actionRewards": {
+        "ar": "مكافآتي",
+        "en": "My rewards",
+        "placeholders": [],
+        "plural": false
+    },
+    "actionScan": {
+        "ar": "مسح كود",
+        "en": "Scan code",
+        "placeholders": [],
+        "plural": false
+    },
+    "actionWheel": {
+        "ar": "عجلة الحظ",
+        "en": "Lucky wheel",
+        "placeholders": [],
+        "plural": false
+    },
+    "addressCity": {
+        "ar": "المدينة",
+        "en": "City",
+        "placeholders": [],
+        "plural": false
+    },
+    "addressDefault": {
+        "ar": "الافتراضي",
+        "en": "Default",
+        "placeholders": [],
+        "plural": false
+    },
+    "addressDefaultSet": {
+        "ar": "أصبح هذا عنوانك الافتراضي.",
+        "en": "This is now your default address.",
+        "placeholders": [],
+        "plural": false
+    },
+    "addressDelete": {
+        "ar": "حذف",
+        "en": "Delete",
+        "placeholders": [],
+        "plural": false
+    },
+    "addressDeleteBody": {
+        "ar": "لن يظهر في عناوينك بعد الآن. الطلبات السابقة تحتفظ بعنوانها.",
+        "en": "It will no longer appear in your addresses. Past orders keep their address.",
+        "placeholders": [],
+        "plural": false
+    },
+    "addressDeleteTitle": {
+        "ar": "حذف العنوان؟",
+        "en": "Delete this address?",
+        "placeholders": [],
+        "plural": false
+    },
+    "addressDeleted": {
+        "ar": "تم حذف العنوان.",
+        "en": "The address was deleted.",
+        "placeholders": [],
+        "plural": false
+    },
+    "addressEdit": {
+        "ar": "تعديل",
+        "en": "Edit",
+        "placeholders": [],
+        "plural": false
+    },
+    "addressEditTitle": {
+        "ar": "تعديل العنوان",
+        "en": "Edit address",
+        "placeholders": [],
+        "plural": false
+    },
+    "addressGovernorate": {
+        "ar": "المحافظة",
+        "en": "Governorate",
+        "placeholders": [],
+        "plural": false
+    },
+    "addressMakeDefault": {
+        "ar": "تعيين كافتراضي",
+        "en": "Make default",
+        "placeholders": [],
+        "plural": false
+    },
+    "addressName": {
+        "ar": "اسم المستلم",
+        "en": "Recipient name",
+        "placeholders": [],
+        "plural": false
+    },
+    "addressNewTitle": {
+        "ar": "عنوان جديد",
+        "en": "New address",
+        "placeholders": [],
+        "plural": false
+    },
+    "addressPhone": {
+        "ar": "رقم الجوال",
+        "en": "Mobile number",
+        "placeholders": [],
+        "plural": false
+    },
+    "addressPhoneInvalid": {
+        "ar": "رقم غير صحيح",
+        "en": "Invalid number",
+        "placeholders": [],
+        "plural": false
+    },
+    "addressRecipient": {
+        "ar": "اسم المستلم",
+        "en": "Recipient name",
+        "placeholders": [],
+        "plural": false
+    },
+    "addressSave": {
+        "ar": "حفظ العنوان",
+        "en": "Save address",
+        "placeholders": [],
+        "plural": false
+    },
+    "addressSaveChanges": {
+        "ar": "حفظ التعديلات",
+        "en": "Save changes",
+        "placeholders": [],
+        "plural": false
+    },
+    "addressSaved": {
+        "ar": "تم حفظ العنوان.",
+        "en": "The address was saved.",
+        "placeholders": [],
+        "plural": false
+    },
+    "addressStreet": {
+        "ar": "العنوان بالتفصيل",
+        "en": "Full address",
+        "placeholders": [],
+        "plural": false
+    },
+    "addressStreetDetail": {
+        "ar": "الشارع، رقم العمارة، الدور",
+        "en": "Street, building, floor",
+        "placeholders": [],
+        "plural": false
+    },
+    "addressStreetHint": {
+        "ar": "الشارع، رقم العمارة، الشقة",
+        "en": "Street, building number, flat",
+        "placeholders": [],
+        "plural": false
+    },
+    "addressesEmpty": {
+        "ar": "لا توجد عناوين محفوظة بعد. أضف عنواناً ليظهر عند إتمام الطلب.",
+        "en": "No saved addresses yet. Add one to use it at checkout.",
+        "placeholders": [],
+        "plural": false
+    },
+    "addressesLoadFailed": {
+        "ar": "تعذر تحميل العناوين",
+        "en": "Could not load your addresses",
+        "placeholders": [],
+        "plural": false
+    },
+    "appName": {
+        "ar": "مقام",
+        "en": "MAQAM",
+        "placeholders": [],
+        "plural": false
+    },
+    "assistantGreeting": {
+        "ar": "أهلاً بك! كيف أقدر أساعدك؟",
+        "en": "Hello! How can I help you?",
+        "placeholders": [],
+        "plural": false
+    },
+    "assistantHint": {
+        "ar": "اكتب سؤالك...",
+        "en": "Type your question...",
+        "placeholders": [],
+        "plural": false
+    },
+    "assistantMessagesLeft": {
+        "ar": "متبقي {count} رسالة اليوم",
+        "en": "{count} messages left today",
+        "placeholders": [
+            "count"
+        ],
+        "plural": false
+    },
+    "assistantSend": {
+        "ar": "إرسال",
+        "en": "Send",
+        "placeholders": [],
+        "plural": false
+    },
+    "assistantSubtitle": {
+        "ar": "مساعد آلي للأسئلة العامة",
+        "en": "An automated helper for general questions",
+        "placeholders": [],
+        "plural": false
+    },
+    "assistantSuggestCancel": {
+        "ar": "إلغاء طلب",
+        "en": "Cancelling an order",
+        "placeholders": [],
+        "plural": false
+    },
+    "assistantSuggestPoints": {
+        "ar": "إزاي أكسب نقاط؟",
+        "en": "How do I earn points?",
+        "placeholders": [],
+        "plural": false
+    },
+    "assistantSuggestReturns": {
+        "ar": "سياسة الاسترجاع",
+        "en": "Returns policy",
+        "placeholders": [],
+        "plural": false
+    },
+    "assistantTitle": {
+        "ar": "مساعد MAQAM",
+        "en": "MAQAM assistant",
+        "placeholders": [],
+        "plural": false
+    },
+    "assistantTyping": {
+        "ar": "المساعد يكتب",
+        "en": "The assistant is typing",
+        "placeholders": [],
+        "plural": false
+    },
+    "back": {
+        "ar": "رجوع",
+        "en": "Back",
+        "placeholders": [],
+        "plural": false
+    },
+    "biometricEnableReason": {
+        "ar": "أكّد هويتك لتفعيل الدخول بالبصمة أو الوجه",
+        "en": "Confirm it's you to enable fingerprint or face sign-in",
+        "placeholders": [],
+        "plural": false
+    },
+    "biometricSetupBodyWith": {
+        "ar": "ادخل {method} بدل كتابة رقمك وكلمة المرور، حتى بعد تسجيل الخروج.",
+        "en": "Sign in {method} instead of typing your number and password, even after signing out.",
+        "placeholders": [
+            "method"
+        ],
+        "plural": false
+    },
+    "biometricSetupEnableWith": {
+        "ar": "تفعيل الدخول {method}",
+        "en": "Turn on sign-in {method}",
+        "placeholders": [
+            "method"
+        ],
+        "plural": false
+    },
+    "biometricSetupFailed": {
+        "ar": "لم نتمكن من التحقق. حاول مرة أخرى أو اختر «ليس الآن».",
+        "en": "We could not verify you. Try again or choose Not now.",
+        "placeholders": [],
+        "plural": false
+    },
+    "biometricSetupNotNow": {
+        "ar": "ليس الآن",
+        "en": "Not now",
+        "placeholders": [],
+        "plural": false
+    },
+    "biometricSetupPoint1": {
+        "ar": "بصمتك تبقى على جهازك فقط، ولا تُرسل إلينا",
+        "en": "Your biometrics stay on your device and are never sent to us",
+        "placeholders": [],
+        "plural": false
+    },
+    "biometricSetupPoint2": {
+        "ar": "تقدر توقفه في أي وقت من «حسابي»",
+        "en": "You can turn this off at any time from My Account",
+        "placeholders": [],
+        "plural": false
+    },
+    "biometricSetupPoint3": {
+        "ar": "الدخول بكود واتساب يبقى متاحاً دائماً",
+        "en": "Signing in with a WhatsApp code is always available",
+        "placeholders": [],
+        "plural": false
+    },
+    "biometricSetupTitle": {
+        "ar": "ادخل أسرع المرة القادمة",
+        "en": "Sign in faster next time",
+        "placeholders": [],
+        "plural": false
+    },
+    "cancel": {
+        "ar": "إلغاء",
+        "en": "Cancel",
+        "placeholders": [],
+        "plural": false
+    },
+    "cart": {
+        "ar": "السلة",
+        "en": "Cart",
+        "placeholders": [],
+        "plural": false
+    },
+    "cartBrowse": {
+        "ar": "تصفّح المتجر",
+        "en": "Browse the store",
+        "placeholders": [],
+        "plural": false
+    },
+    "cartCheckout": {
+        "ar": "متابعة لإتمام الطلب",
+        "en": "Continue to checkout",
+        "placeholders": [],
+        "plural": false
+    },
+    "cartCouponApplied": {
+        "ar": "تم تطبيق الكود.",
+        "en": "Code applied.",
+        "placeholders": [],
+        "plural": false
+    },
+    "cartCouponApply": {
+        "ar": "تطبيق",
+        "en": "Apply",
+        "placeholders": [],
+        "plural": false
+    },
+    "cartCouponHint": {
+        "ar": "أدخل الكود",
+        "en": "Enter the code",
+        "placeholders": [],
+        "plural": false
+    },
+    "cartCouponLabel": {
+        "ar": "كود خصم أو مكافأة",
+        "en": "Discount or reward code",
+        "placeholders": [],
+        "plural": false
+    },
+    "cartCouponRemove": {
+        "ar": "إزالة",
+        "en": "Remove",
+        "placeholders": [],
+        "plural": false
+    },
+    "cartEmpty": {
+        "ar": "سلتك فارغة",
+        "en": "Your cart is empty",
+        "placeholders": [],
+        "plural": false
+    },
+    "cartEmptyBody": {
+        "ar": "أضف منتجات من المتجر لتظهر هنا.",
+        "en": "Add products from the store and they will appear here.",
+        "placeholders": [],
+        "plural": false
+    },
+    "cartGuest": {
+        "ar": "سجّل الدخول لعرض سلتك وإتمام طلبك.",
+        "en": "Sign in to see your cart and place your order.",
+        "placeholders": [],
+        "plural": false
+    },
+    "cartItemsCount": {
+        "ar": "{count, plural, =0{فارغة} =1{منتج واحد} =2{منتجان} few{{count} منتجات} many{{count} منتجاً} other{{count} منتج}}",
+        "en": "{count, plural, =0{empty} =1{1 item} other{{count} items}}",
+        "placeholders": [
+            "count",
+            "empty"
+        ],
+        "plural": true
+    },
+    "cartLoadFailed": {
+        "ar": "تعذر تحميل السلة",
+        "en": "Could not load your cart",
+        "placeholders": [],
+        "plural": false
+    },
+    "cartTitle": {
+        "ar": "السلة",
+        "en": "Cart",
+        "placeholders": [],
+        "plural": false
+    },
+    "catalogAll": {
+        "ar": "الكل",
+        "en": "All",
+        "placeholders": [],
+        "plural": false
+    },
+    "catalogEmpty": {
+        "ar": "لا توجد منتجات",
+        "en": "No products found",
+        "placeholders": [],
+        "plural": false
+    },
+    "catalogLoadFailed": {
+        "ar": "تعذر تحميل المنتجات",
+        "en": "Could not load products",
+        "placeholders": [],
+        "plural": false
+    },
+    "changePhoneDone": {
+        "ar": "تم تغيير رقم الجوال.",
+        "en": "Your phone number was changed.",
+        "placeholders": [],
+        "plural": false
+    },
+    "changePhoneLabel": {
+        "ar": "رقم الجوال الجديد",
+        "en": "New phone number",
+        "placeholders": [],
+        "plural": false
+    },
+    "changePhoneSubtitle": {
+        "ar": "اكتب رقمك الجديد. سنطلب منك إرسال كود من الرقم الجديد على واتساب لإثبات ملكيته.",
+        "en": "Enter your new number. You will send a code from it on WhatsApp to prove it is yours.",
+        "placeholders": [],
+        "plural": false
+    },
+    "changePhoneTitle": {
+        "ar": "تغيير رقم الجوال",
+        "en": "Change phone number",
+        "placeholders": [],
+        "plural": false
+    },
+    "chat": {
+        "ar": "المساعد",
+        "en": "Assistant",
+        "placeholders": [],
+        "plural": false
+    },
+    "checkoutAddress": {
+        "ar": "عنوان التوصيل",
+        "en": "Delivery address",
+        "placeholders": [],
+        "plural": false
+    },
+    "checkoutChange": {
+        "ar": "تغيير",
+        "en": "Change",
+        "placeholders": [],
+        "plural": false
+    },
+    "checkoutConfirm": {
+        "ar": "تأكيد الطلب",
+        "en": "Place order",
+        "placeholders": [],
+        "plural": false
+    },
+    "checkoutNotes": {
+        "ar": "ملاحظات للمندوب",
+        "en": "Notes for the courier",
+        "placeholders": [],
+        "plural": false
+    },
+    "checkoutNotesHint": {
+        "ar": "مثال: الاتصال قبل الوصول",
+        "en": "Example: call before arriving",
+        "placeholders": [],
+        "plural": false
+    },
+    "checkoutOptional": {
+        "ar": " (اختياري)",
+        "en": " (optional)",
+        "placeholders": [],
+        "plural": false
+    },
+    "checkoutPayment": {
+        "ar": "طريقة الدفع",
+        "en": "Payment method",
+        "placeholders": [],
+        "plural": false
+    },
+    "checkoutPaymentOpenFailed": {
+        "ar": "تم إنشاء الطلب، لكن تعذر فتح صفحة الدفع. يمكنك الدفع لاحقاً من طلباتك.",
+        "en": "Your order was created, but the payment page could not be opened. You can pay later from your orders.",
+        "placeholders": [],
+        "plural": false
+    },
+    "checkoutTitle": {
+        "ar": "إتمام الطلب",
+        "en": "Checkout",
+        "placeholders": [],
+        "plural": false
+    },
+    "checkoutUseSaved": {
+        "ar": "استخدام العنوان المحفوظ",
+        "en": "Use my saved address",
+        "placeholders": [],
+        "plural": false
+    },
+    "close": {
+        "ar": "إغلاق",
+        "en": "Close",
+        "placeholders": [],
+        "plural": false
+    },
+    "deleteConfirmPrefix": {
+        "ar": "للتأكيد اكتب كلمة ",
+        "en": "To confirm, type ",
+        "placeholders": [],
+        "plural": false
+    },
+    "deleteDone": {
+        "ar": "تم حذف حسابك.",
+        "en": "Your account was deleted.",
+        "placeholders": [],
+        "plural": false
+    },
+    "deleteKeep": {
+        "ar": "تراجع",
+        "en": "Go back",
+        "placeholders": [],
+        "plural": false
+    },
+    "deleteKeptOrders": {
+        "ar": "سجل الطلبات السابقة، لأغراض محاسبية فقط.",
+        "en": "Your past orders, for accounting only.",
+        "placeholders": [],
+        "plural": false
+    },
+    "deleteKeptTitle": {
+        "ar": "يبقى بدون بياناتك الشخصية",
+        "en": "Kept without your personal details",
+        "placeholders": [],
+        "plural": false
+    },
+    "deleteLostAddresses": {
+        "ar": "عناوينك وإشعاراتك وسلة مشترياتك",
+        "en": "Your addresses, notifications and cart",
+        "placeholders": [],
+        "plural": false
+    },
+    "deleteLostIdentity": {
+        "ar": "اسمك ورقم جوالك وبريدك",
+        "en": "Your name, phone number and email",
+        "placeholders": [],
+        "plural": false
+    },
+    "deleteLostPoints": {
+        "ar": "رصيد نقاطك ورتبتك",
+        "en": "Your points balance and rank",
+        "placeholders": [],
+        "plural": false
+    },
+    "deleteLostPointsCount": {
+        "ar": "رصيد نقاطك ({points} نقطة) ورتبتك",
+        "en": "Your points balance ({points} points) and rank",
+        "placeholders": [
+            "points"
+        ],
+        "plural": false
+    },
+    "deleteLostRewards": {
+        "ar": "مكافآتك غير المستخدمة",
+        "en": "Your unused rewards",
+        "placeholders": [],
+        "plural": false
+    },
+    "deleteLostTitle": {
+        "ar": "سيُحذف نهائياً",
+        "en": "Deleted for good",
+        "placeholders": [],
+        "plural": false
+    },
+    "deleteSubmit": {
+        "ar": "حذف حسابي نهائياً",
+        "en": "Delete my account for good",
+        "placeholders": [],
+        "plural": false
+    },
+    "deleteSubtitle": {
+        "ar": "الحذف نهائي ولا يمكن التراجع عنه.",
+        "en": "Deleting is permanent and cannot be undone.",
+        "placeholders": [],
+        "plural": false
+    },
+    "deleteTitle": {
+        "ar": "هل أنت متأكد؟",
+        "en": "Are you sure?",
+        "placeholders": [],
+        "plural": false
+    },
+    "errorGeneric": {
+        "ar": "حدث خطأ غير متوقع. حاول مرة أخرى.",
+        "en": "Something went wrong. Please try again.",
+        "placeholders": [],
+        "plural": false
+    },
+    "errorNetwork": {
+        "ar": "تعذر الاتصال. تحقق من الإنترنت وحاول مرة أخرى.",
+        "en": "Could not connect. Check your internet and try again.",
+        "placeholders": [],
+        "plural": false
+    },
+    "fieldRequired": {
+        "ar": "هذا الحقل مطلوب.",
+        "en": "This field is required.",
+        "placeholders": [],
+        "plural": false
+    },
+    "filterEarned": {
+        "ar": "كسب",
+        "en": "Earned",
+        "placeholders": [],
+        "plural": false
+    },
+    "filterSpent": {
+        "ar": "صرف",
+        "en": "Spent",
+        "placeholders": [],
+        "plural": false
+    },
+    "homeGreeting": {
+        "ar": "أهلاً {name} · رصيد نقاطك",
+        "en": "Hello {name} · your points",
+        "placeholders": [
+            "name"
+        ],
+        "plural": false
+    },
+    "homeGreetingNoName": {
+        "ar": "أهلاً بك · رصيد نقاطك",
+        "en": "Hello · your points",
+        "placeholders": [],
+        "plural": false
+    },
+    "homeGuestBody": {
+        "ar": "سجّل الدخول لتمسح الأكواد وتجمع النقاط والجوائز.",
+        "en": "Sign in to scan codes and collect points and prizes.",
+        "placeholders": [],
+        "plural": false
+    },
+    "homeGuestTitle": {
+        "ar": "اكسب نقاطاً مع كل عبوة",
+        "en": "Earn points with every pack",
+        "placeholders": [],
+        "plural": false
+    },
+    "homeNewArrivals": {
+        "ar": "وصل حديثاً",
+        "en": "New arrivals",
+        "placeholders": [],
+        "plural": false
+    },
+    "homeToNextRank": {
+        "ar": "باقي {points} نقطة للوصول إلى رتبة {rank}",
+        "en": "{points} points to reach {rank}",
+        "placeholders": [
+            "points",
+            "rank"
+        ],
+        "plural": false
+    },
+    "homeTopRank": {
+        "ar": "أنت في أعلى رتبة",
+        "en": "You are at the top rank",
+        "placeholders": [],
+        "plural": false
+    },
+    "languageName": {
+        "ar": "العربية",
+        "en": "English",
+        "placeholders": [],
+        "plural": false
+    },
+    "legalLoadFailed": {
+        "ar": "تعذر تحميل الصفحة",
+        "en": "Could not load the page",
+        "placeholders": [],
+        "plural": false
+    },
+    "legalPrivacy": {
+        "ar": "سياسة الخصوصية",
+        "en": "Privacy policy",
+        "placeholders": [],
+        "plural": false
+    },
+    "legalTerms": {
+        "ar": "الشروط والأحكام",
+        "en": "Terms",
+        "placeholders": [],
+        "plural": false
+    },
+    "listSeparator": {
+        "ar": "، ",
+        "en": ", ",
+        "placeholders": [],
+        "plural": false
+    },
+    "lockPinCreate": {
+        "ar": "إنشاء رمز PIN",
+        "en": "Create a PIN",
+        "placeholders": [],
+        "plural": false
+    },
+    "lockPinOfferBody": {
+        "ar": "أنشئ رمزاً من 4 أرقام يُطلب عند فتح التطبيق، حتى لا يفتحه غيرك.",
+        "en": "Create a 4-digit code that is asked for when the app opens, so nobody else can open it.",
+        "placeholders": [],
+        "plural": false
+    },
+    "lockPinOfferTitle": {
+        "ar": "احمِ تطبيقك برمز PIN",
+        "en": "Protect your app with a PIN",
+        "placeholders": [],
+        "plural": false
+    },
+    "lockPinPoint1": {
+        "ar": "الرمز يبقى على جهازك فقط، ولا يُرسل إلينا",
+        "en": "The PIN stays on your device and is never sent to us",
+        "placeholders": [],
+        "plural": false
+    },
+    "lockUsePinInstead": {
+        "ar": "استخدام رمز PIN بدلاً من ذلك",
+        "en": "Use a PIN instead",
+        "placeholders": [],
+        "plural": false
+    },
+    "lockWithFace": {
+        "ar": "ببصمة الوجه",
+        "en": "with face unlock",
+        "placeholders": [],
+        "plural": false
+    },
+    "lockWithFaceId": {
+        "ar": "بـ Face ID",
+        "en": "with Face ID",
+        "placeholders": [],
+        "plural": false
+    },
+    "lockWithFingerprint": {
+        "ar": "ببصمة الإصبع",
+        "en": "with your fingerprint",
+        "placeholders": [],
+        "plural": false
+    },
+    "loginContinue": {
+        "ar": "متابعة",
+        "en": "Continue",
+        "placeholders": [],
+        "plural": false
+    },
+    "loginLegalAnd": {
+        "ar": " و",
+        "en": " and ",
+        "placeholders": [],
+        "plural": false
+    },
+    "loginLegalPrefix": {
+        "ar": "بالمتابعة توافق على ",
+        "en": "By continuing you agree to the ",
+        "placeholders": [],
+        "plural": false
+    },
+    "loginLegalPrivacy": {
+        "ar": "سياسة الخصوصية",
+        "en": "Privacy Policy",
+        "placeholders": [],
+        "plural": false
+    },
+    "loginLegalTerms": {
+        "ar": "الشروط والأحكام",
+        "en": "Terms and Conditions",
+        "placeholders": [],
+        "plural": false
+    },
+    "loginNoSpam": {
+        "ar": "لن نرسل لك أي رسالة قبل أن تراسلنا أنت أولاً.",
+        "en": "We will never message you before you message us first.",
+        "placeholders": [],
+        "plural": false
+    },
+    "loginPhoneInvalid": {
+        "ar": "رقم الجوال غير صحيح. مثال: 10 1234 5678",
+        "en": "This mobile number is not valid. Example: 10 1234 5678",
+        "placeholders": [],
+        "plural": false
+    },
+    "loginPhoneLabel": {
+        "ar": "رقم الجوال",
+        "en": "Mobile number",
+        "placeholders": [],
+        "plural": false
+    },
+    "loginPhoneRequired": {
+        "ar": "أدخل رقم الجوال.",
+        "en": "Enter your mobile number.",
+        "placeholders": [],
+        "plural": false
+    },
+    "loginSubtitle": {
+        "ar": "أدخل رقم جوالك. بدون كلمة مرور: ستؤكد الرقم برسالة قصيرة من واتساب.",
+        "en": "Enter your mobile number. No password: you confirm it with a short WhatsApp message.",
+        "placeholders": [],
+        "plural": false
+    },
+    "loginTitle": {
+        "ar": "تسجيل الدخول",
+        "en": "Sign in",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantAddressHint": {
+        "ar": "المحافظة، المدينة، الشارع",
+        "en": "Governorate, city, street",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantAddressLabel": {
+        "ar": "عنوان المحل",
+        "en": "Shop address",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantApplied": {
+        "ar": "تم إرسال طلبك. سيصلك إشعار بعد المراجعة.",
+        "en": "Request sent. You will be notified after the review.",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantApproved": {
+        "ar": "تاجر معتمد",
+        "en": "Approved merchant",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantBenefitCode": {
+        "ar": "تحصل على كود تاجر خاص بك",
+        "en": "You get a merchant code of your own",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantBenefitPoints": {
+        "ar": "تكسب نقاطاً كل مرة يمسح عميل كوداً ويختارك",
+        "en": "You earn points each time a customer scans a code and picks you",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantBenefitReview": {
+        "ar": "يراجع فريق MAQAM طلبك ويصلك إشعار بالنتيجة",
+        "en": "The MAQAM team reviews your request and notifies you of the result",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantChangeLogo": {
+        "ar": "تغيير شعار المحل",
+        "en": "Change shop logo",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantCodeCopied": {
+        "ar": "تم نسخ كود التاجر.",
+        "en": "Merchant code copied.",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantCodeHint": {
+        "ar": "اطلب من العميل إدخال هذا الكود عند مسح أي عبوة اشتراها منك.",
+        "en": "Ask customers to enter this code when they scan any pack bought from you.",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantCodeLabel": {
+        "ar": "كود التاجر",
+        "en": "Merchant code",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantDashboardTitle": {
+        "ar": "لوحة التاجر",
+        "en": "Merchant dashboard",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantLastScan": {
+        "ar": "آخر مسح: {time}",
+        "en": "Last scan: {time}",
+        "placeholders": [
+            "time"
+        ],
+        "plural": false
+    },
+    "merchantLoadFailed": {
+        "ar": "تعذر تحميل بيانات التاجر",
+        "en": "Could not load your merchant profile",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantLoadMore": {
+        "ar": "تحميل المزيد",
+        "en": "Load more",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantLogoChosen": {
+        "ar": "تم اختيار الصورة",
+        "en": "Image chosen",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantLogoHint": {
+        "ar": "JPG أو PNG حتى 2MB",
+        "en": "JPG or PNG up to 2MB",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantLogoLabel": {
+        "ar": "شعار المحل",
+        "en": "Shop logo",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantLogoPick": {
+        "ar": "رفع صورة",
+        "en": "Upload an image",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantLogoPlaceholder": {
+        "ar": "الشعار",
+        "en": "Logo",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantNameHint": {
+        "ar": "مثال: معرض النور",
+        "en": "e.g. Al Nour Showroom",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantNameLabel": {
+        "ar": "اسم النشاط التجاري",
+        "en": "Business name",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantNoScans": {
+        "ar": "لم يستخدم أحد كودك بعد. شاركه مع عملائك ليبدأ رصيدك.",
+        "en": "No one has used your code yet. Share it with your customers to start earning.",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantPending": {
+        "ar": "قيد المراجعة",
+        "en": "Under review",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantPendingHint": {
+        "ar": "طلبك قيد المراجعة. سيعمل الكود بعد موافقة الإدارة ويصلك إشعار بذلك.",
+        "en": "Your request is under review. The code will work once approved, and you will be notified.",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantPointsNote": {
+        "ar": "نقاط التاجر رصيد تراكمي للعرض حالياً، ولا يمكن استخدام كودك في مسحك أنت.",
+        "en": "Merchant points are a running total for display for now, and you cannot use your own code in your own scans.",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantRecentScans": {
+        "ar": "آخر من استخدم كودك",
+        "en": "Latest scans with your code",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantScanPoints": {
+        "ar": "+{points} نقطة",
+        "en": "+{points} pts",
+        "placeholders": [
+            "points"
+        ],
+        "plural": false
+    },
+    "merchantScansLoadFailed": {
+        "ar": "تعذر تحميل المسحات",
+        "en": "Could not load the scans",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantScansTitle": {
+        "ar": "المسحات بكودك",
+        "en": "Scans with your code",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantShare": {
+        "ar": "مشاركة",
+        "en": "Share",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantShareText": {
+        "ar": "اشتريت من {name}؟ أدخل كود التاجر {code} عند مسح عبوة MAQAM.",
+        "en": "Bought from {name}? Enter merchant code {code} when you scan a MAQAM pack.",
+        "placeholders": [
+            "name",
+            "code"
+        ],
+        "plural": false
+    },
+    "merchantSince": {
+        "ar": "تاجر منذ {date}",
+        "en": "Merchant since {date}",
+        "placeholders": [
+            "date"
+        ],
+        "plural": false
+    },
+    "merchantStatCustomers": {
+        "ar": "عملاء مختلفون",
+        "en": "Different customers",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantStatMonth": {
+        "ar": "مسحات هذا الشهر",
+        "en": "Scans this month",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantStatMonthPoints": {
+        "ar": "نقاط هذا الشهر",
+        "en": "Points this month",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantStatPoints": {
+        "ar": "إجمالي نقاطك",
+        "en": "Your total points",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantStatScans": {
+        "ar": "عدد المسحات",
+        "en": "Scans",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantSubmit": {
+        "ar": "إرسال الطلب",
+        "en": "Send request",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantSubmitNote": {
+        "ar": "الكود لا يعمل في المسح قبل موافقة الإدارة.",
+        "en": "The code does not work in scans until MAQAM approves it.",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantUnknownCustomer": {
+        "ar": "عميل",
+        "en": "Customer",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantViewAll": {
+        "ar": "عرض الكل",
+        "en": "View all",
+        "placeholders": [],
+        "plural": false
+    },
+    "navAccount": {
+        "ar": "حسابي",
+        "en": "Account",
+        "placeholders": [],
+        "plural": false
+    },
+    "navHome": {
+        "ar": "الرئيسية",
+        "en": "Home",
+        "placeholders": [],
+        "plural": false
+    },
+    "navScan": {
+        "ar": "مسح كود",
+        "en": "Scan code",
+        "placeholders": [],
+        "plural": false
+    },
+    "navStore": {
+        "ar": "المتجر",
+        "en": "Store",
+        "placeholders": [],
+        "plural": false
+    },
+    "navWallet": {
+        "ar": "المحفظة",
+        "en": "Wallet",
+        "placeholders": [],
+        "plural": false
+    },
+    "notificationUnread": {
+        "ar": "غير مقروء",
+        "en": "Unread",
+        "placeholders": [],
+        "plural": false
+    },
+    "notifications": {
+        "ar": "الإشعارات",
+        "en": "Notifications",
+        "placeholders": [],
+        "plural": false
+    },
+    "notificationsEmpty": {
+        "ar": "لا توجد إشعارات",
+        "en": "No notifications",
+        "placeholders": [],
+        "plural": false
+    },
+    "notificationsEmptyBody": {
+        "ar": "تحديثات طلباتك ونقاطك وعروضنا ستظهر هنا.",
+        "en": "Updates about your orders, points and our offers will appear here.",
+        "placeholders": [],
+        "plural": false
+    },
+    "notificationsLoadFailed": {
+        "ar": "تعذر تحميل الإشعارات",
+        "en": "Could not load notifications",
+        "placeholders": [],
+        "plural": false
+    },
+    "notificationsMarkAllRead": {
+        "ar": "تعليم الكل كمقروء",
+        "en": "Mark all as read",
+        "placeholders": [],
+        "plural": false
+    },
+    "onboarding1Body": {
+        "ar": "تسوّق مفاتيح وبرايز وإضاءة MAQAM، واطلبها إلى باب بيتك.",
+        "en": "Shop MAQAM switches, sockets and lighting, delivered to your door.",
+        "placeholders": [],
+        "plural": false
+    },
+    "onboarding1ChipA": {
+        "ar": "المتجر",
+        "en": "Store",
+        "placeholders": [],
+        "plural": false
+    },
+    "onboarding1ChipB": {
+        "ar": "توصيل للمنزل",
+        "en": "Home delivery",
+        "placeholders": [],
+        "plural": false
+    },
+    "onboarding1Title": {
+        "ar": "الفخامة في كل لمسة",
+        "en": "Prestige in Every Touch",
+        "placeholders": [],
+        "plural": false
+    },
+    "onboarding2Body": {
+        "ar": "امسح الكود الموجود على كل عبوة لتضيف نقاطاً إلى رصيدك فوراً.",
+        "en": "Scan the code on every pack to add points to your balance right away.",
+        "placeholders": [],
+        "plural": false
+    },
+    "onboarding2ChipA": {
+        "ar": "كود العبوة",
+        "en": "Pack code",
+        "placeholders": [],
+        "plural": false
+    },
+    "onboarding2ChipB": {
+        "ar": "نقاط فورية",
+        "en": "Instant points",
+        "placeholders": [],
+        "plural": false
+    },
+    "onboarding2Title": {
+        "ar": "امسح واكسب",
+        "en": "Scan and earn",
+        "placeholders": [],
+        "plural": false
+    },
+    "onboarding3Body": {
+        "ar": "كل نقطة تكسبها تقرّبك من رتبة أعلى ومزايا أكثر، والصرف لا ينزّل رتبتك.",
+        "en": "Every point you earn brings a higher rank and more benefits, and spending never lowers it.",
+        "placeholders": [],
+        "plural": false
+    },
+    "onboarding3ChipA": {
+        "ar": "رتبة أعلى",
+        "en": "Higher rank",
+        "placeholders": [],
+        "plural": false
+    },
+    "onboarding3ChipB": {
+        "ar": "مزايا أكثر",
+        "en": "More benefits",
+        "placeholders": [],
+        "plural": false
+    },
+    "onboarding3Title": {
+        "ar": "رتبتك ترتفع مع نقاطك",
+        "en": "Your rank grows with your points",
+        "placeholders": [],
+        "plural": false
+    },
+    "onboarding4Body": {
+        "ar": "استبدل نقاطك بلفّة على عجلة الحظ، واربح خصومات وهدايا تُحفظ في مكافآتك.",
+        "en": "Trade points for a spin of the lucky wheel and win discounts and gifts kept in your rewards.",
+        "placeholders": [],
+        "plural": false
+    },
+    "onboarding4ChipA": {
+        "ar": "خصومات",
+        "en": "Discounts",
+        "placeholders": [],
+        "plural": false
+    },
+    "onboarding4ChipB": {
+        "ar": "هدايا",
+        "en": "Gifts",
+        "placeholders": [],
+        "plural": false
+    },
+    "onboarding4Title": {
+        "ar": "عجلة الحظ ومكافآت",
+        "en": "Lucky wheel and rewards",
+        "placeholders": [],
+        "plural": false
+    },
+    "onboarding5Body": {
+        "ar": "سجّل برقم جوالك وأكّده برسالة واتساب، ثم افتح التطبيق ببصمتك أو وجهك.",
+        "en": "Sign in with your mobile number, confirm it on WhatsApp, then unlock with your fingerprint or face.",
+        "placeholders": [],
+        "plural": false
+    },
+    "onboarding5ChipA": {
+        "ar": "واتساب",
+        "en": "WhatsApp",
+        "placeholders": [],
+        "plural": false
+    },
+    "onboarding5ChipB": {
+        "ar": "بصمة أو وجه",
+        "en": "Fingerprint or face",
+        "placeholders": [],
+        "plural": false
+    },
+    "onboarding5Title": {
+        "ar": "دخول آمن بلا كلمة مرور",
+        "en": "Secure sign-in, no password",
+        "placeholders": [],
+        "plural": false
+    },
+    "onboardingGuest": {
+        "ar": "تصفّح المتجر كزائر",
+        "en": "Browse the store as a guest",
+        "placeholders": [],
+        "plural": false
+    },
+    "onboardingNext": {
+        "ar": "التالي",
+        "en": "Next",
+        "placeholders": [],
+        "plural": false
+    },
+    "onboardingPage": {
+        "ar": "الشاشة {current} من {total}",
+        "en": "Screen {current} of {total}",
+        "placeholders": [
+            "current",
+            "total"
+        ],
+        "plural": false
+    },
+    "onboardingStart": {
+        "ar": "ابدأ الآن",
+        "en": "Get started",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderAwaitingPayment": {
+        "ar": "بانتظار الدفع",
+        "en": "Awaiting payment",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderAwaitingPaymentNote": {
+        "ar": "لم يكتمل دفع هذا الطلب، ولن يبدأ تجهيزه قبل الدفع. إن لم تعد تريده يمكنك إلغاؤه.",
+        "en": "This order has not been paid, and it will not be prepared until it is. You can cancel it if you no longer want it.",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderCancel": {
+        "ar": "إلغاء الطلب",
+        "en": "Cancel order",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderCancelConfirmTitle": {
+        "ar": "إلغاء هذا الطلب؟",
+        "en": "Cancel this order?",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderCancelKeep": {
+        "ar": "الإبقاء على الطلب",
+        "en": "Keep the order",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderCancelNote": {
+        "ar": "متاح قبل الشحن، وترجع نقاطك ومكافأتك تلقائياً.",
+        "en": "Possible before shipping; your points and reward are returned automatically.",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderDetailsTitle": {
+        "ar": "تفاصيل الطلب",
+        "en": "Order details",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderItemFree": {
+        "ar": "مجاناً",
+        "en": "Free",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderItemQuantity": {
+        "ar": "الكمية {count}",
+        "en": "Quantity {count}",
+        "placeholders": [
+            "count"
+        ],
+        "plural": false
+    },
+    "orderPaidTitle": {
+        "ar": "تم الدفع واستلام طلبك",
+        "en": "Paid, and we got your order",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderPaymentCard": {
+        "ar": "بطاقة",
+        "en": "Card",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderPaymentCod": {
+        "ar": "عند الاستلام",
+        "en": "Cash on delivery",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderPaymentFailedBody": {
+        "ar": "لم يُخصم أي مبلغ. يمكنك إعادة الطلب واختيار طريقة دفع أخرى.",
+        "en": "Nothing was charged. You can order again and choose another payment method.",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderPaymentFailedTitle": {
+        "ar": "لم يكتمل الدفع",
+        "en": "The payment did not go through",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderPaymentPendingBody": {
+        "ar": "لم نتأكد من الدفع بعد. سنبدأ تجهيز الطلب فور تأكيده.",
+        "en": "We have not confirmed the payment yet. We will start on your order as soon as it is.",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderPaymentPoints": {
+        "ar": "نقاط",
+        "en": "Points",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderPlacedBody": {
+        "ar": "سنبدأ تجهيزه الآن، وتصلك إشعارات بكل تحديث.",
+        "en": "We are preparing it now and will notify you at every step.",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderPlacedHome": {
+        "ar": "العودة للرئيسية",
+        "en": "Back to home",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderPlacedPointsBody": {
+        "ar": "عند الاستلام، امسح كود QR داخل كل عبوة لتكسب نقاط الولاء.",
+        "en": "On delivery, scan the QR code inside every pack to earn loyalty points.",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderPlacedPointsTitle": {
+        "ar": "لا تنسَ نقاطك",
+        "en": "Don't forget your points",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderPlacedTitle": {
+        "ar": "تم استلام طلبك",
+        "en": "We got your order",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderPlacedTrack": {
+        "ar": "متابعة الطلب",
+        "en": "Track order",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderStatusCancelled": {
+        "ar": "ملغي",
+        "en": "Cancelled",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderStatusDelivered": {
+        "ar": "تم التسليم",
+        "en": "Delivered",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderStatusPreparing": {
+        "ar": "جارٍ التجهيز",
+        "en": "Being prepared",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderStatusReceived": {
+        "ar": "تم الاستلام",
+        "en": "Received",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderStatusShipped": {
+        "ar": "تم الشحن",
+        "en": "Shipped",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderStepDelivery": {
+        "ar": "التسليم",
+        "en": "Delivery",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderStepPreparing": {
+        "ar": "التجهيز",
+        "en": "Preparing",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderStepReceived": {
+        "ar": "الاستلام",
+        "en": "Received",
+        "placeholders": [],
+        "plural": false
+    },
+    "orderStepShipping": {
+        "ar": "الشحن",
+        "en": "Shipping",
+        "placeholders": [],
+        "plural": false
+    },
+    "ordersEmpty": {
+        "ar": "لا توجد طلبات بعد",
+        "en": "No orders yet",
+        "placeholders": [],
+        "plural": false
+    },
+    "ordersEmptyBody": {
+        "ar": "طلباتك ستظهر هنا بعد أول عملية شراء.",
+        "en": "Your orders will appear here after your first purchase.",
+        "placeholders": [],
+        "plural": false
+    },
+    "ordersFilterActive": {
+        "ar": "جارية",
+        "en": "In progress",
+        "placeholders": [],
+        "plural": false
+    },
+    "ordersFilterCompleted": {
+        "ar": "مكتملة",
+        "en": "Completed",
+        "placeholders": [],
+        "plural": false
+    },
+    "ordersLoadFailed": {
+        "ar": "تعذر تحميل الطلبات",
+        "en": "Could not load your orders",
+        "placeholders": [],
+        "plural": false
+    },
+    "ordersNoneInFilter": {
+        "ar": "لا توجد طلبات في هذا التصنيف.",
+        "en": "No orders in this group.",
+        "placeholders": [],
+        "plural": false
+    },
+    "otpDoNotShare": {
+        "ar": "لا تشارك هذا الكود مع أي شخص. فريق MAQAM لن يطلبه منك أبداً.",
+        "en": "Never share this code with anyone. The MAQAM team will never ask you for it.",
+        "placeholders": [],
+        "plural": false
+    },
+    "otpExpired": {
+        "ar": "انتهت صلاحية كود الدخول.",
+        "en": "The sign-in code has expired.",
+        "placeholders": [],
+        "plural": false
+    },
+    "otpExpiresIn": {
+        "ar": "ينتهي الكود خلال ",
+        "en": "The code expires in ",
+        "placeholders": [],
+        "plural": false
+    },
+    "otpFieldLabel": {
+        "ar": "كود الدخول المكوّن من 6 أرقام",
+        "en": "6-digit sign-in code",
+        "placeholders": [],
+        "plural": false
+    },
+    "otpNotReceivedPrefix": {
+        "ar": "لم يصلك الكود؟ تأكد أنك أرسلت من نفس الرقم، ثم ",
+        "en": "Didn't get the code? Make sure you sent from the same number, then ",
+        "placeholders": [],
+        "plural": false
+    },
+    "otpSubmit": {
+        "ar": "دخول",
+        "en": "Sign in",
+        "placeholders": [],
+        "plural": false
+    },
+    "otpSubtitle": {
+        "ar": "وصلتنا رسالتك، وأرسلنا لك الكود على واتساب.",
+        "en": "We got your message and sent the code to you on WhatsApp.",
+        "placeholders": [],
+        "plural": false
+    },
+    "otpTitle": {
+        "ar": "أدخل كود الدخول",
+        "en": "Enter the sign-in code",
+        "placeholders": [],
+        "plural": false
+    },
+    "outOfStock": {
+        "ar": "غير متوفر",
+        "en": "Out of stock",
+        "placeholders": [],
+        "plural": false
+    },
+    "passwordForgot": {
+        "ar": "نسيت كلمة المرور؟ ادخل بكود واتساب",
+        "en": "Forgot your password? Sign in with a WhatsApp code",
+        "placeholders": [],
+        "plural": false
+    },
+    "passwordHide": {
+        "ar": "إخفاء كلمة المرور",
+        "en": "Hide password",
+        "placeholders": [],
+        "plural": false
+    },
+    "passwordLabel": {
+        "ar": "كلمة المرور",
+        "en": "Password",
+        "placeholders": [],
+        "plural": false
+    },
+    "passwordRequired": {
+        "ar": "أدخل كلمة المرور.",
+        "en": "Enter your password.",
+        "placeholders": [],
+        "plural": false
+    },
+    "passwordShow": {
+        "ar": "إظهار كلمة المرور",
+        "en": "Show password",
+        "placeholders": [],
+        "plural": false
+    },
+    "passwordSubmit": {
+        "ar": "دخول",
+        "en": "Sign in",
+        "placeholders": [],
+        "plural": false
+    },
+    "passwordSubtitlePrefix": {
+        "ar": "للدخول إلى حساب الرقم ",
+        "en": "To sign in to the account for ",
+        "placeholders": [],
+        "plural": false
+    },
+    "passwordTitle": {
+        "ar": "أدخل كلمة المرور",
+        "en": "Enter your password",
+        "placeholders": [],
+        "plural": false
+    },
+    "paymentChecking": {
+        "ar": "جارٍ التأكد من الدفع...",
+        "en": "Checking your payment...",
+        "placeholders": [],
+        "plural": false
+    },
+    "paymentCod": {
+        "ar": "الدفع عند الاستلام",
+        "en": "Cash on delivery",
+        "placeholders": [],
+        "plural": false
+    },
+    "paymentLeaveBody": {
+        "ar": "طلبك محفوظ. إذا لم تكمل الدفع فلن يبدأ تجهيزه.",
+        "en": "Your order is saved. It will not be prepared until it is paid.",
+        "placeholders": [],
+        "plural": false
+    },
+    "paymentLeaveConfirm": {
+        "ar": "إغلاق",
+        "en": "Close",
+        "placeholders": [],
+        "plural": false
+    },
+    "paymentLeaveStay": {
+        "ar": "متابعة الدفع",
+        "en": "Keep paying",
+        "placeholders": [],
+        "plural": false
+    },
+    "paymentLeaveTitle": {
+        "ar": "إغلاق صفحة الدفع؟",
+        "en": "Close the payment page?",
+        "placeholders": [],
+        "plural": false
+    },
+    "paymentOnline": {
+        "ar": "بطاقة أو محفظة إلكترونية",
+        "en": "Card or mobile wallet",
+        "placeholders": [],
+        "plural": false
+    },
+    "paymentOnlineBody": {
+        "ar": "فيزا، ماستركارد، ميزة، فودافون كاش",
+        "en": "Visa, Mastercard, Meeza, Vodafone Cash",
+        "placeholders": [],
+        "plural": false
+    },
+    "paymentPoints": {
+        "ar": "نقاط الولاء",
+        "en": "Loyalty points",
+        "placeholders": [],
+        "plural": false
+    },
+    "paymentPointsBalance": {
+        "ar": "رصيدك {points} نقطة",
+        "en": "Your balance: {points} points",
+        "placeholders": [
+            "points"
+        ],
+        "plural": false
+    },
+    "paymentTitle": {
+        "ar": "دفع آمن",
+        "en": "Secure payment",
+        "placeholders": [],
+        "plural": false
+    },
+    "pendingAlreadyCredited": {
+        "ar": "أُضيف",
+        "en": "Added",
+        "placeholders": [],
+        "plural": false
+    },
+    "pendingAuto": {
+        "ar": "تُرفع تلقائياً عند رجوع الاتصال",
+        "en": "Uploaded automatically when you are back online",
+        "placeholders": [],
+        "plural": false
+    },
+    "pendingCount": {
+        "ar": "{count, plural, =1{مسحة واحدة في انتظار الرفع} =2{مسحتان في انتظار الرفع} few{{count} مسحات في انتظار الرفع} other{{count} مسحة في انتظار الرفع}}",
+        "en": "{count, plural, =1{1 scan waiting to upload} other{{count} scans waiting to upload}}",
+        "placeholders": [
+            "count"
+        ],
+        "plural": true
+    },
+    "pendingEmpty": {
+        "ar": "لا توجد مسحات في الانتظار",
+        "en": "No scans waiting",
+        "placeholders": [],
+        "plural": false
+    },
+    "pendingEmptyBody": {
+        "ar": "المسحات التي تتم بدون إنترنت تُحفظ هنا حتى تُرفع.",
+        "en": "Scans made without a connection wait here until they are uploaded.",
+        "placeholders": [],
+        "plural": false
+    },
+    "pendingFooter": {
+        "ar": "المسحات محفوظة على هذا الهاتف فقط. لا تحذف التطبيق قبل رفعها.",
+        "en": "Scans are saved on this phone only. Do not delete the app before they upload.",
+        "placeholders": [],
+        "plural": false
+    },
+    "pendingHide": {
+        "ar": "إخفاء",
+        "en": "Hide",
+        "placeholders": [],
+        "plural": false
+    },
+    "pendingLastUpload": {
+        "ar": "آخر عملية رفع",
+        "en": "Last upload",
+        "placeholders": [],
+        "plural": false
+    },
+    "pendingRejected": {
+        "ar": "لم يُقبل: {reason}",
+        "en": "Not accepted: {reason}",
+        "placeholders": [
+            "reason"
+        ],
+        "plural": false
+    },
+    "pendingStillOffline": {
+        "ar": "لا يوجد اتصال بعد. سنحاول مرة أخرى تلقائياً.",
+        "en": "Still no connection. We will try again automatically.",
+        "placeholders": [],
+        "plural": false
+    },
+    "pendingTitle": {
+        "ar": "مسحات بدون إنترنت",
+        "en": "Offline scans",
+        "placeholders": [],
+        "plural": false
+    },
+    "pendingUploadNow": {
+        "ar": "رفع الآن",
+        "en": "Upload now",
+        "placeholders": [],
+        "plural": false
+    },
+    "pendingWaiting": {
+        "ar": "في الانتظار",
+        "en": "Waiting",
+        "placeholders": [],
+        "plural": false
+    },
+    "pinBlocked": {
+        "ar": "تم إيقاف الرمز بعد محاولات خاطئة كثيرة. ادخل بكود واتساب.",
+        "en": "The PIN was blocked after too many wrong attempts. Sign in with a WhatsApp code.",
+        "placeholders": [],
+        "plural": false
+    },
+    "pinConfirmBody": {
+        "ar": "للتأكد من أنك كتبته صحيحاً.",
+        "en": "To make sure you typed it correctly.",
+        "placeholders": [],
+        "plural": false
+    },
+    "pinConfirmTitle": {
+        "ar": "أعد إدخال الرمز",
+        "en": "Enter it again",
+        "placeholders": [],
+        "plural": false
+    },
+    "pinDelete": {
+        "ar": "حذف رقم",
+        "en": "Delete digit",
+        "placeholders": [],
+        "plural": false
+    },
+    "pinMismatch": {
+        "ar": "الرمزان غير متطابقين. ابدأ من جديد.",
+        "en": "The two PINs do not match. Start again.",
+        "placeholders": [],
+        "plural": false
+    },
+    "pinProgress": {
+        "ar": "{entered} من {total} أرقام",
+        "en": "{entered} of {total} digits",
+        "placeholders": [
+            "entered",
+            "total"
+        ],
+        "plural": false
+    },
+    "pinSetupBody": {
+        "ar": "اختر 4 أرقام تتذكرها بسهولة.",
+        "en": "Choose 4 digits you will remember.",
+        "placeholders": [],
+        "plural": false
+    },
+    "pinSetupTitle": {
+        "ar": "أنشئ رمز PIN",
+        "en": "Create a PIN",
+        "placeholders": [],
+        "plural": false
+    },
+    "pinUnlockHint": {
+        "ar": "أدخل رمز PIN",
+        "en": "Enter your PIN",
+        "placeholders": [],
+        "plural": false
+    },
+    "pinWrong": {
+        "ar": "الرمز غير صحيح. المحاولات المتبقية: {count}",
+        "en": "Wrong PIN. Attempts left: {count}",
+        "placeholders": [
+            "count"
+        ],
+        "plural": false
+    },
+    "pointsAmount": {
+        "ar": "{points} نقطة",
+        "en": "{points} points",
+        "placeholders": [
+            "points"
+        ],
+        "plural": false
+    },
+    "pointsUnit": {
+        "ar": "نقطة",
+        "en": "points",
+        "placeholders": [],
+        "plural": false
+    },
+    "priceEgp": {
+        "ar": "{amount} ج.م",
+        "en": "EGP {amount}",
+        "placeholders": [
+            "amount"
+        ],
+        "plural": false
+    },
+    "priceOnRequest": {
+        "ar": "السعر عند الطلب",
+        "en": "Price on request",
+        "placeholders": [],
+        "plural": false
+    },
+    "productAddToCart": {
+        "ar": "أضف إلى السلة",
+        "en": "Add to cart",
+        "placeholders": [],
+        "plural": false
+    },
+    "productAddWithTotal": {
+        "ar": "أضف إلى السلة · {total}",
+        "en": "Add to cart · {total}",
+        "placeholders": [
+            "total"
+        ],
+        "plural": false
+    },
+    "productAdded": {
+        "ar": "تمت إضافة المنتج إلى السلة.",
+        "en": "Added to your cart.",
+        "placeholders": [],
+        "plural": false
+    },
+    "productColor": {
+        "ar": "اللون: ",
+        "en": "Colour: ",
+        "placeholders": [],
+        "plural": false
+    },
+    "productDescription": {
+        "ar": "الوصف",
+        "en": "Description",
+        "placeholders": [],
+        "plural": false
+    },
+    "productGallery": {
+        "ar": "صورة {current} من {total}",
+        "en": "Image {current} of {total}",
+        "placeholders": [
+            "current",
+            "total"
+        ],
+        "plural": false
+    },
+    "productInStock": {
+        "ar": "متوفر",
+        "en": "In stock",
+        "placeholders": [],
+        "plural": false
+    },
+    "productLoadFailed": {
+        "ar": "تعذر تحميل المنتج",
+        "en": "Could not load this product",
+        "placeholders": [],
+        "plural": false
+    },
+    "productLowStock": {
+        "ar": "باقي {count} فقط",
+        "en": "Only {count} left",
+        "placeholders": [
+            "count"
+        ],
+        "plural": false
+    },
+    "productPerkCod": {
+        "ar": "الدفع عند الاستلام",
+        "en": "Cash on delivery",
+        "placeholders": [],
+        "plural": false
+    },
+    "productPerkDelivery": {
+        "ar": "توصيل للمنزل",
+        "en": "Home delivery",
+        "placeholders": [],
+        "plural": false
+    },
+    "productPerkPoints": {
+        "ar": "نقاط مع كل عبوة",
+        "en": "Points in every pack",
+        "placeholders": [],
+        "plural": false
+    },
+    "productQrNote": {
+        "ar": "داخل العبوة كود QR: امسحه بعد الاستلام لتكسب نقاطاً.",
+        "en": "There is a QR code inside the pack: scan it after delivery to earn points.",
+        "placeholders": [],
+        "plural": false
+    },
+    "productReadLess": {
+        "ar": "عرض أقل",
+        "en": "Show less",
+        "placeholders": [],
+        "plural": false
+    },
+    "productReadMore": {
+        "ar": "عرض المزيد",
+        "en": "Read more",
+        "placeholders": [],
+        "plural": false
+    },
+    "productSignInToBuy": {
+        "ar": "سجّل الدخول لإضافة المنتجات إلى سلتك.",
+        "en": "Sign in to add products to your cart.",
+        "placeholders": [],
+        "plural": false
+    },
+    "productSimilar": {
+        "ar": "منتجات مشابهة",
+        "en": "Similar products",
+        "placeholders": [],
+        "plural": false
+    },
+    "productSpecCategory": {
+        "ar": "القسم",
+        "en": "Category",
+        "placeholders": [],
+        "plural": false
+    },
+    "productSpecDimensions": {
+        "ar": "الأبعاد",
+        "en": "Dimensions",
+        "placeholders": [],
+        "plural": false
+    },
+    "productSpecSku": {
+        "ar": "كود المنتج",
+        "en": "Product code",
+        "placeholders": [],
+        "plural": false
+    },
+    "productSpecWeight": {
+        "ar": "الوزن",
+        "en": "Weight",
+        "placeholders": [],
+        "plural": false
+    },
+    "productSpecs": {
+        "ar": "المواصفات",
+        "en": "Specifications",
+        "placeholders": [],
+        "plural": false
+    },
+    "productViewCart": {
+        "ar": "عرض السلة",
+        "en": "View cart",
+        "placeholders": [],
+        "plural": false
+    },
+    "productWeightKg": {
+        "ar": "{weight} كجم",
+        "en": "{weight} kg",
+        "placeholders": [
+            "weight"
+        ],
+        "plural": false
+    },
+    "productZoom": {
+        "ar": "تكبير الصورة",
+        "en": "Zoom image",
+        "placeholders": [],
+        "plural": false
+    },
+    "quantityDecrease": {
+        "ar": "تقليل الكمية",
+        "en": "Decrease quantity",
+        "placeholders": [],
+        "plural": false
+    },
+    "quantityIncrease": {
+        "ar": "زيادة الكمية",
+        "en": "Increase quantity",
+        "placeholders": [],
+        "plural": false
+    },
+    "resetSubtitle": {
+        "ar": "تم التحقق من رقمك. اختر كلمة مرور جديدة لحسابك.",
+        "en": "Your number is verified. Choose a new password for your account.",
+        "placeholders": [],
+        "plural": false
+    },
+    "resetTitle": {
+        "ar": "كلمة مرور جديدة",
+        "en": "New password",
+        "placeholders": [],
+        "plural": false
+    },
+    "retry": {
+        "ar": "إعادة المحاولة",
+        "en": "Try again",
+        "placeholders": [],
+        "plural": false
+    },
+    "rewardDiscount": {
+        "ar": "خصم {amount} على طلبك",
+        "en": "{amount} off your order",
+        "placeholders": [
+            "amount"
+        ],
+        "plural": false
+    },
+    "rewardExpiredOn": {
+        "ar": "انتهى {date}",
+        "en": "Expired {date}",
+        "placeholders": [
+            "date"
+        ],
+        "plural": false
+    },
+    "rewardExpiresIn": {
+        "ar": "ينتهي خلال {days} يوماً",
+        "en": "Expires in {days} days",
+        "placeholders": [
+            "days"
+        ],
+        "plural": false
+    },
+    "rewardFromMaqam": {
+        "ar": "من MAQAM",
+        "en": "From MAQAM",
+        "placeholders": [],
+        "plural": false
+    },
+    "rewardFromWheel": {
+        "ar": "من عجلة الحظ",
+        "en": "From the lucky wheel",
+        "placeholders": [],
+        "plural": false
+    },
+    "rewardNoExpiry": {
+        "ar": "بدون تاريخ انتهاء",
+        "en": "No expiry date",
+        "placeholders": [],
+        "plural": false
+    },
+    "rewardProduct": {
+        "ar": "منتج هدية: {name}",
+        "en": "Free gift: {name}",
+        "placeholders": [
+            "name"
+        ],
+        "plural": false
+    },
+    "rewardProductFallback": {
+        "ar": "منتج",
+        "en": "a product",
+        "placeholders": [],
+        "plural": false
+    },
+    "rewardShipsFree": {
+        "ar": "يُشحن مجاناً مع أي طلب",
+        "en": "Ships free with any order",
+        "placeholders": [],
+        "plural": false
+    },
+    "rewardUseInCart": {
+        "ar": "استخدم في السلة",
+        "en": "Use in cart",
+        "placeholders": [],
+        "plural": false
+    },
+    "rewardUsedOn": {
+        "ar": "استُخدم {date}",
+        "en": "Used {date}",
+        "placeholders": [
+            "date"
+        ],
+        "plural": false
+    },
+    "rewardsAvailable": {
+        "ar": "متاحة",
+        "en": "Available",
+        "placeholders": [],
+        "plural": false
+    },
+    "rewardsEmpty": {
+        "ar": "لا توجد مكافآت هنا",
+        "en": "No rewards here",
+        "placeholders": [],
+        "plural": false
+    },
+    "rewardsEmptyBody": {
+        "ar": "جوائز عجلة الحظ والكوبونات الخاصة بك تظهر هنا.",
+        "en": "Your lucky wheel prizes and personal coupons appear here.",
+        "placeholders": [],
+        "plural": false
+    },
+    "rewardsExpired": {
+        "ar": "منتهية",
+        "en": "Expired",
+        "placeholders": [],
+        "plural": false
+    },
+    "rewardsLoadFailed": {
+        "ar": "تعذر تحميل المكافآت",
+        "en": "Could not load your rewards",
+        "placeholders": [],
+        "plural": false
+    },
+    "rewardsNote": {
+        "ar": "كود واحد لكل طلب. إذا ألغيت الطلب ترجع المكافأة إلى هنا تلقائياً.",
+        "en": "One code per order. If you cancel the order, the reward comes back here automatically.",
+        "placeholders": [],
+        "plural": false
+    },
+    "rewardsTryWheel": {
+        "ar": "جرّب حظك في العجلة",
+        "en": "Try your luck on the wheel",
+        "placeholders": [],
+        "plural": false
+    },
+    "rewardsUsed": {
+        "ar": "مستخدمة",
+        "en": "Used",
+        "placeholders": [],
+        "plural": false
+    },
+    "save": {
+        "ar": "حفظ",
+        "en": "Save",
+        "placeholders": [],
+        "plural": false
+    },
+    "scanAnother": {
+        "ar": "مسح كود آخر",
+        "en": "Scan another code",
+        "placeholders": [],
+        "plural": false
+    },
+    "scanCameraUnavailable": {
+        "ar": "تعذر تشغيل الكاميرا. اسمح للتطبيق باستخدامها من إعدادات الجهاز، أو أدخل الكود يدوياً.",
+        "en": "The camera could not be started. Allow the app to use it in your device settings, or type the code in.",
+        "placeholders": [],
+        "plural": false
+    },
+    "scanCodeTail": {
+        "ar": "الكود {tail} ••••",
+        "en": "Code {tail} ••••",
+        "placeholders": [
+            "tail"
+        ],
+        "plural": false
+    },
+    "scanHint": {
+        "ar": "اقشط طبقة الحماية داخل العبوة\nووجّه الكاميرا إلى الكود",
+        "en": "Scratch off the cover inside the pack\nand point the camera at the code",
+        "placeholders": [],
+        "plural": false
+    },
+    "scanManualEntry": {
+        "ar": "إدخال يدوي",
+        "en": "Type the code",
+        "placeholders": [],
+        "plural": false
+    },
+    "scanManualHint": {
+        "ar": "الكود المطبوع داخل العبوة",
+        "en": "The code printed inside the pack",
+        "placeholders": [],
+        "plural": false
+    },
+    "scanManualSubmit": {
+        "ar": "تأكيد",
+        "en": "Confirm",
+        "placeholders": [],
+        "plural": false
+    },
+    "scanMerchantAdd": {
+        "ar": "إضافة",
+        "en": "Add",
+        "placeholders": [],
+        "plural": false
+    },
+    "scanMerchantCodeHint": {
+        "ar": "كود تاجر جديد، مثال M-AB12CD34",
+        "en": "New merchant code, e.g. M-AB12CD34",
+        "placeholders": [],
+        "plural": false
+    },
+    "scanMerchantQuestion": {
+        "ar": "من أي تاجر اشتريت؟",
+        "en": "Which merchant did you buy from?",
+        "placeholders": [],
+        "plural": false
+    },
+    "scanNoMerchant": {
+        "ar": "بدون تاجر",
+        "en": "No merchant",
+        "placeholders": [],
+        "plural": false
+    },
+    "scanOfflineBanner": {
+        "ar": "لا يوجد اتصال: المسح يُحفظ على هاتفك الآن",
+        "en": "No connection: scans are saved on your phone for now",
+        "placeholders": [],
+        "plural": false
+    },
+    "scanOfflineExplain": {
+        "ar": "نقاطك لم تُضف بعد. سنرفع المسحات تلقائياً ونضيف النقاط أول ما يرجع الإنترنت، حتى لو كان التطبيق مغلقاً.",
+        "en": "Your points are not added yet. We will upload your scans and add the points as soon as you are back online.",
+        "placeholders": [],
+        "plural": false
+    },
+    "scanOfflineSaved": {
+        "ar": "تم حفظ المسح",
+        "en": "Scan saved",
+        "placeholders": [],
+        "plural": false
+    },
+    "scanOpenWallet": {
+        "ar": "عرض المحفظة",
+        "en": "Open wallet",
+        "placeholders": [],
+        "plural": false
+    },
+    "scanOptional": {
+        "ar": "اختياري",
+        "en": "Optional",
+        "placeholders": [],
+        "plural": false
+    },
+    "scanPendingBadge": {
+        "ar": "في الانتظار",
+        "en": "Pending",
+        "placeholders": [],
+        "plural": false
+    },
+    "scanPendingCount": {
+        "ar": "في الانتظار ({count})",
+        "en": "Pending ({count})",
+        "placeholders": [
+            "count"
+        ],
+        "plural": false
+    },
+    "scanResultAdded": {
+        "ar": "تمت إضافة",
+        "en": "You earned",
+        "placeholders": [],
+        "plural": false
+    },
+    "scanResultBalance": {
+        "ar": "رصيدك الآن",
+        "en": "Your balance now",
+        "placeholders": [],
+        "plural": false
+    },
+    "scanResultMerchant": {
+        "ar": "التاجر",
+        "en": "Merchant",
+        "placeholders": [],
+        "plural": false
+    },
+    "scanResultToRank": {
+        "ar": "باقي لرتبة {rank}",
+        "en": "Left to reach {rank}",
+        "placeholders": [
+            "rank"
+        ],
+        "plural": false
+    },
+    "scanTitle": {
+        "ar": "مسح كود QR",
+        "en": "Scan QR code",
+        "placeholders": [],
+        "plural": false
+    },
+    "scanTorchOff": {
+        "ar": "إطفاء الفلاش",
+        "en": "Turn the flash off",
+        "placeholders": [],
+        "plural": false
+    },
+    "scanTorchOn": {
+        "ar": "تشغيل الفلاش",
+        "en": "Turn the flash on",
+        "placeholders": [],
+        "plural": false
+    },
+    "seminarClosed": {
+        "ar": "انتهى التسجيل في هذا السيمينار.",
+        "en": "Sign-up for this seminar is closed.",
+        "placeholders": [],
+        "plural": false
+    },
+    "seminarCollect": {
+        "ar": "تواصل مع فريق MAQAM لاستلام جائزتك.",
+        "en": "Contact the MAQAM team to collect your prize.",
+        "placeholders": [],
+        "plural": false
+    },
+    "seminarDays": {
+        "ar": "{count, plural, =1{يوم} =2{يومين} few{{count} أيام} other{{count} يوماً}}",
+        "en": "{count, plural, =1{1 day} other{{count} days}}",
+        "placeholders": [
+            "count"
+        ],
+        "plural": true
+    },
+    "seminarEnded": {
+        "ar": "انتهى",
+        "en": "Ended",
+        "placeholders": [],
+        "plural": false
+    },
+    "seminarEndsIn": {
+        "ar": "ينتهي خلال {time}",
+        "en": "Ends in {time}",
+        "placeholders": [
+            "time"
+        ],
+        "plural": false
+    },
+    "seminarHours": {
+        "ar": "{count, plural, =1{ساعة} =2{ساعتين} few{{count} ساعات} other{{count} ساعة}}",
+        "en": "{count, plural, =1{1 hour} other{{count} hours}}",
+        "placeholders": [
+            "count"
+        ],
+        "plural": true
+    },
+    "seminarHowItWorks": {
+        "ar": "سجّل أثناء السيمينار، ويُسحب الفائزون عشوائياً. كل شخص يفوز بجائزة واحدة على الأكثر.",
+        "en": "Sign up during the seminar; winners are drawn at random. Each person wins one prize at most.",
+        "placeholders": [],
+        "plural": false
+    },
+    "seminarJoin": {
+        "ar": "سجّل في السحب",
+        "en": "Join the draw",
+        "placeholders": [],
+        "plural": false
+    },
+    "seminarLive": {
+        "ar": "جارٍ الآن",
+        "en": "Live now",
+        "placeholders": [],
+        "plural": false
+    },
+    "seminarLoadFailed": {
+        "ar": "تعذر تحميل السيمينار",
+        "en": "Could not load the seminar",
+        "placeholders": [],
+        "plural": false
+    },
+    "seminarMinutes": {
+        "ar": "{count, plural, =1{دقيقة} =2{دقيقتين} few{{count} دقائق} other{{count} دقيقة}}",
+        "en": "{count, plural, =1{1 minute} other{{count} minutes}}",
+        "placeholders": [
+            "count"
+        ],
+        "plural": true
+    },
+    "seminarNotDrawn": {
+        "ar": "لم تُسحب بعد",
+        "en": "Not drawn yet",
+        "placeholders": [],
+        "plural": false
+    },
+    "seminarPrizes": {
+        "ar": "الجوائز والفائزون",
+        "en": "Prizes and winners",
+        "placeholders": [],
+        "plural": false
+    },
+    "seminarPromoBody": {
+        "ar": "{count, plural, =1{سحب على جائزة} =2{سحب على جائزتين} few{سحب على {count} جوائز} other{سحب على {count} جائزة}}",
+        "en": "{count, plural, =1{A draw for 1 prize} other{A draw for {count} prizes}}",
+        "placeholders": [
+            "count"
+        ],
+        "plural": true
+    },
+    "seminarRegisteredCount": {
+        "ar": "{count, plural, =0{كن أول المسجلين} =1{مسجل واحد} =2{مسجلان} few{{count} مسجلين} other{{count} مسجل}}",
+        "en": "{count, plural, =0{Be the first to sign up} =1{1 signed up} other{{count} signed up}}",
+        "placeholders": [
+            "count"
+        ],
+        "plural": true
+    },
+    "seminarRegisteredDone": {
+        "ar": "تم تسجيلك في السحب. بالتوفيق!",
+        "en": "You are in the draw. Good luck!",
+        "placeholders": [],
+        "plural": false
+    },
+    "seminarRegisteredEnded": {
+        "ar": "كنت مسجّلاً في هذا السحب.",
+        "en": "You took part in this draw.",
+        "placeholders": [],
+        "plural": false
+    },
+    "seminarRegisteredLive": {
+        "ar": "أنت مسجّل في السحب. تابع النتائج هنا.",
+        "en": "You are in the draw. Follow the results here.",
+        "placeholders": [],
+        "plural": false
+    },
+    "seminarTitle": {
+        "ar": "السيمينار",
+        "en": "Seminar",
+        "placeholders": [],
+        "plural": false
+    },
+    "seminarWinner": {
+        "ar": "الفائز: {name}",
+        "en": "Winner: {name}",
+        "placeholders": [
+            "name"
+        ],
+        "plural": false
+    },
+    "seminarWinnerYou": {
+        "ar": "الفائز: أنت!",
+        "en": "Winner: you!",
+        "placeholders": [],
+        "plural": false
+    },
+    "seminarYouAreIn": {
+        "ar": "أنت مسجّل",
+        "en": "You're in",
+        "placeholders": [],
+        "plural": false
+    },
+    "seminarYouWon": {
+        "ar": "مبروك! فزت بـ {prize}",
+        "en": "Congratulations! You won {prize}",
+        "placeholders": [
+            "prize"
+        ],
+        "plural": false
+    },
+    "sendCodeChangeNumber": {
+        "ar": "تغيير الرقم",
+        "en": "Change number",
+        "placeholders": [],
+        "plural": false
+    },
+    "sendCodeCopied": {
+        "ar": "تم نسخ الكود",
+        "en": "Code copied",
+        "placeholders": [],
+        "plural": false
+    },
+    "sendCodeCopy": {
+        "ar": "نسخ الكود",
+        "en": "Copy code",
+        "placeholders": [],
+        "plural": false
+    },
+    "sendCodeExpired": {
+        "ar": "انتهت صلاحية الكود.",
+        "en": "This code has expired.",
+        "placeholders": [],
+        "plural": false
+    },
+    "sendCodeLabel": {
+        "ar": "كود التأكيد",
+        "en": "Confirmation code",
+        "placeholders": [],
+        "plural": false
+    },
+    "sendCodeOpenWhatsapp": {
+        "ar": "فتح واتساب وإرسال الكود",
+        "en": "Open WhatsApp and send the code",
+        "placeholders": [],
+        "plural": false
+    },
+    "sendCodeStep1": {
+        "ar": "اضغط الزر: الرسالة مكتوبة جاهزة",
+        "en": "Tap the button: the message is already written",
+        "placeholders": [],
+        "plural": false
+    },
+    "sendCodeStep2": {
+        "ar": "اضغط «إرسال» داخل واتساب",
+        "en": "Tap Send inside WhatsApp",
+        "placeholders": [],
+        "plural": false
+    },
+    "sendCodeStep3": {
+        "ar": "ارجع للتطبيق واكتب كود الدخول الذي يصلك",
+        "en": "Come back and enter the sign-in code you receive",
+        "placeholders": [],
+        "plural": false
+    },
+    "sendCodeSubtitlePrefix": {
+        "ar": "أرسله من الرقم ",
+        "en": "Send it from ",
+        "placeholders": [],
+        "plural": false
+    },
+    "sendCodeSubtitleSuffix": {
+        "ar": " وسنرد عليك بكود الدخول.",
+        "en": " and we will reply with your sign-in code.",
+        "placeholders": [],
+        "plural": false
+    },
+    "sendCodeTitle": {
+        "ar": "أرسل الكود من واتساب",
+        "en": "Send the code on WhatsApp",
+        "placeholders": [],
+        "plural": false
+    },
+    "sendCodeValidFor": {
+        "ar": "الكود صالح لمدة {minutes} دقائق · ",
+        "en": "The code is valid for {minutes} minutes · ",
+        "placeholders": [
+            "minutes"
+        ],
+        "plural": false
+    },
+    "sendCodeWaiting": {
+        "ar": "في انتظار رسالتك...",
+        "en": "Waiting for your message...",
+        "placeholders": [],
+        "plural": false
+    },
+    "sendCodeWhatsappMissing": {
+        "ar": "تعذر فتح واتساب. انسخ الكود وأرسله يدوياً.",
+        "en": "Could not open WhatsApp. Copy the code and send it yourself.",
+        "placeholders": [],
+        "plural": false
+    },
+    "setupConfirmLabel": {
+        "ar": "تأكيد كلمة المرور",
+        "en": "Confirm password",
+        "placeholders": [],
+        "plural": false
+    },
+    "setupConfirmMismatch": {
+        "ar": "كلمتا المرور غير متطابقتين.",
+        "en": "The two passwords do not match.",
+        "placeholders": [],
+        "plural": false
+    },
+    "setupLater": {
+        "ar": "لاحقاً",
+        "en": "Later",
+        "placeholders": [],
+        "plural": false
+    },
+    "setupNameHint": {
+        "ar": "مثال: أحمد محمود",
+        "en": "Example: Ahmed Mahmoud",
+        "placeholders": [],
+        "plural": false
+    },
+    "setupNameLabel": {
+        "ar": "الاسم الكامل",
+        "en": "Full name",
+        "placeholders": [],
+        "plural": false
+    },
+    "setupNameRequired": {
+        "ar": "أدخل اسمك.",
+        "en": "Enter your name.",
+        "placeholders": [],
+        "plural": false
+    },
+    "setupNote": {
+        "ar": "الدخول بكود واتساب يبقى متاحاً دائماً إذا نسيت كلمة المرور.",
+        "en": "Signing in with a WhatsApp code is always available if you forget your password.",
+        "placeholders": [],
+        "plural": false
+    },
+    "setupPasswordHint": {
+        "ar": "8 أحرف أو أرقام على الأقل",
+        "en": "At least 8 letters or digits",
+        "placeholders": [],
+        "plural": false
+    },
+    "setupPasswordLabel": {
+        "ar": "كلمة المرور",
+        "en": "Password",
+        "placeholders": [],
+        "plural": false
+    },
+    "setupPasswordTooShort": {
+        "ar": "كلمة المرور يجب ألا تقل عن 8 خانات.",
+        "en": "The password must be at least 8 characters.",
+        "placeholders": [],
+        "plural": false
+    },
+    "setupSave": {
+        "ar": "حفظ ومتابعة",
+        "en": "Save and continue",
+        "placeholders": [],
+        "plural": false
+    },
+    "setupSubtitle": {
+        "ar": "اختر اسماً وكلمة مرور لتدخل بهما المرة القادمة دون انتظار كود واتساب.",
+        "en": "Choose a name and a password to sign in next time without waiting for a WhatsApp code.",
+        "placeholders": [],
+        "plural": false
+    },
+    "setupTitle": {
+        "ar": "أكمل بياناتك",
+        "en": "Complete your details",
+        "placeholders": [],
+        "plural": false
+    },
+    "signIn": {
+        "ar": "تسجيل الدخول",
+        "en": "Sign in",
+        "placeholders": [],
+        "plural": false
+    },
+    "signOut": {
+        "ar": "تسجيل الخروج",
+        "en": "Sign out",
+        "placeholders": [],
+        "plural": false
+    },
+    "signOutConfirmBody": {
+        "ar": "ستحتاج إلى كود واتساب للدخول مرة أخرى.",
+        "en": "You will need a WhatsApp code to sign in again.",
+        "placeholders": [],
+        "plural": false
+    },
+    "signOutConfirmTitle": {
+        "ar": "تسجيل الخروج؟",
+        "en": "Sign out?",
+        "placeholders": [],
+        "plural": false
+    },
+    "skip": {
+        "ar": "تخطي",
+        "en": "Skip",
+        "placeholders": [],
+        "plural": false
+    },
+    "sortBy": {
+        "ar": "الترتيب",
+        "en": "Sort",
+        "placeholders": [],
+        "plural": false
+    },
+    "sortNewest": {
+        "ar": "الأحدث",
+        "en": "Newest",
+        "placeholders": [],
+        "plural": false
+    },
+    "sortPriceHigh": {
+        "ar": "السعر: من الأعلى",
+        "en": "Price: high to low",
+        "placeholders": [],
+        "plural": false
+    },
+    "sortPriceLow": {
+        "ar": "السعر: من الأقل",
+        "en": "Price: low to high",
+        "placeholders": [],
+        "plural": false
+    },
+    "startOver": {
+        "ar": "ابدأ من جديد",
+        "en": "Start over",
+        "placeholders": [],
+        "plural": false
+    },
+    "stepOf": {
+        "ar": "الخطوة {step} من {total}",
+        "en": "Step {step} of {total}",
+        "placeholders": [
+            "step",
+            "total"
+        ],
+        "plural": false
+    },
+    "storeCount": {
+        "ar": "{count} منتج",
+        "en": "{count} products",
+        "placeholders": [
+            "count"
+        ],
+        "plural": false
+    },
+    "storeSearchHint": {
+        "ar": "ابحث باسم المنتج أو الكود",
+        "en": "Search by product name or code",
+        "placeholders": [],
+        "plural": false
+    },
+    "summaryDiscount": {
+        "ar": "الخصم",
+        "en": "Discount",
+        "placeholders": [],
+        "plural": false
+    },
+    "summaryShipping": {
+        "ar": "الشحن",
+        "en": "Shipping",
+        "placeholders": [],
+        "plural": false
+    },
+    "summarySubtotal": {
+        "ar": "المجموع",
+        "en": "Subtotal",
+        "placeholders": [],
+        "plural": false
+    },
+    "summaryTotal": {
+        "ar": "الإجمالي",
+        "en": "Total",
+        "placeholders": [],
+        "plural": false
+    },
+    "suspendedBody": {
+        "ar": "رصدنا نشاطاً غير معتاد في عمليات المسح، فأوقفنا الحساب للمراجعة حمايةً لنقاطك. تواصل مع الدعم لإعادة تفعيله.",
+        "en": "We noticed unusual scanning activity, so we paused the account for review to protect your points. Contact support to have it reactivated.",
+        "placeholders": [],
+        "plural": false
+    },
+    "suspendedContact": {
+        "ar": "التواصل مع الدعم",
+        "en": "Contact support",
+        "placeholders": [],
+        "plural": false
+    },
+    "suspendedSupportFailed": {
+        "ar": "تعذر فتح واتساب. راسلنا على support@maqam-eg.com.",
+        "en": "Could not open WhatsApp. Email us at support@maqam-eg.com.",
+        "placeholders": [],
+        "plural": false
+    },
+    "suspendedSupportMessage": {
+        "ar": "مرحباً، حسابي في تطبيق MAQAM موقوف وأريد مراجعته.",
+        "en": "Hello, my MAQAM app account is suspended and I would like it reviewed.",
+        "placeholders": [],
+        "plural": false
+    },
+    "suspendedTitle": {
+        "ar": "الحساب موقوف مؤقتاً",
+        "en": "Account temporarily suspended",
+        "placeholders": [],
+        "plural": false
+    },
+    "switchLanguage": {
+        "ar": "English",
+        "en": "العربية",
+        "placeholders": [],
+        "plural": false
+    },
+    "timeHoursAgo": {
+        "ar": "منذ {count} س",
+        "en": "{count} h ago",
+        "placeholders": [
+            "count"
+        ],
+        "plural": false
+    },
+    "timeMinutesAgo": {
+        "ar": "منذ {count} د",
+        "en": "{count} min ago",
+        "placeholders": [
+            "count"
+        ],
+        "plural": false
+    },
+    "timeNow": {
+        "ar": "الآن",
+        "en": "Now",
+        "placeholders": [],
+        "plural": false
+    },
+    "today": {
+        "ar": "اليوم",
+        "en": "Today",
+        "placeholders": [],
+        "plural": false
+    },
+    "unlockBrowseAsGuest": {
+        "ar": "تصفّح كزائر",
+        "en": "Browse as a guest",
+        "placeholders": [],
+        "plural": false
+    },
+    "unlockButtonWith": {
+        "ar": "الدخول {method}",
+        "en": "Sign in {method}",
+        "placeholders": [
+            "method"
+        ],
+        "plural": false
+    },
+    "unlockDifferentAccount": {
+        "ar": "ليس حسابك؟ دخول برقم آخر",
+        "en": "Not you? Sign in with another number",
+        "placeholders": [],
+        "plural": false
+    },
+    "unlockFailed": {
+        "ar": "لم نتمكن من التحقق. حاول مرة أخرى.",
+        "en": "We could not verify you. Please try again.",
+        "placeholders": [],
+        "plural": false
+    },
+    "unlockHintFace": {
+        "ar": "انظر إلى الهاتف للدخول",
+        "en": "Look at your phone to sign in",
+        "placeholders": [],
+        "plural": false
+    },
+    "unlockHintFingerprint": {
+        "ar": "المس مستشعر البصمة للدخول",
+        "en": "Touch the fingerprint sensor to sign in",
+        "placeholders": [],
+        "plural": false
+    },
+    "unlockReason": {
+        "ar": "افتح تطبيق مقام",
+        "en": "Unlock MAQAM",
+        "placeholders": [],
+        "plural": false
+    },
+    "unlockUseWhatsapp": {
+        "ar": "الدخول بكود واتساب",
+        "en": "Sign in with a WhatsApp code",
+        "placeholders": [],
+        "plural": false
+    },
+    "unlockWelcomeBack": {
+        "ar": "أهلاً بعودتك",
+        "en": "Welcome back",
+        "placeholders": [],
+        "plural": false
+    },
+    "unlockWelcomeBackName": {
+        "ar": "أهلاً بعودتك، {name}",
+        "en": "Welcome back, {name}",
+        "placeholders": [
+            "name"
+        ],
+        "plural": false
+    },
+    "updateBody": {
+        "ar": "هذا الإصدار لم يعد مدعوماً. حدّث التطبيق لتكمل استخدام محفظتك وطلباتك.",
+        "en": "This version is no longer supported. Update the app to keep using your wallet and orders.",
+        "placeholders": [],
+        "plural": false
+    },
+    "updateNow": {
+        "ar": "تحديث الآن",
+        "en": "Update now",
+        "placeholders": [],
+        "plural": false
+    },
+    "updateStoreFailed": {
+        "ar": "تعذر فتح المتجر. حدّث التطبيق من Google Play أو App Store.",
+        "en": "Could not open the store. Update the app from Google Play or the App Store.",
+        "placeholders": [],
+        "plural": false
+    },
+    "updateTitle": {
+        "ar": "يوجد إصدار جديد",
+        "en": "A new version is available",
+        "placeholders": [],
+        "plural": false
+    },
+    "updateVersions": {
+        "ar": "إصدارك {current} · المطلوب {minimum}",
+        "en": "Your version {current} · Required {minimum}",
+        "placeholders": [
+            "current",
+            "minimum"
+        ],
+        "plural": false
+    },
+    "view": {
+        "ar": "عرض",
+        "en": "View",
+        "placeholders": [],
+        "plural": false
+    },
+    "viewAll": {
+        "ar": "عرض الكل",
+        "en": "View all",
+        "placeholders": [],
+        "plural": false
+    },
+    "walletAvailable": {
+        "ar": "متاح للصرف",
+        "en": "Available to spend",
+        "placeholders": [],
+        "plural": false
+    },
+    "walletEarn": {
+        "ar": "اكسب نقاطاً",
+        "en": "Earn points",
+        "placeholders": [],
+        "plural": false
+    },
+    "walletGuest": {
+        "ar": "سجّل الدخول لعرض نقاطك وحركاتك.",
+        "en": "Sign in to see your points and activity.",
+        "placeholders": [],
+        "plural": false
+    },
+    "walletLoadFailed": {
+        "ar": "تعذر تحميل المحفظة",
+        "en": "Could not load your wallet",
+        "placeholders": [],
+        "plural": false
+    },
+    "walletNextRankAt": {
+        "ar": "{rank} عند {points}",
+        "en": "{rank} at {points}",
+        "placeholders": [
+            "rank",
+            "points"
+        ],
+        "plural": false
+    },
+    "walletNoTransactions": {
+        "ar": "لا توجد حركات بعد",
+        "en": "No activity yet",
+        "placeholders": [],
+        "plural": false
+    },
+    "walletRankNote": {
+        "ar": "الرتبة تُحسب على إجمالي ما كسبته: الصرف لا ينزّل رتبتك.",
+        "en": "Your rank follows total points earned: spending never lowers it.",
+        "placeholders": [],
+        "plural": false
+    },
+    "walletRecent": {
+        "ar": "آخر الحركات",
+        "en": "Recent activity",
+        "placeholders": [],
+        "plural": false
+    },
+    "walletTotalEarned": {
+        "ar": "إجمالي ما كسبته",
+        "en": "Total earned",
+        "placeholders": [],
+        "plural": false
+    },
+    "wheelBalanceAfter": {
+        "ar": "رصيدك بعد اللفة",
+        "en": "Balance after the spin",
+        "placeholders": [],
+        "plural": false
+    },
+    "wheelCost": {
+        "ar": "تكلفة اللفة",
+        "en": "Cost per spin",
+        "placeholders": [],
+        "plural": false
+    },
+    "wheelDisabled": {
+        "ar": "عجلة الحظ متوقفة حالياً. جرّب لاحقاً.",
+        "en": "The lucky wheel is paused for now. Try again later.",
+        "placeholders": [],
+        "plural": false
+    },
+    "wheelFooterPrefix": {
+        "ar": "الجوائز تُضاف إلى ",
+        "en": "Prizes go to ",
+        "placeholders": [],
+        "plural": false
+    },
+    "wheelFooterSuffix": {
+        "ar": " وتُستخدم بكودها في السلة.",
+        "en": " and are used with their code in the cart.",
+        "placeholders": [],
+        "plural": false
+    },
+    "wheelLoadFailed": {
+        "ar": "تعذر تحميل العجلة",
+        "en": "Could not load the wheel",
+        "placeholders": [],
+        "plural": false
+    },
+    "wheelLocked": {
+        "ar": "عجلة الحظ مقفلة",
+        "en": "The lucky wheel is locked",
+        "placeholders": [],
+        "plural": false
+    },
+    "wheelLostBody": {
+        "ar": "لم تربح هذه المرة. جرّب مرة أخرى.",
+        "en": "No prize this time. Try again.",
+        "placeholders": [],
+        "plural": false
+    },
+    "wheelLostTitle": {
+        "ar": "حظ أوفر",
+        "en": "Better luck next time",
+        "placeholders": [],
+        "plural": false
+    },
+    "wheelNotEnough": {
+        "ar": "تحتاج {points} نقطة على الأقل للّفة.",
+        "en": "You need at least {points} points to spin.",
+        "placeholders": [
+            "points"
+        ],
+        "plural": false
+    },
+    "wheelOk": {
+        "ar": "حسناً",
+        "en": "OK",
+        "placeholders": [],
+        "plural": false
+    },
+    "wheelSemantics": {
+        "ar": "عجلة الحظ: {slices}",
+        "en": "Lucky wheel: {slices}",
+        "placeholders": [
+            "slices"
+        ],
+        "plural": false
+    },
+    "wheelSpin": {
+        "ar": "لفّ العجلة",
+        "en": "Spin the wheel",
+        "placeholders": [],
+        "plural": false
+    },
+    "wheelSpinning": {
+        "ar": "العجلة تدور…",
+        "en": "Spinning…",
+        "placeholders": [],
+        "plural": false
+    },
+    "wheelWonBody": {
+        "ar": "ربحت {prize}.",
+        "en": "You won {prize}.",
+        "placeholders": [
+            "prize"
+        ],
+        "plural": false
+    },
+    "wheelWonTitle": {
+        "ar": "مبروك!",
+        "en": "Congratulations!",
+        "placeholders": [],
+        "plural": false
+    },
+    "yesterday": {
+        "ar": "أمس",
+        "en": "Yesterday",
+        "placeholders": [],
+        "plural": false
+    }
+}

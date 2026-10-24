@@ -96,7 +96,7 @@
         <div class="space-y-2">
             @forelse($approved as $m)
                 <div class="ui-card-static p-3 text-sm">
-                    <div class="font-medium">{{ $m->business_name }}</div>
+                    <a href="{{ route('admin.merchants.show', $m) }}" class="font-medium hover:underline">{{ $m->business_name }}</a>
                     <div class="mt-1 flex items-center justify-between">
                         <code class="text-[11px] text-maqam-gold-dark" dir="ltr">{{ $m->merchant_code }}</code>
                         <button type="button" onclick="copyText(@json($m->merchant_code))" class="text-[10px] ui-muted underline">{{ __('admin.copy') }}</button>

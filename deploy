@@ -74,6 +74,14 @@ After editing .env: php artisan config:clear (and config:cache again if you cach
 - shipping_cost (default 35.00) and free_shipping_threshold (default 500.00) come from a migration;
   edit them there.
 
+## 5b. Nothing depends on a seeder
+- Every setting the code reads is created by a migration (`migrate --force` is enough on a fresh server);
+  edit the values in Admin > Settings.
+- Ranks, prize types, products etc. are created from the dashboard.
+- Mobile app wording: Admin > App texts. Only changed texts are stored (table app_texts); the app keeps
+  its own text for the rest. resources/app_texts/defaults.json lists the app's texts — refresh it with
+  `php artisan app-texts:sync` after the app's strings change (needs the "mobile app" folder next to it).
+
 ## 6. Checks after moving servers
 grep -E "Order WhatsApp|Senderbot:" storage/logs/laravel.log | tail -20
 php artisan tinker --execute="dump(app(App\Services\WhatsApp\SenderBotService::class)->status());"   # connected => true

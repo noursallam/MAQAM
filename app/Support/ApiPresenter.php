@@ -11,6 +11,7 @@ use App\Models\Merchant;
 use App\Models\Order;
 use App\Models\PointsTransaction;
 use App\Models\Product;
+use App\Models\QrScan;
 use App\Models\Rank;
 use App\Models\Seminar;
 use App\Models\SeminarDraw;
@@ -100,6 +101,24 @@ class ApiPresenter
             'logo_url' => $merchant->logo_url ? app(MediaService::class)->url($merchant->logo_url) : null,
             'is_approved' => (bool) $merchant->is_approved,
             'approved_at' => $merchant->approved_at?->toIso8601String(),
+        ];
+    }
+
+    /**
+     * A scan credited to a merchant, as the merchant sees it: who scanned, not their full number.
+     */
+    public static function merchantScan(QrScan $scan): array
+    {
+        $prize = $scan->qrCode?->categoryPrize;
+        $phone = (string) $scan->customer?->user?->phone_number;
+
+        return [
+            'id' => $scan->id,
+            'customer_name' => $scan->customer?->user?->full_name,
+            'customer_phone' => preg_match('/^\d{11}$/', $phone) ? substr($phone, 0, 3).'****'.substr($phone, -3) : null,
+            'prize' => $prize ? (app()->getLocale() === 'en' ? ($prize->name_en ?: $prize->name_ar) : ($prize->name_ar ?: $prize->name_en)) : null,
+            'points' => (int) $scan->points_awarded_merchant,
+            'scanned_at' => $scan->scanned_at?->toIso8601String(),
         ];
     }
 

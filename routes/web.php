@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\LocaleController;
 use App\Http\Controllers\Admin\LoyaltyController;
 use App\Http\Controllers\Admin\MerchantController;
 use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\Admin\AppTextController;
 use App\Http\Controllers\Admin\SeminarController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PrizeCategoryController;
@@ -141,7 +142,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('audience/export', [AudienceController::class, 'export'])->name('audience.export');
 
         Route::get('merchants/inbox', [MerchantController::class, 'inbox'])->name('merchants.inbox');
-        Route::resource('merchants', MerchantController::class)->except(['show']);
+        Route::resource('merchants', MerchantController::class);
         Route::post('merchants/{merchant}/approve', [MerchantController::class, 'approve'])->name('merchants.approve');
         Route::post('merchants/{merchant}/reject', [MerchantController::class, 'reject'])->name('merchants.reject');
 
@@ -221,6 +222,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('admin-roles', AdminRoleController::class)->except(['index', 'show'])
             ->parameters(['admin-roles' => 'adminRole']);
 
+        Route::get('app-texts', [AppTextController::class, 'index'])->name('app-texts.index');
+        Route::put('app-texts', [AppTextController::class, 'update'])->name('app-texts.update');
         Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
         Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
 
