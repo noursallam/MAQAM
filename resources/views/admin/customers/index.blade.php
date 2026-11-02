@@ -4,6 +4,7 @@
 @section('subtitle', __('admin.customers.subtitle'))
 
 @section('actions')
+<a href="{{ route('admin.customers.export', request()->query()) }}" class="ui-btn ui-btn-ghost">{{ __('admin.export_excel') }}</a>
 <a href="{{ route('admin.customers.create') }}" class="ui-btn ui-btn-primary">{{ __('admin.customers.add') }}</a>
 @endsection
 

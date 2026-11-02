@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\UsersExport;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Order;
@@ -14,6 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CustomerController extends Controller
 {
@@ -194,5 +196,13 @@ class CustomerController extends Controller
         $customer->user->delete();
 
         return redirect()->route('admin.customers.index')->with('success', __('admin.success'));
+    }
+
+    public function export(Request $request)
+    {
+        return Excel::download(
+            new UsersExport($request->governorate, $request->merchant_id ? (int) $request->merchant_id : null),
+            'users-'.now()->format('Y-m-d').'.xlsx',
+        );
     }
 }

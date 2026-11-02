@@ -180,6 +180,12 @@
         ],
         "plural": false
     },
+    "actionLeaderboard": {
+        "ar": "المتصدرين",
+        "en": "Leaderboard",
+        "placeholders": [],
+        "plural": false
+    },
     "actionOrders": {
         "ar": "طلباتي",
         "en": "My orders",
@@ -419,6 +425,42 @@
     "back": {
         "ar": "رجوع",
         "en": "Back",
+        "placeholders": [],
+        "plural": false
+    },
+    "bindMerchantCodeHint": {
+        "ar": "أدخل كود التاجر",
+        "en": "Enter the merchant code",
+        "placeholders": [],
+        "plural": false
+    },
+    "bindMerchantCodeLabel": {
+        "ar": "كود التاجر",
+        "en": "Merchant code",
+        "placeholders": [],
+        "plural": false
+    },
+    "bindMerchantCodeRequired": {
+        "ar": "أدخل كود التاجر.",
+        "en": "Enter the merchant code.",
+        "placeholders": [],
+        "plural": false
+    },
+    "bindMerchantSubmit": {
+        "ar": "تأكيد",
+        "en": "Confirm",
+        "placeholders": [],
+        "plural": false
+    },
+    "bindMerchantSubtitle": {
+        "ar": "أدخل كود التاجر الذي تعمل معه. يمكنك تغييره لاحقاً من حسابك.",
+        "en": "Enter the code of the merchant you work with. You can change it later from your profile.",
+        "placeholders": [],
+        "plural": false
+    },
+    "bindMerchantTitle": {
+        "ar": "أدخل كود التاجر",
+        "en": "Enter your merchant code",
         "placeholders": [],
         "plural": false
     },
@@ -856,6 +898,26 @@
         "placeholders": [],
         "plural": false
     },
+    "leaderboardEmpty": {
+        "ar": "لا يوجد متصدرين بعد",
+        "en": "No leaders yet",
+        "placeholders": [],
+        "plural": false
+    },
+    "leaderboardPoints": {
+        "ar": "{points} نقطة",
+        "en": "{points} pts",
+        "placeholders": [
+            "points"
+        ],
+        "plural": false
+    },
+    "leaderboardTitle": {
+        "ar": "لوحة المتصدرين",
+        "en": "Leaderboard",
+        "placeholders": [],
+        "plural": false
+    },
     "legalLoadFailed": {
         "ar": "تعذر تحميل الصفحة",
         "en": "Could not load the page",
@@ -1036,9 +1098,57 @@
         "placeholders": [],
         "plural": false
     },
+    "merchantChangeApproved": {
+        "ar": "تمت الموافقة على طلب تغيير التاجر.",
+        "en": "Your merchant change request was approved.",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantChangeCodeRequired": {
+        "ar": "أدخل كود التاجر الجديد.",
+        "en": "Enter the new merchant code.",
+        "placeholders": [],
+        "plural": false
+    },
     "merchantChangeLogo": {
         "ar": "تغيير شعار المحل",
         "en": "Change shop logo",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantChangePending": {
+        "ar": "طلب تغيير التاجر قيد المراجعة.",
+        "en": "Your merchant change request is pending review.",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantChangeRejected": {
+        "ar": "تم رفض طلب تغيير التاجر.",
+        "en": "Your merchant change request was rejected.",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantChangeRequestSent": {
+        "ar": "تم إرسال طلبك وهو قيد المراجعة.",
+        "en": "Your request has been sent and is pending review.",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantChangeSubmit": {
+        "ar": "إرسال الطلب",
+        "en": "Send request",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantChangeSubtitle": {
+        "ar": "أدخل كود التاجر الجديد. سيتم مراجعة طلبك من الإدارة.",
+        "en": "Enter the code of the new merchant. Your request will be reviewed by the admin.",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantChangeTitle": {
+        "ar": "تغيير التاجر",
+        "en": "Change merchant",
         "placeholders": [],
         "plural": false
     },
@@ -1060,9 +1170,69 @@
         "placeholders": [],
         "plural": false
     },
+    "merchantDashboard": {
+        "ar": "لوحة تحكم التاجر",
+        "en": "Merchant dashboard",
+        "placeholders": [],
+        "plural": false
+    },
     "merchantDashboardTitle": {
         "ar": "لوحة التاجر",
         "en": "Merchant dashboard",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantDeductAmount": {
+        "ar": "المبلغ",
+        "en": "Amount",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantDeductAmountHint": {
+        "ar": "عدد النقاط المراد خصمها",
+        "en": "Number of points to deduct",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantDeductAmountRequired": {
+        "ar": "أدخل المبلغ.",
+        "en": "Enter the amount.",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantDeductPoints": {
+        "ar": "خصم نقاط",
+        "en": "Deduct points",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantDeductReason": {
+        "ar": "السبب",
+        "en": "Reason",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantDeductReasonHint": {
+        "ar": "مثال: مرتجع منتج",
+        "en": "e.g. product return",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantDeductReasonRequired": {
+        "ar": "أدخل السبب.",
+        "en": "Enter the reason.",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantDeductSubmit": {
+        "ar": "خصم",
+        "en": "Deduct",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantDeductSuccess": {
+        "ar": "تم خصم النقاط بنجاح.",
+        "en": "Points deducted successfully.",
         "placeholders": [],
         "plural": false
     },
@@ -1131,6 +1301,18 @@
     "merchantNoScans": {
         "ar": "لم يستخدم أحد كودك بعد. شاركه مع عملائك ليبدأ رصيدك.",
         "en": "No one has used your code yet. Share it with your customers to start earning.",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantNoTechnicians": {
+        "ar": "لا يوجد فنيين مربوطين بتاجرك بعد.",
+        "en": "No technicians bound to your merchant yet.",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantNoTransactions": {
+        "ar": "لا توجد عمليات بعد.",
+        "en": "No transactions yet.",
         "placeholders": [],
         "plural": false
     },
@@ -1240,6 +1422,48 @@
     "merchantSubmitNote": {
         "ar": "الكود لا يعمل في المسح قبل موافقة الإدارة.",
         "en": "The code does not work in scans until MAQAM approves it.",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantTechnicianBalance": {
+        "ar": "الرصيد",
+        "en": "Balance",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantTechnicianPoints": {
+        "ar": "النقاط",
+        "en": "Points",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantTechnicianScans": {
+        "ar": "السكانات",
+        "en": "Scans",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantTechnicians": {
+        "ar": "الفنيين",
+        "en": "Technicians",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantTransactionDeducted": {
+        "ar": "خصم",
+        "en": "Deducted",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantTransactionEarned": {
+        "ar": "إضافة",
+        "en": "Earned",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantTransactions": {
+        "ar": "العمليات",
+        "en": "Transactions",
         "placeholders": [],
         "plural": false
     },
@@ -2758,6 +2982,18 @@
         "placeholders": [],
         "plural": false
     },
+    "setupAreaHint": {
+        "ar": "المنطقة أو الحي",
+        "en": "Your area or district",
+        "placeholders": [],
+        "plural": false
+    },
+    "setupAreaLabel": {
+        "ar": "المنطقة",
+        "en": "Area",
+        "placeholders": [],
+        "plural": false
+    },
     "setupConfirmLabel": {
         "ar": "تأكيد كلمة المرور",
         "en": "Confirm password",
@@ -2767,6 +3003,18 @@
     "setupConfirmMismatch": {
         "ar": "كلمتا المرور غير متطابقتين.",
         "en": "The two passwords do not match.",
+        "placeholders": [],
+        "plural": false
+    },
+    "setupGovernorateHint": {
+        "ar": "اختر محافظتك",
+        "en": "Select your governorate",
+        "placeholders": [],
+        "plural": false
+    },
+    "setupGovernorateLabel": {
+        "ar": "المحافظة",
+        "en": "Governorate",
         "placeholders": [],
         "plural": false
     },

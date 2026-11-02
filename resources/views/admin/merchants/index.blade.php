@@ -1,6 +1,7 @@
 @extends('admin.layouts.app')
 @section('title', __('admin.merchants.title'))
 @section('actions')
+<a href="{{ route('admin.merchants.export') }}" class="ui-btn ui-btn-ghost">{{ __('admin.export_excel') }}</a>
 <a href="{{ route('admin.merchants.inbox') }}" class="ui-btn ui-btn-ghost">{{ __('admin.nav.merchant_inbox') }}</a>
 <a href="{{ route('admin.merchants.create') }}" class="ui-btn ui-btn-primary">{{ __('admin.merchants.add') }}</a>
 @endsection

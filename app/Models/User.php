@@ -31,6 +31,9 @@ class User extends Authenticatable
         'face_id_token',
         'otp_code',
         'otp_expires_at',
+        'governorate',
+        'area',
+        'bound_merchant_id',
     ];
 
     protected $hidden = [
@@ -92,5 +95,10 @@ class User extends Authenticatable
     public function admin(): HasOne
     {
         return $this->hasOne(Admin::class);
+    }
+
+    public function boundMerchant(): BelongsTo
+    {
+        return $this->belongsTo(Merchant::class, 'bound_merchant_id');
     }
 }

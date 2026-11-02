@@ -6,6 +6,8 @@ use App\Exceptions\ApiException;
 use App\Models\Customer;
 use App\Models\DeviceLogin;
 use App\Models\DeviceToken;
+use App\Models\Merchant;
+use App\Models\MerchantChangeRequest;
 use App\Models\Rank;
 use App\Models\User;
 use App\Services\Store\CartService;
@@ -189,12 +191,20 @@ class AuthController extends ApiController
             'email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'date_of_birth' => ['nullable', 'date', 'before:today'],
             'password' => ['required', 'confirmed', Password::min(8)],
+            'governorate' => ['nullable', 'string', 'max:100'],
+            'area' => ['nullable', 'string', 'max:255'],
         ]);
 
         DB::transaction(function () use ($request, $user, $validated) {
             $user->full_name = $validated['full_name'];
             if (! empty($validated['email'])) {
                 $user->email = $validated['email'];
+            }
+            if (! empty($validated['governorate'])) {
+                $user->governorate = $validated['governorate'];
+            }
+            if (! empty($validated['area'])) {
+                $user->area = $validated['area'];
             }
             $user->forceFill([
                 'password' => Hash::make($validated['password']),
@@ -337,10 +347,11 @@ class AuthController extends ApiController
             'email' => ['sometimes', 'nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'preferred_language' => ['sometimes', 'required', Rule::in(['ar', 'en'])],
             'date_of_birth' => ['sometimes', 'nullable', 'date', 'before:today'],
+            'governorate' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'area' => ['sometimes', 'nullable', 'string', 'max:255'],
         ]);
 
-        // Only these fields are ever writable from the app: never role, phone or balances
-        $user->fill(collect($validated)->only(['full_name', 'preferred_language'])->all());
+        $user->fill(collect($validated)->only(['full_name', 'preferred_language', 'governorate', 'area'])->all());
         if (array_key_exists('email', $validated) && $validated['email']) {
             $user->email = $validated['email'];
         }
@@ -392,6 +403,7 @@ class AuthController extends ApiController
     private function issueSession(User $user, array $device, array $abilities): JsonResponse
     {
         $user->forceFill(['last_login_at' => now()])->save();
+        $user->load('boundMerchant');
 
         if (! empty($device['device_token'])) {
             DeviceToken::register($user, $device['device_token'], $device['platform'] ?? null);
@@ -441,6 +453,94 @@ class AuthController extends ApiController
             'total_points_earned' => 0,
             'total_points_spent' => 0,
         ]);
+    }
+
+    /**
+     * Bind the signed-in user to a merchant, once. After this, scans auto-credit the merchant.
+     */
+    public function bindMerchant(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'merchant_code' => ['required', 'string', 'max:50'],
+        ]);
+
+        $user = $request->user();
+
+        if ($user->bound_merchant_id) {
+            throw new ApiException('ALREADY_BOUND', __('api.merchant.already_bound'), 409);
+        }
+
+        $merchant = Merchant::where('merchant_code', trim($validated['merchant_code']))
+            ->where('is_approved', true)->first();
+
+        if (! $merchant) {
+            throw new ApiException('MERCHANT_NOT_FOUND', __('api.qr.merchant_not_found'), 422);
+        }
+
+        if ($merchant->user_id === $user->id) {
+            throw new ApiException('MERCHANT_SELF_BIND', __('api.merchant.cannot_bind_self'), 422);
+        }
+
+        $user->update(['bound_merchant_id' => $merchant->id]);
+        $user->load('boundMerchant');
+
+        return $this->ok([
+            'user' => ApiPresenter::user($user),
+        ], __('api.merchant.bound'));
+    }
+
+    public function requestMerchantChange(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'merchant_code' => ['required', 'string', 'max:50'],
+        ]);
+
+        $user = $request->user();
+
+        if (! $user->bound_merchant_id) {
+            throw new ApiException('NOT_BOUND', __('api.merchant.not_bound'), 422);
+        }
+
+        $pending = MerchantChangeRequest::where('user_id', $user->id)
+            ->where('status', 'pending')->exists();
+
+        if ($pending) {
+            throw new ApiException('CHANGE_PENDING', __('api.merchant.change_pending'), 409);
+        }
+
+        $merchant = Merchant::where('merchant_code', trim($validated['merchant_code']))
+            ->where('is_approved', true)->first();
+
+        if (! $merchant) {
+            throw new ApiException('MERCHANT_NOT_FOUND', __('api.qr.merchant_not_found'), 422);
+        }
+
+        if ($merchant->id === $user->bound_merchant_id) {
+            throw new ApiException('SAME_MERCHANT', __('api.merchant.same_merchant'), 422);
+        }
+
+        MerchantChangeRequest::create([
+            'user_id' => $user->id,
+            'current_merchant_id' => $user->bound_merchant_id,
+            'requested_merchant_code' => $validated['merchant_code'],
+            'requested_merchant_id' => $merchant->id,
+        ]);
+
+        return $this->ok(null, __('api.merchant.change_requested'));
+    }
+
+    public function merchantChangeStatus(Request $request): JsonResponse
+    {
+        $latest = MerchantChangeRequest::where('user_id', $request->user()->id)
+            ->latest()->first();
+
+        return $this->ok($latest ? [
+            'status' => $latest->status,
+            'requested_merchant' => $latest->requestedMerchant
+                ? ApiPresenter::merchant($latest->requestedMerchant)
+                : null,
+            'reviewed_at' => $latest->reviewed_at?->toIso8601String(),
+        ] : null);
     }
 
     private function normalizePhone(string $phone): string

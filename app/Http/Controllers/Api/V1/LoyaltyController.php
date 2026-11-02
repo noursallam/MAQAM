@@ -122,6 +122,24 @@ class LoyaltyController extends ApiController
         ], $spin->is_win ? __('api.wheel.won') : __('api.wheel.lost'));
     }
 
+    public function leaderboard(): JsonResponse
+    {
+        $top = \App\Models\Customer::query()
+            ->join('users', 'users.id', '=', 'customers.user_id')
+            ->where('users.role', '!=', 'admin')
+            ->orderByDesc('customers.total_points_earned')
+            ->limit(20)
+            ->get(['customers.id', 'customers.user_id', 'customers.total_points_earned', 'users.full_name']);
+
+        $entries = $top->values()->map(fn ($c, $i) => [
+            'rank' => $i + 1,
+            'name' => $c->full_name ?? __('api.anonymous'),
+            'points' => (int) $c->total_points_earned,
+        ]);
+
+        return $this->ok($entries);
+    }
+
     /**
      * @return list<array{id: ?int, type: string, label: string, label_ar: string, label_en: string}>
      */

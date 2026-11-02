@@ -1,5 +1,8 @@
 @extends('admin.layouts.app')
 @section('title', __('admin.loyalty.transactions'))
+@section('actions')
+<a href="{{ route('admin.loyalty.transactions.export', request()->query()) }}" class="ui-btn ui-btn-ghost">{{ __('admin.export_excel') }}</a>
+@endsection
 @section('content')
 <form class="ui-toolbar">
     <select name="type" class="ui-select max-w-xs" onchange="this.form.submit()">

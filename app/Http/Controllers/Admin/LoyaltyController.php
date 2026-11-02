@@ -219,4 +219,12 @@ class LoyaltyController extends Controller
             'is_active' => $request->boolean('is_active', true),
         ];
     }
+
+    public function exportTransactions(Request $request)
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\PointsTransactionsExport($request->type, $request->from, $request->to),
+            'transactions-'.now()->format('Y-m-d').'.xlsx',
+        );
+    }
 }

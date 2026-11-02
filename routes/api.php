@@ -46,6 +46,8 @@ Route::get('app/texts', [AppController::class, 'texts']);
 Route::get('content/faq', [AppController::class, 'faq']);
 Route::get('content/pages/{slug}', [AppController::class, 'page']);
 Route::get('ranks', [LoyaltyController::class, 'ranks']);
+Route::get('leaderboard', [LoyaltyController::class, 'leaderboard']);
+Route::get('governorates', [AppController::class, 'governorates']);
 
 // Seminars with a prize draw: public to read, an account to sign up
 Route::get('seminars/current', [SeminarController::class, 'current']);
@@ -61,6 +63,9 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
 
     Route::get('user/profile', [AuthController::class, 'profile']);
     Route::put('user/profile', [AuthController::class, 'updateProfile']);
+    Route::post('user/bind-merchant', [AuthController::class, 'bindMerchant'])->middleware('throttle:10,1');
+    Route::post('user/request-merchant-change', [AuthController::class, 'requestMerchantChange'])->middleware('throttle:5,1');
+    Route::get('user/merchant-change-status', [AuthController::class, 'merchantChangeStatus']);
     Route::delete('user/account', [AccountController::class, 'destroy'])->middleware('throttle:5,1');
     Route::post('user/phone/start', [AccountController::class, 'startPhoneChange'])->middleware('throttle:otp-start');
     Route::post('user/phone/verify', [AccountController::class, 'verifyPhoneChange'])->middleware('throttle:otp-verify');
@@ -107,11 +112,16 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::post('notifications/{id}/read', [NotificationController::class, 'markRead'])->whereNumber('id');
     Route::post('notifications/device-token', [AuthController::class, 'deviceToken']);
 
-    // Merchant profile
+    // Merchant profile and dashboard
     Route::post('merchant/apply', [MerchantController::class, 'apply'])->middleware('throttle:5,1');
     Route::post('merchant/logo', [MerchantController::class, 'logo'])->middleware('throttle:10,1');
     Route::get('merchant', [MerchantController::class, 'show']);
     Route::get('merchant/scans', [MerchantController::class, 'scans']);
+    Route::get('merchant/technicians', [MerchantController::class, 'technicians']);
+    Route::get('merchant/technicians/{id}', [MerchantController::class, 'technician'])->whereNumber('id');
+    Route::get('merchant/technicians/{id}/scans', [MerchantController::class, 'technicianScans'])->whereNumber('id');
+    Route::post('merchant/technicians/{id}/deduct-points', [MerchantController::class, 'deductPoints'])->whereNumber('id')->middleware('throttle:20,1');
+    Route::get('merchant/transactions', [MerchantController::class, 'transactions']);
 
     // Support assistant
     Route::post('chat', [AppController::class, 'chat'])->middleware('throttle:10,1');

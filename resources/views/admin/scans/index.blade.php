@@ -4,6 +4,7 @@
 @section('subtitle', __('admin.qr.scan_subtitle'))
 
 @section('actions')
+<a href="{{ route('admin.scans.export', request()->query()) }}" class="ui-btn ui-btn-ghost">{{ __('admin.export_excel') }}</a>
 <button type="button" id="openScanSimModal" class="ui-btn ui-btn-primary">{{ __('admin.qr.scan_simulate') }}</button>
 @endsection
 

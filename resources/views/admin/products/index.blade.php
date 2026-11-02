@@ -10,6 +10,7 @@
     </svg>
     {{ __('admin.import.action') }}
 </a>
+<a href="{{ route('admin.products.export') }}" class="ui-btn ui-btn-ghost">{{ __('admin.export_excel') }}</a>
 <a href="{{ route('admin.categories.create') }}" class="ui-btn ui-btn-ghost">+ {{ __('admin.commerce.add_category') }}</a>
 <a href="{{ route('admin.products.create') }}" class="ui-btn ui-btn-primary">{{ __('admin.commerce.add_product') }}</a>
 @endsection

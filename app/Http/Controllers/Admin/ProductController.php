@@ -373,4 +373,9 @@ class ProductController extends Controller
             ]);
         }
     }
+
+    public function export()
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\ProductsExport, 'products-'.now()->format('Y-m-d').'.xlsx');
+    }
 }

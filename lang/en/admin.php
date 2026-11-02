@@ -36,6 +36,7 @@ return [
     'filter' => 'Filter',
     'search' => 'Search',
     'download' => 'Download',
+    'export_excel' => 'Export Excel',
     'copy' => 'Copy',
     'copied' => 'Copied',
     'empty_title' => 'Nothing here yet',
@@ -259,6 +260,20 @@ return [
         'pending_count' => 'pending reviews',
         'review' => 'Review profile',
         'empty_inbox' => 'No pending requests — inbox is clear',
+    ],
+
+    'merchant_change' => [
+        'title' => 'Merchant Change Requests',
+        'user' => 'User',
+        'current' => 'Current Merchant',
+        'requested' => 'Requested Merchant',
+        'date' => 'Date',
+        'status_pending' => 'Pending',
+        'status_approved' => 'Approved',
+        'status_rejected' => 'Rejected',
+        'approved' => 'Request approved and merchant updated.',
+        'rejected' => 'Request rejected.',
+        'already_reviewed' => 'This request has already been reviewed.',
     ],
 
     'qr' => [

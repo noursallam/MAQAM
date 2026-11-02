@@ -39,6 +39,11 @@ class ApiPresenter
             'phone_verified_at' => $user->phone_verified_at?->toIso8601String(),
             // False until the customer has chosen a password of their own
             'has_password' => $user->password_set_at !== null,
+            'governorate' => $user->governorate,
+            'area' => $user->area,
+            'bound_merchant' => $user->boundMerchant && $user->boundMerchant->is_approved
+                ? self::merchant($user->boundMerchant)
+                : null,
         ];
     }
 

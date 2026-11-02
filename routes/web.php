@@ -127,6 +127,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('search', [DashboardController::class, 'search'])->name('search');
 
+        Route::get('customers/export', [CustomerController::class, 'export'])->name('customers.export');
         Route::get('customers', [CustomerController::class, 'index'])->name('customers.index');
         Route::get('customers/create', [CustomerController::class, 'create'])->name('customers.create');
         Route::post('customers', [CustomerController::class, 'store'])->name('customers.store');
@@ -141,6 +142,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('audience', [AudienceController::class, 'index'])->name('audience.index');
         Route::get('audience/export', [AudienceController::class, 'export'])->name('audience.export');
 
+        Route::get('merchants/export', [MerchantController::class, 'export'])->name('merchants.export');
         Route::get('merchants/inbox', [MerchantController::class, 'inbox'])->name('merchants.inbox');
         Route::resource('merchants', MerchantController::class);
         Route::post('merchants/{merchant}/approve', [MerchantController::class, 'approve'])->name('merchants.approve');
@@ -150,6 +152,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('categories', CategoryController::class)->except(['show']);
         Route::post('categories/{category}/toggle', [CategoryController::class, 'toggle'])->name('categories.toggle');
         Route::resource('prize-categories', PrizeCategoryController::class)->except(['show']);
+        Route::get('products/export', [ProductController::class, 'export'])->name('products.export');
         Route::get('products/sku-suggest', [ProductController::class, 'suggestSku'])->name('products.sku-suggest');
         Route::get('products/barcode-preview', [ProductController::class, 'barcodePreview'])->name('products.barcode-preview');
         Route::get('products/barcodes/export', [ProductController::class, 'exportBarcodes'])->name('products.barcodes.export');
@@ -178,6 +181,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('qr-codes/batches/{batchId}', [QrCodeController::class, 'destroyBatch'])->name('qr-codes.destroy-batch');
         Route::delete('qr-codes/{qr_code}', [QrCodeController::class, 'destroy'])->name('qr-codes.destroy');
 
+        Route::get('scans/export', [ScanController::class, 'export'])->name('scans.export');
         Route::get('scans', [ScanController::class, 'index'])->name('scans.index');
         Route::post('scans/simulate', [ScanController::class, 'simulate'])->name('scans.simulate');
 
@@ -202,6 +206,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('seminars/{seminar}/draw', [SeminarController::class, 'draw'])->name('seminars.draw');
         Route::post('seminars/{seminar}/draw-all', [SeminarController::class, 'drawAll'])->name('seminars.draw-all');
 
+        Route::get('loyalty/transactions/export', [LoyaltyController::class, 'exportTransactions'])->name('loyalty.transactions.export');
         Route::get('loyalty/transactions', [LoyaltyController::class, 'transactions'])->name('loyalty.transactions');
         Route::get('loyalty/spins', [LoyaltyController::class, 'spins'])->name('loyalty.spins');
         Route::post('loyalty/wheel-toggle', [LoyaltyController::class, 'toggleWheel'])->name('loyalty.wheel-toggle');
@@ -221,6 +226,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('admins', AdminUserController::class)->except(['show', 'destroy']);
         Route::resource('admin-roles', AdminRoleController::class)->except(['index', 'show'])
             ->parameters(['admin-roles' => 'adminRole']);
+
+        Route::get('merchant-change-requests', [\App\Http\Controllers\Admin\MerchantChangeRequestController::class, 'index'])->name('merchant-change-requests.index');
+        Route::post('merchant-change-requests/{merchantChangeRequest}/approve', [\App\Http\Controllers\Admin\MerchantChangeRequestController::class, 'approve'])->name('merchant-change-requests.approve');
+        Route::post('merchant-change-requests/{merchantChangeRequest}/reject', [\App\Http\Controllers\Admin\MerchantChangeRequestController::class, 'reject'])->name('merchant-change-requests.reject');
 
         Route::get('app-texts', [AppTextController::class, 'index'])->name('app-texts.index');
         Route::put('app-texts', [AppTextController::class, 'update'])->name('app-texts.update');

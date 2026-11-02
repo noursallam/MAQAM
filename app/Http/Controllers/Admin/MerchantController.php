@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\MerchantsExport;
 use App\Http\Controllers\Controller;
 use App\Models\Merchant;
 use App\Services\NotificationService;
@@ -226,5 +227,10 @@ class MerchantController extends Controller
         $merchant->user->delete();
 
         return redirect()->route('admin.merchants.index')->with('success', __('admin.success'));
+    }
+
+    public function export()
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(new MerchantsExport, 'merchants-'.now()->format('Y-m-d').'.xlsx');
     }
 }

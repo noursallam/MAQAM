@@ -36,6 +36,7 @@ return [
     'filter' => 'تصفية',
     'search' => 'بحث',
     'download' => 'تحميل',
+    'export_excel' => 'تصدير Excel',
     'copy' => 'نسخ',
     'copied' => 'تم النسخ',
     'empty_title' => 'لا توجد بيانات',
@@ -260,6 +261,20 @@ return [
         'pending_count' => 'طلب بانتظار المراجعة',
         'review' => 'مراجعة الطلب',
         'empty_inbox' => 'لا توجد طلبات جديدة',
+    ],
+
+    'merchant_change' => [
+        'title' => 'طلبات تغيير التاجر',
+        'user' => 'المستخدم',
+        'current' => 'التاجر الحالي',
+        'requested' => 'التاجر المطلوب',
+        'date' => 'التاريخ',
+        'status_pending' => 'قيد المراجعة',
+        'status_approved' => 'موافق عليه',
+        'status_rejected' => 'مرفوض',
+        'approved' => 'تمت الموافقة على الطلب وتم تحديث التاجر.',
+        'rejected' => 'تم رفض الطلب.',
+        'already_reviewed' => 'تم مراجعة هذا الطلب مسبقاً.',
     ],
 
     'qr' => [

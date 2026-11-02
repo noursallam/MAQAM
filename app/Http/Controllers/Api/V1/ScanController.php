@@ -191,6 +191,12 @@ class ScanController extends ApiController
 
     private function resolveMerchant(?string $code, Customer $customer): ?Merchant
     {
+        // Technicians bound to a merchant use that merchant automatically
+        if (($code === null || trim($code) === '') && $customer->user->bound_merchant_id) {
+            return Merchant::where('id', $customer->user->bound_merchant_id)
+                ->where('is_approved', true)->first();
+        }
+
         if ($code === null || trim($code) === '') {
             return null;
         }

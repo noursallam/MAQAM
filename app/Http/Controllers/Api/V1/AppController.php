@@ -118,4 +118,23 @@ class AppController extends ApiController
             'messages_left_today' => RateLimiter::remaining($key, self::CHAT_MESSAGES_PER_DAY),
         ]);
     }
+
+    public function governorates(): JsonResponse
+    {
+        $setting = SystemSetting::getValue('governorates', '');
+        $list = array_filter(array_map('trim', explode("\n", $setting)));
+
+        if (empty($list)) {
+            $list = [
+                'القاهرة', 'الجيزة', 'الإسكندرية', 'الدقهلية', 'البحر الأحمر',
+                'البحيرة', 'الفيوم', 'الغربية', 'الإسماعيلية', 'المنوفية',
+                'المنيا', 'القليوبية', 'الوادي الجديد', 'السويس', 'أسوان',
+                'أسيوط', 'بني سويف', 'بورسعيد', 'دمياط', 'الشرقية',
+                'جنوب سيناء', 'كفر الشيخ', 'مطروح', 'الأقصر', 'قنا',
+                'شمال سيناء', 'سوهاج',
+            ];
+        }
+
+        return $this->ok($list);
+    }
 }

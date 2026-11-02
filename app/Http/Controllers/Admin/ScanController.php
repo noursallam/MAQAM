@@ -76,4 +76,12 @@ class ScanController extends Controller
             ], 422);
         }
     }
+
+    public function export(Request $request)
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\ScansExport($request->from, $request->to, $request->merchant_id ? (int) $request->merchant_id : null),
+            'scans-'.now()->format('Y-m-d').'.xlsx',
+        );
+    }
 }
