@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1E2538"/>
+      <stop offset="100%" stop-color="#0F1320"/>
+    </linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F0D496"/>
+      <stop offset="40%" stop-color="#DCB479"/>
+      <stop offset="70%" stop-color="#C5A059"/>
+      <stop offset="100%" stop-color="#8B6D2E"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.15"/>
+      <stop offset="60%" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <!-- Shield shape -->
+  <path d="M100 10 L185 55 L185 130 Q185 180 100 215 Q15 180 15 130 L15 55Z" fill="url(#metal)" filter="url(#shadow)"/>
+  <path d="M100 22 L175 62 L175 128 Q175 172 100 203 Q25 172 25 128 L25 62Z" fill="url(#bg)"/>
+  <!-- Inner border -->
+  <path d="M100 32 L165 67 L165 125 Q165 163 100 192 Q35 163 35 125 L35 67Z" fill="none" stroke="#C5A059" stroke-width="1.5" opacity="0.4"/>
+  <!-- Star top -->
+  <polygon points="100,42 104,55 118,55 107,63 111,76 100,68 89,76 93,63 82,55 96,55" fill="#DCB479" filter="url(#glow)"/>
+  <!-- M -->
+  <text x="100" y="128" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="52" fill="#DCB479">M</text>
+  <!-- Three stars bottom -->
+  <g fill="#C5A059">
+    <polygon points="70,155 72,161 78,161 73,165 75,171 70,167 65,171 67,165 62,161 68,161"/>
+    <polygon points="100,160 102,166 108,166 103,170 105,176 100,172 95,176 97,170 92,166 98,166"/>
+    <polygon points="130,155 132,161 138,161 133,165 135,171 130,167 125,171 127,165 122,161 128,161"/>
+  </g>
+  <path d="M100 10 L185 55 L185 130 Q185 180 100 215 Q15 180 15 130 L15 55Z" fill="url(#shine)"/>
+</svg>

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 230" width="200" height="230">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1E2538"/>
+      <stop offset="100%" stop-color="#161B29"/>
+    </linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#DCB479"/>
+      <stop offset="30%" stop-color="#F0D496"/>
+      <stop offset="60%" stop-color="#C5A059"/>
+      <stop offset="100%" stop-color="#9A7B3C"/>
+    </linearGradient>
+    <linearGradient id="ribbon" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#C5A059"/>
+      <stop offset="100%" stop-color="#7A5C28"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.18"/>
+      <stop offset="50%" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="7" flood-color="#000" flood-opacity="0.45"/>
+    </filter>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <!-- Ribbon -->
+  <path d="M65 170 L50 225 L75 200 L100 225 L100 170Z" fill="url(#ribbon)"/>
+  <path d="M135 170 L150 225 L125 200 L100 225 L100 170Z" fill="url(#ribbon)" opacity="0.85"/>
+  <!-- Medal body -->
+  <circle cx="100" cy="100" r="90" fill="url(#metal)" filter="url(#shadow)"/>
+  <circle cx="100" cy="100" r="82" fill="url(#bg)"/>
+  <circle cx="100" cy="100" r="76" fill="none" stroke="#C5A059" stroke-width="2" opacity="0.5"/>
+  <!-- Inner ornate ring -->
+  <circle cx="100" cy="100" r="52" fill="none" stroke="#C5A059" stroke-width="2.5"/>
+  <circle cx="100" cy="100" r="48" fill="none" stroke="#C5A059" stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/>
+  <!-- M -->
+  <text x="100" y="114" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="46" fill="#DCB479">M</text>
+  <!-- Stars top arc -->
+  <g fill="#DCB479" filter="url(#glow)">
+    <polygon points="60,22 62.5,30 71,30 64.5,35 67,43 60,38 53,43 55.5,35 49,30 57.5,30"/>
+    <polygon points="100,12 103,21 112,21 105,26 108,35 100,29 92,35 95,26 88,21 97,21"/>
+    <polygon points="140,22 142.5,30 151,30 144.5,35 147,43 140,38 133,43 135.5,35 129,30 137.5,30"/>
+  </g>
+  <!-- Stars bottom -->
+  <g fill="#C5A059" opacity="0.7">
+    <polygon points="70,163 72,168 77,168 73,172 74,177 70,174 66,177 67,172 63,168 68,168"/>
+    <polygon points="100,168 102,173 107,173 103,177 104,182 100,179 96,182 97,177 93,173 98,173"/>
+    <polygon points="130,163 132,168 137,168 133,172 134,177 130,174 126,177 127,172 123,168 128,168"/>
+  </g>
+  <circle cx="100" cy="100" r="90" fill="url(#shine)"/>
+</svg>
