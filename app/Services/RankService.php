@@ -31,7 +31,10 @@ class RankService
             return null;
         }
 
-        $customer->forceFill(['rank_id' => $earned->id])->save();
+        $customer->forceFill([
+            'rank_id' => $earned->id,
+            'pending_rank_id' => $earned->id,
+        ])->save();
         $customer->setRelation('rank', $earned);
 
         if ($current) {

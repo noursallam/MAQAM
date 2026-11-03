@@ -75,6 +75,7 @@ return [
     'rank' => [
         'upgraded_title' => 'Congratulations! New rank',
         'upgraded_body' => 'You have been promoted to :rank. Enjoy your new benefits.',
+        'acknowledged' => 'Rank-up acknowledged.',
     ],
 
     'payment_return' => [

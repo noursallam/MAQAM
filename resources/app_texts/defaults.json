@@ -1413,6 +1413,18 @@
         "placeholders": [],
         "plural": false
     },
+    "merchantStatTotalPoints": {
+        "ar": "إجمالي النقاط",
+        "en": "Total points",
+        "placeholders": [],
+        "plural": false
+    },
+    "merchantStatTotalScans": {
+        "ar": "إجمالي المسحات",
+        "en": "Total scans",
+        "placeholders": [],
+        "plural": false
+    },
     "merchantSubmit": {
         "ar": "إرسال الطلب",
         "en": "Send request",
@@ -2430,6 +2442,26 @@
         "ar": "زيادة الكمية",
         "en": "Increase quantity",
         "placeholders": [],
+        "plural": false
+    },
+    "rankUpCongrats": {
+        "ar": "مبروك!",
+        "en": "Congratulations!",
+        "placeholders": [],
+        "plural": false
+    },
+    "rankUpDismiss": {
+        "ar": "تمام",
+        "en": "Got it",
+        "placeholders": [],
+        "plural": false
+    },
+    "rankUpMessage": {
+        "ar": "لقد تمت ترقيتك إلى رتبة {rank}",
+        "en": "You have been promoted to {rank}",
+        "placeholders": [
+            "rank"
+        ],
         "plural": false
     },
     "resetSubtitle": {

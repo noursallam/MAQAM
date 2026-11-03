@@ -81,6 +81,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
 
     // Loyalty wallet and lucky wheel
     Route::get('wallet', [LoyaltyController::class, 'wallet']);
+    Route::post('wallet/acknowledge-rank-up', [LoyaltyController::class, 'acknowledgeRankUp']);
     Route::get('wallet/transactions', [LoyaltyController::class, 'transactions']);
     Route::get('customer/rewards', [LoyaltyController::class, 'rewards']);
     Route::get('wheel/config', [LoyaltyController::class, 'wheelConfig']);

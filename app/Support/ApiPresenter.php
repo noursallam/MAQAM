@@ -81,6 +81,10 @@ class ApiPresenter
             ->orderBy('min_points')
             ->first();
 
+        $pendingRank = $customer->pending_rank_id
+            ? Rank::find($customer->pending_rank_id)
+            : null;
+
         return [
             'customer_id' => $customer->id,
             'points_balance' => $balance,
@@ -93,6 +97,7 @@ class ApiPresenter
             'progress_percent' => $nextRank && $nextRank->min_points > 0
                 ? (int) min(100, max(5, round($earned / $nextRank->min_points * 100)))
                 : 100,
+            'pending_rank_up' => $pendingRank ? self::rank($pendingRank) : null,
         ];
     }
 

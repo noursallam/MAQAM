@@ -24,6 +24,14 @@ class LoyaltyController extends ApiController
         return $this->ok(ApiPresenter::wallet($this->customer($request)));
     }
 
+    public function acknowledgeRankUp(Request $request): JsonResponse
+    {
+        $customer = $this->customer($request);
+        $customer->forceFill(['pending_rank_id' => null])->save();
+
+        return $this->ok(null, __('api.rank.acknowledged'));
+    }
+
     public function transactions(Request $request): JsonResponse
     {
         $validated = $request->validate([

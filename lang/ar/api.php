@@ -75,6 +75,7 @@ return [
     'rank' => [
         'upgraded_title' => 'مبروك! رتبة جديدة',
         'upgraded_body' => 'تمت ترقيتك إلى رتبة :rank. استمتع بمزاياك الجديدة.',
+        'acknowledged' => 'تم تأكيد الترقية.',
     ],
 
     'payment_return' => [
