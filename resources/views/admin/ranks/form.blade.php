@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 @section('title', $rank->exists ? __('admin.edit') : __('admin.ranks.add'))
 @section('content')
-<form method="POST" action="{{ $rank->exists ? route('admin.ranks.update', $rank) : route('admin.ranks.store') }}" class="ui-card-static max-w-2xl space-y-4 p-6">
+<form method="POST" action="{{ $rank->exists ? route('admin.ranks.update', $rank) : route('admin.ranks.store') }}" enctype="multipart/form-data" class="ui-card-static max-w-2xl space-y-4 p-6">
     @csrf @if($rank->exists) @method('PUT') @endif
     <div class="grid gap-4 sm:grid-cols-2">
         <div>
@@ -36,6 +36,14 @@
             <label class="mb-1 block text-sm font-medium">{{ __('admin.ranks.wheel_cost') }}</label>
             <input type="number" name="wheel_cost_points" value="{{ old('wheel_cost_points', $rank->wheel_cost_points ?? 50) }}" required class="ui-input">
         </div>
+    </div>
+    <div>
+        <label class="mb-1 block text-sm font-medium">صورة البادج</label>
+        @if($rank->icon_url)
+            <div class="mb-2"><img src="{{ $rank->icon_url }}" alt="Badge" class="h-20 w-20 rounded object-contain"></div>
+        @endif
+        <input type="file" name="badge_image" accept="image/png,image/webp,image/jpeg" class="ui-input">
+        <p class="mt-1 text-xs ui-muted">PNG مفضّل، بخلفية شفافة</p>
     </div>
     <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', $rank->is_active ?? true))> {{ __('admin.active') }}</label>
     <button class="ui-btn ui-btn-primary">{{ __('admin.save') }}</button>

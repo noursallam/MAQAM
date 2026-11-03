@@ -29,9 +29,14 @@
             <div class="h-2 bg-gradient-to-l {{ $tone }}"></div>
             <div class="p-6">
                 <div class="flex items-start justify-between">
-                    <div>
-                        <div class="text-xl font-semibold">{{ $rank->name_ar }}</div>
-                        <div class="ui-muted">{{ $rank->name_en }}</div>
+                    <div class="flex items-center gap-3">
+                        @if($rank->icon_url)
+                            <img src="{{ $rank->icon_url }}" alt="{{ $rank->name_en }}" class="h-14 w-14 object-contain">
+                        @endif
+                        <div>
+                            <div class="text-xl font-semibold">{{ $rank->name_ar }}</div>
+                            <div class="ui-muted">{{ $rank->name_en }}</div>
+                        </div>
                     </div>
                     <span class="ui-badge {{ $rank->is_active ? 'ui-badge-ok' : 'ui-badge-muted' }}">{{ $rank->is_active ? __('admin.active') : __('admin.inactive') }}</span>
                 </div>

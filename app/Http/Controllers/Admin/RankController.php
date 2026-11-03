@@ -24,7 +24,10 @@ class RankController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        Rank::create($this->validated($request));
+        $data = $this->validated($request);
+        $data['icon_url'] = $this->storeBadge($request, null);
+
+        Rank::create($data);
 
         return redirect()->route('admin.ranks.index')->with('success', 'Rank created.');
     }
@@ -36,7 +39,13 @@ class RankController extends Controller
 
     public function update(Request $request, Rank $rank): RedirectResponse
     {
-        $rank->update($this->validated($request));
+        $data = $this->validated($request);
+        $iconUrl = $this->storeBadge($request, $rank);
+        if ($iconUrl !== null) {
+            $data['icon_url'] = $iconUrl;
+        }
+
+        $rank->update($data);
 
         return redirect()->route('admin.ranks.index')->with('success', 'Rank updated.');
     }
@@ -46,6 +55,26 @@ class RankController extends Controller
         $rank->delete();
 
         return redirect()->route('admin.ranks.index')->with('success', 'Rank deleted.');
+    }
+
+    protected function storeBadge(Request $request, ?Rank $rank): ?string
+    {
+        $request->validate(['badge_image' => ['nullable', 'image', 'max:1024']]);
+
+        if (! $request->hasFile('badge_image')) {
+            return null;
+        }
+
+        $slug = str($request->input('name_en', $rank?->name_en ?? 'rank'))
+            ->slug()->value();
+
+        $file = $request->file('badge_image');
+        $ext = $file->getClientOriginalExtension() ?: 'png';
+        $filename = "{$slug}.{$ext}";
+
+        $file->move(public_path('badges'), $filename);
+
+        return "/badges/{$filename}";
     }
 
     protected function validated(Request $request): array
