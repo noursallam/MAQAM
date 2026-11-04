@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "776987619267",
+    "project_id": "maqam-430eb",
+    "storage_bucket": "maqam-430eb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:776987619267:android:c3aca63da05de36bca9776",
+        "android_client_info": {
+          "package_name": "maqam.egypt"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCIbstBrqOEUZd0weAMPoC64WWhiYTgjUw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
