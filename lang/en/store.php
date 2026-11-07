@@ -466,6 +466,21 @@ return [
         'excerpt' => 'Demo content ready to connect with the admin CMS later.',
     ],
 
+    'delete_account' => [
+        'title' => 'Delete account & data',
+        'lead' => 'You can delete your MAQAM account and personal data at any time.',
+        'app_title' => 'Delete from inside the app',
+        'app_steps' => ['Open the MAQAM app and sign in.', 'Go to Profile, then Settings.', 'Choose "Delete account" and confirm by typing DELETE.'],
+        'form_title' => 'Cannot access the app? Request deletion here',
+        'phone' => 'Registered phone number (01XXXXXXXXX)',
+        'name' => 'Name (optional)',
+        'submit' => 'Submit deletion request',
+        'sent' => 'Your request was received. Your account will be deleted within 30 days at most.',
+        'data_title' => 'What is deleted and what is kept?',
+        'deleted' => 'Deleted: name, phone number, email, addresses, cart, notifications, login devices and push tokens, and merchant personal details.',
+        'kept' => 'Kept anonymously: order and points history, for accounting and legal purposes.',
+        'email_note' => 'You can also email us at:',
+    ],
     'legal' => [
         'privacy_title' => 'Privacy policy',
         'privacy_lead' => 'How we collect and use your data in the MAQAM ecosystem.',

@@ -55,6 +55,8 @@ Route::get('/blog', [StorefrontController::class, 'blog'])->name('store.blog');
 Route::get('/loyalty', [StorefrontController::class, 'loyalty'])->name('store.loyalty');
 Route::get('/faq', [StorefrontController::class, 'faq'])->name('store.faq');
 Route::get('/privacy', [StorefrontController::class, 'privacy'])->name('store.privacy');
+Route::get('/delete-account', [StorefrontController::class, 'deleteAccount'])->name('store.delete-account');
+Route::post('/delete-account', [StorefrontController::class, 'submitDeleteAccount'])->middleware('throttle:5,1')->name('store.delete-account.submit');
 Route::get('/terms', [StorefrontController::class, 'terms'])->name('store.terms');
 Route::get('/shipping', [StorefrontController::class, 'shipping'])->name('store.shipping');
 Route::get('/returns', [StorefrontController::class, 'returns'])->name('store.returns');

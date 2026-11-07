@@ -198,6 +198,31 @@ class StorefrontController extends Controller
         return back()->with('success', __('store.contact.sent_success'));
     }
 
+    public function deleteAccount(): View
+    {
+        return view('store.delete-account', [
+            'email' => SystemSetting::getValue('support_email', 'support@maqam-eg.com'),
+        ]);
+    }
+
+    public function submitDeleteAccount(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'phone' => ['required', 'regex:/^01[0125]\d{8}$/'],
+            'name' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        AppNotification::create([
+            'user_id' => null,
+            'title' => "طلب حذف حساب: {$validated['phone']}",
+            'body' => "الاسم: ".($validated['name'] ?? '-')."\nرقم الجوال: {$validated['phone']}\n\nطلب حذف الحساب والبيانات الشخصية (Google Play).",
+            'type' => 'contact_inquiry',
+            'is_read' => false,
+        ]);
+
+        return back()->with('success', __('store.delete_account.sent'));
+    }
+
     public function about(): View
     {
         return view('store.about');
