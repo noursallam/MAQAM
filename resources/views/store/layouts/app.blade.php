@@ -25,7 +25,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Inter:ital,opsz,wght@0,14..32,300..700;1,14..32,300..700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('store/css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('store/css/app.css') . '?v=' . filemtime(public_path('store/css/app.css')) }}">
     @stack('styles')
 </head>
 <body class="mq-store">
