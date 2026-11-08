@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 
-/// App version shown in the account screen. Keep in step with `pubspec.yaml`.
-const appVersion = '1.0.0';
+/// App version sent to the server and shown in the account screen.
+/// Read from the installed build (`pubspec.yaml`) at launch; the value here is only a fallback.
+String appVersion = '1.0.0';
 
 /// The top bar of a screen opened from a tab: back arrow and a start-aligned title.
 class SubPageAppBar extends StatelessWidget implements PreferredSizeWidget {
