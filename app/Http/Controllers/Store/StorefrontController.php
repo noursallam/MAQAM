@@ -19,7 +19,7 @@ class StorefrontController extends Controller
 {
     public function home(): View
     {
-        $banners = Banner::active()->orderBy('sort_order')->get();
+        $banners = Banner::websiteHero()->active()->orderBy('sort_order')->orderBy('id')->get();
 
         $categories = Category::where('is_active', true)
             ->withCount('products')
@@ -76,11 +76,16 @@ class StorefrontController extends Controller
             });
         }
 
-        // Price Filtering
-        if ($request->filled('min_price')) {
-            $query->where('price', '>=', (float) $request->input('min_price'));
+        // Price Filtering (products without a price are never matched by a price filter)
+        $hasPriceFilter = $request->filled('min_price') || $request->filled('max_price')
+            || in_array($request->input('price_range'), ['under_200', 'between_200_500', 'over_500'], true);
+        if ($hasPriceFilter) {
+            $query->where('price', '>', 0);
         }
-        if ($request->filled('max_price')) {
+        if ($request->filled('min_price') && is_numeric($request->input('min_price'))) {
+            $query->where('price', '>=', max(0, (float) $request->input('min_price')));
+        }
+        if ($request->filled('max_price') && is_numeric($request->input('max_price'))) {
             $query->where('price', '<=', (float) $request->input('max_price'));
         }
 
@@ -100,6 +105,8 @@ class StorefrontController extends Controller
 
         // Sorting
         $sort = $request->input('sort', 'newest');
+        // Available products first, unavailable ones last, then the chosen order
+        $query->orderByRaw('stock_quantity > 0 desc');
         match ($sort) {
             'price_asc' => $query->orderBy('price', 'asc'),
             'price_desc' => $query->orderBy('price', 'desc'),

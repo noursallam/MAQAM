@@ -10,6 +10,10 @@ class Banner extends Model
 {
     public const PLATFORM_MOBILE = 'mobile_app';
 
+    public const SLOT_WEBSITE_HERO = 'website_hero';
+
+    public const SLOTS = [self::PLATFORM_MOBILE, self::SLOT_WEBSITE_HERO];
+
     protected $fillable = [
         'slot', 'title_ar', 'title_en', 'image_path', 'link_url', 'is_active', 'sort_order',
     ];
@@ -25,6 +29,11 @@ class Banner extends Model
     public function scopeMobile(Builder $query): Builder
     {
         return $query->where('slot', self::PLATFORM_MOBILE);
+    }
+
+    public function scopeWebsiteHero(Builder $query): Builder
+    {
+        return $query->where('slot', self::SLOT_WEBSITE_HERO);
     }
 
     public function scopeActive(Builder $query): Builder

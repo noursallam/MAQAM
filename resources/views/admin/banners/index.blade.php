@@ -17,6 +17,13 @@
         <h2 class="ui-section-title">{{ __('admin.banners.add') }}</h2>
         <p class="ui-muted text-sm">{{ __('admin.banners.add_hint') }}</p>
         <div>
+            <label class="mb-1 block text-sm">{{ __('admin.banners.slot') }} *</label>
+            <select name="slot" class="ui-input" required>
+                <option value="mobile_app" @selected(old('slot') === 'mobile_app')>{{ __('admin.banners.slot_mobile') }}</option>
+                <option value="website_hero" @selected(old('slot') === 'website_hero')>{{ __('admin.banners.slot_hero') }}</option>
+            </select>
+        </div>
+        <div>
             <label class="mb-1 block text-sm">{{ __('admin.banners.image') }} *</label>
             <input type="file" name="image" accept="image/*" required class="ui-input">
         </div>
@@ -39,47 +46,58 @@
         <button class="ui-btn ui-btn-primary w-full">{{ __('admin.banners.add') }}</button>
     </form>
 
-    <div>
-        @if($banners->isEmpty())
-            <div class="ui-empty">
-                <p class="font-semibold">{{ __('admin.banners.empty') }}</p>
-                <p class="ui-muted mt-2">{{ __('admin.banners.add_hint') }}</p>
-            </div>
-        @else
-            <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                @foreach($banners as $banner)
-                    <article class="ui-card-static overflow-hidden p-0">
-                        <div class="aspect-[16/9] bg-[#F1F1F3]">
-                            @if($banner->imageUrl())
-                                <img src="{{ $banner->imageUrl() }}" alt="{{ $banner->title_ar ?: $banner->title_en ?: 'banner' }}" class="h-full w-full object-cover">
-                            @endif
-                        </div>
-                        <div class="space-y-3 p-4">
-                            <div class="flex items-start justify-between gap-2">
-                                <div class="min-w-0">
-                                    <div class="truncate font-medium">{{ $banner->title_ar ?: $banner->title_en ?: __('admin.banners.untitled') }}</div>
-                                    <div class="ui-muted mt-0.5 text-xs">#{{ $banner->sort_order }} · {{ $banner->created_at?->diffForHumans() }}</div>
+    <div class="space-y-8">
+        @foreach([
+            ['title' => __('admin.banners.section_hero'), 'hint' => __('admin.banners.section_hero_hint'), 'list' => $heroBanners, 'emptyText' => __('admin.banners.empty_hero')],
+            ['title' => __('admin.banners.section_mobile'), 'hint' => __('admin.banners.section_mobile_hint'), 'list' => $mobileBanners, 'emptyText' => __('admin.banners.empty')],
+        ] as $section)
+            @php($list = $section['list'])
+            @php($emptyText = $section['emptyText'])
+            <section>
+                <h2 class="ui-section-title">{{ $section['title'] }} <span class="ui-muted text-sm">({{ $list->count() }})</span></h2>
+                <p class="ui-muted mb-3 text-sm">{{ $section['hint'] }}</p>
+            @if($list->isEmpty())
+                <div class="ui-empty">
+                    <p class="font-semibold">{{ $emptyText }}</p>
+                    <p class="ui-muted mt-2">{{ __('admin.banners.add_hint') }}</p>
+                </div>
+            @else
+                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    @foreach($list as $banner)
+                        <article class="ui-card-static overflow-hidden p-0">
+                            <div class="aspect-[16/9] bg-[#F1F1F3]">
+                                @if($banner->imageUrl())
+                                    <img src="{{ $banner->imageUrl() }}" alt="{{ $banner->title_ar ?: $banner->title_en ?: 'banner' }}" class="h-full w-full object-cover">
+                                @endif
+                            </div>
+                            <div class="space-y-3 p-4">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="min-w-0">
+                                        <div class="truncate font-medium">{{ $banner->title_ar ?: $banner->title_en ?: __('admin.banners.untitled') }}</div>
+                                        <div class="ui-muted mt-0.5 text-xs">#{{ $banner->sort_order }} · {{ $banner->created_at?->diffForHumans() }}</div>
+                                    </div>
+                                    <span class="ui-badge {{ $banner->is_active ? 'ui-badge-ok' : 'ui-badge-muted' }}">
+                                        {{ $banner->is_active ? __('admin.active') : __('admin.inactive') }}
+                                    </span>
                                 </div>
-                                <span class="ui-badge {{ $banner->is_active ? 'ui-badge-ok' : 'ui-badge-muted' }}">
-                                    {{ $banner->is_active ? __('admin.active') : __('admin.inactive') }}
-                                </span>
+                                <div class="flex flex-wrap gap-2">
+                                    <form method="POST" action="{{ route('admin.banners.toggle', $banner) }}">
+                                        @csrf
+                                        <button class="ui-btn ui-btn-ghost text-xs">{{ $banner->is_active ? __('admin.banners.disable') : __('admin.banners.enable') }}</button>
+                                    </form>
+                                    <form method="POST" action="{{ route('admin.banners.destroy', $banner) }}" onsubmit="return confirm('{{ __('admin.banners.delete_confirm') }}')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="ui-btn ui-btn-ghost text-xs text-red-700">{{ __('admin.delete') }}</button>
+                                    </form>
+                                </div>
                             </div>
-                            <div class="flex flex-wrap gap-2">
-                                <form method="POST" action="{{ route('admin.banners.toggle', $banner) }}">
-                                    @csrf
-                                    <button class="ui-btn ui-btn-ghost text-xs">{{ $banner->is_active ? __('admin.banners.disable') : __('admin.banners.enable') }}</button>
-                                </form>
-                                <form method="POST" action="{{ route('admin.banners.destroy', $banner) }}" onsubmit="return confirm('{{ __('admin.banners.delete_confirm') }}')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="ui-btn ui-btn-ghost text-xs text-red-700">{{ __('admin.delete') }}</button>
-                                </form>
-                            </div>
-                        </div>
-                    </article>
-                @endforeach
-            </div>
-        @endif
+                        </article>
+                    @endforeach
+                </div>
+            @endif
+            </section>
+        @endforeach
     </div>
 </div>
 @endsection

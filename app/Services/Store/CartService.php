@@ -63,6 +63,10 @@ class CartService
             throw new Exception(__('store.cart.product_unavailable'));
         }
 
+        if ((int) $product->stock_quantity <= 0) {
+            throw new Exception(__('store.cart.product_unavailable'));
+        }
+
         $cart = $this->getCart();
 
         $quantity = max(1, $quantity);
@@ -93,6 +97,10 @@ class CartService
             $labels[] = $option;
         }
         $optionLabel = !empty($labels) ? implode(' · ', $labels) : null;
+
+        if ($unitPrice <= 0) {
+            throw new Exception(__('store.cart.product_unavailable'));
+        }
 
         // Find existing cart line with exact same product and option
         $query = $cart->items()->where('product_id', $product->id);

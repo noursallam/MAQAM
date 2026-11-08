@@ -24,7 +24,7 @@
         <p class="mq-hero-slogan-en">{{ __('store.home.hero_slogan_en') }}</p>
         <p>{{ __('store.home.hero_text') }}</p>
         <div class="mq-hero-actions">
-            <a href="{{ route('store.shop') }}" class="mq-btn mq-btn-primary">{{ __('store.home.shop_now') }}</a>
+            <a href="{{ $primaryBanner && $primaryBanner->link_url ? $primaryBanner->link_url : route('store.shop') }}" class="mq-btn mq-btn-primary">{{ __('store.home.shop_now') }}</a>
             <a href="{{ route('store.loyalty') }}" class="mq-btn mq-btn-ghost">{{ __('store.home.loyalty_cta') }}</a>
         </div>
     </div>

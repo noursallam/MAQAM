@@ -1,0 +1,1000 @@
+{
+  "@@locale": "ar",
+  "appName": "مقام",
+  "onboardingStart": "ابدأ الآن",
+  "onboardingGuest": "تصفّح المتجر كزائر",
+  "loginTitle": "تسجيل الدخول",
+  "loginSubtitle": "أدخل رقم جوالك. بدون كلمة مرور: ستؤكد الرقم برسالة قصيرة من واتساب.",
+  "loginPhoneLabel": "رقم الجوال",
+  "loginContinue": "متابعة",
+  "loginNoSpam": "لن نرسل لك أي رسالة قبل أن تراسلنا أنت أولاً.",
+  "loginPhoneRequired": "أدخل رقم الجوال.",
+  "loginPhoneInvalid": "رقم الجوال غير صحيح. مثال: 10 1234 5678",
+  "loginLegalPrefix": "بالمتابعة توافق على ",
+  "loginLegalTerms": "الشروط والأحكام",
+  "loginLegalAnd": " و",
+  "loginLegalPrivacy": "سياسة الخصوصية",
+  "switchLanguage": "English",
+  "back": "رجوع",
+  "catalogAll": "الكل",
+  "catalogLoadFailed": "تعذر تحميل المنتجات",
+  "catalogEmpty": "لا توجد منتجات",
+  "retry": "إعادة المحاولة",
+  "priceOnRequest": "السعر عند الطلب",
+  "priceEgp": "{amount} ج.م",
+  "@priceEgp": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "stepOf": "الخطوة {step} من {total}",
+  "sendCodeTitle": "أرسل الكود من واتساب",
+  "sendCodeSubtitlePrefix": "أرسله من الرقم ",
+  "sendCodeSubtitleSuffix": " وسنرد عليك بكود الدخول.",
+  "sendCodeLabel": "كود التأكيد",
+  "sendCodeCopy": "نسخ الكود",
+  "sendCodeCopied": "تم نسخ الكود",
+  "sendCodeOpenWhatsapp": "فتح واتساب وإرسال الكود",
+  "sendCodeWhatsappMissing": "تعذر فتح واتساب. انسخ الكود وأرسله يدوياً.",
+  "sendCodeWaiting": "في انتظار رسالتك...",
+  "sendCodeStep1": "اضغط الزر: الرسالة مكتوبة جاهزة",
+  "sendCodeStep2": "اضغط «إرسال» داخل واتساب",
+  "sendCodeStep3": "ارجع للتطبيق واكتب كود الدخول الذي يصلك",
+  "sendCodeValidFor": "الكود صالح لمدة {minutes} دقائق · ",
+  "sendCodeChangeNumber": "تغيير الرقم",
+  "sendCodeExpired": "انتهت صلاحية الكود.",
+  "startOver": "ابدأ من جديد",
+  "otpTitle": "أدخل كود الدخول",
+  "otpSubtitle": "وصلتنا رسالتك، وأرسلنا لك الكود على واتساب.",
+  "otpFieldLabel": "كود الدخول المكوّن من 6 أرقام",
+  "otpExpiresIn": "ينتهي الكود خلال ",
+  "otpExpired": "انتهت صلاحية كود الدخول.",
+  "otpSubmit": "دخول",
+  "otpNotReceivedPrefix": "لم يصلك الكود؟ تأكد أنك أرسلت من نفس الرقم، ثم ",
+  "otpDoNotShare": "لا تشارك هذا الكود مع أي شخص. فريق MAQAM لن يطلبه منك أبداً.",
+  "errorNetwork": "تعذر الاتصال. تحقق من الإنترنت وحاول مرة أخرى.",
+  "errorGeneric": "حدث خطأ غير متوقع. حاول مرة أخرى.",
+  "signIn": "تسجيل الدخول",
+  "signOut": "تسجيل الخروج",
+  "@stepOf": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@sendCodeValidFor": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "skip": "تخطي",
+  "biometricSetupTitle": "ادخل أسرع المرة القادمة",
+  "biometricSetupPoint1": "بصمتك تبقى على جهازك فقط، ولا تُرسل إلينا",
+  "biometricSetupPoint2": "تقدر توقفه في أي وقت من «حسابي»",
+  "biometricSetupPoint3": "الدخول بكود واتساب يبقى متاحاً دائماً",
+  "biometricSetupNotNow": "ليس الآن",
+  "biometricSetupFailed": "لم نتمكن من التحقق. حاول مرة أخرى أو اختر «ليس الآن».",
+  "biometricEnableReason": "أكّد هويتك لتفعيل الدخول بالبصمة أو الوجه",
+  "unlockWelcomeBack": "أهلاً بعودتك",
+  "unlockWelcomeBackName": "أهلاً بعودتك، {name}",
+  "unlockFailed": "لم نتمكن من التحقق. حاول مرة أخرى.",
+  "unlockReason": "افتح تطبيق مقام",
+  "unlockUseWhatsapp": "الدخول بكود واتساب",
+  "unlockDifferentAccount": "ليس حسابك؟ دخول برقم آخر",
+  "@unlockWelcomeBackName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "navHome": "الرئيسية",
+  "navStore": "المتجر",
+  "navScan": "مسح كود",
+  "navWallet": "المحفظة",
+  "navAccount": "حسابي",
+  "homeGreeting": "أهلاً {name} · رصيد نقاطك",
+  "homeGreetingNoName": "أهلاً بك · رصيد نقاطك",
+  "pointsUnit": "نقطة",
+  "homeToNextRank": "باقي {points} نقطة للوصول إلى رتبة {rank}",
+  "homeTopRank": "أنت في أعلى رتبة",
+  "rankUpCongrats": "مبروك!",
+  "rankUpMessage": "لقد تمت ترقيتك إلى رتبة {rank}",
+  "@rankUpMessage": {
+    "placeholders": {
+      "rank": { "type": "String" }
+    }
+  },
+  "rankUpDismiss": "تمام",
+  "homeGuestTitle": "اكسب نقاطاً مع كل عبوة",
+  "homeGuestBody": "سجّل الدخول لتمسح الأكواد وتجمع النقاط والجوائز.",
+  "actionScan": "مسح كود",
+  "actionWheel": "عجلة الحظ",
+  "actionRewards": "مكافآتي",
+  "actionOrders": "طلباتي",
+  "actionLeaderboard": "المتصدرين",
+  "leaderboardTitle": "لوحة المتصدرين",
+  "leaderboardEmpty": "لا يوجد متصدرين بعد",
+  "leaderboardPoints": "{points} نقطة",
+  "@leaderboardPoints": {
+    "placeholders": {
+      "points": {
+        "type": "String"
+      }
+    }
+  },
+  "homeNewArrivals": "وصل حديثاً",
+  "viewAll": "عرض الكل",
+  "chat": "المساعد",
+  "notifications": "الإشعارات",
+  "storeSearchHint": "ابحث باسم المنتج أو الكود",
+  "storeCount": "{count} منتج",
+  "cart": "السلة",
+  "sortNewest": "الأحدث",
+  "sortPriceLow": "السعر: من الأقل",
+  "sortPriceHigh": "السعر: من الأعلى",
+  "sortBy": "الترتيب",
+  "outOfStock": "غير متوفر",
+  "walletAvailable": "متاح للصرف",
+  "walletTotalEarned": "إجمالي ما كسبته",
+  "walletNextRankAt": "{rank} عند {points}",
+  "walletRankNote": "الرتبة تُحسب على إجمالي ما كسبته: الصرف لا ينزّل رتبتك.",
+  "walletEarn": "اكسب نقاطاً",
+  "walletRecent": "آخر الحركات",
+  "filterEarned": "كسب",
+  "filterSpent": "صرف",
+  "walletNoTransactions": "لا توجد حركات بعد",
+  "walletLoadFailed": "تعذر تحميل المحفظة",
+  "walletGuest": "سجّل الدخول لعرض نقاطك وحركاتك.",
+  "today": "اليوم",
+  "yesterday": "أمس",
+  "accountEdit": "تعديل",
+  "accountMerchantTitle": "الانضمام كتاجر معتمد",
+  "accountMerchantBody": "اكسب نقاطاً مع كل مسح بكودك",
+  "accountAddresses": "عناويني",
+  "accountPendingScans": "مسحات في انتظار الرفع",
+  "accountBiometricsOff": "غير مفعّل",
+  "accountChangePhone": "تغيير رقم الجوال",
+  "accountLanguage": "اللغة",
+  "languageName": "العربية",
+  "accountHelp": "المساعد والأسئلة الشائعة",
+  "accountLegal": "الشروط وسياسة الخصوصية",
+  "accountDelete": "حذف الحساب",
+  "accountVersion": "الإصدار {version}",
+  "accountGuest": "سجّل الدخول لإدارة حسابك وطلباتك.",
+  "accountNoName": "عميل مقام",
+  "signOutConfirmTitle": "تسجيل الخروج؟",
+  "signOutConfirmBody": "ستحتاج إلى كود واتساب للدخول مرة أخرى.",
+  "cancel": "إلغاء",
+  "@homeGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@homeToNextRank": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      },
+      "rank": {
+        "type": "String"
+      }
+    }
+  },
+  "@storeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@walletNextRankAt": {
+    "placeholders": {
+      "rank": {
+        "type": "String"
+      },
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "@accountVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingNext": "التالي",
+  "onboardingPage": "الشاشة {current} من {total}",
+  "onboarding1Title": "الفخامة في كل لمسة",
+  "onboarding1Body": "تسوّق مفاتيح وبرايز وإضاءة MAQAM، واطلبها إلى باب بيتك.",
+  "onboarding1ChipA": "المتجر",
+  "onboarding1ChipB": "توصيل للمنزل",
+  "onboarding2Title": "امسح واكسب",
+  "onboarding2Body": "امسح الكود الموجود على كل عبوة لتضيف نقاطاً إلى رصيدك فوراً.",
+  "onboarding2ChipA": "كود العبوة",
+  "onboarding2ChipB": "نقاط فورية",
+  "onboarding3Title": "رتبتك ترتفع مع نقاطك",
+  "onboarding3Body": "كل نقطة تكسبها تقرّبك من رتبة أعلى ومزايا أكثر، والصرف لا ينزّل رتبتك.",
+  "onboarding3ChipA": "رتبة أعلى",
+  "onboarding3ChipB": "مزايا أكثر",
+  "onboarding4Title": "عجلة الحظ ومكافآت",
+  "onboarding4Body": "استبدل نقاطك بلفّة على عجلة الحظ، واربح خصومات وهدايا تُحفظ في مكافآتك.",
+  "onboarding4ChipA": "خصومات",
+  "onboarding4ChipB": "هدايا",
+  "onboarding5Title": "دخول آمن بلا كلمة مرور",
+  "onboarding5Body": "سجّل برقم جوالك وأكّده برسالة واتساب، ثم افتح التطبيق ببصمتك أو وجهك.",
+  "onboarding5ChipA": "واتساب",
+  "onboarding5ChipB": "بصمة أو وجه",
+  "@onboardingPage": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "passwordTitle": "أدخل كلمة المرور",
+  "passwordSubtitlePrefix": "للدخول إلى حساب الرقم ",
+  "passwordLabel": "كلمة المرور",
+  "passwordShow": "إظهار كلمة المرور",
+  "passwordHide": "إخفاء كلمة المرور",
+  "passwordRequired": "أدخل كلمة المرور.",
+  "passwordSubmit": "دخول",
+  "passwordForgot": "نسيت كلمة المرور؟ ادخل بكود واتساب",
+  "setupTitle": "أكمل بياناتك",
+  "setupSubtitle": "اختر اسماً وكلمة مرور لتدخل بهما المرة القادمة دون انتظار كود واتساب.",
+  "setupNameLabel": "الاسم الكامل",
+  "setupNameHint": "مثال: أحمد محمود",
+  "setupNameRequired": "أدخل اسمك.",
+  "setupPasswordLabel": "كلمة المرور",
+  "setupPasswordHint": "8 أحرف أو أرقام على الأقل",
+  "setupPasswordTooShort": "كلمة المرور يجب ألا تقل عن 8 خانات.",
+  "setupConfirmLabel": "تأكيد كلمة المرور",
+  "setupConfirmMismatch": "كلمتا المرور غير متطابقتين.",
+  "setupGovernorateLabel": "المحافظة",
+  "setupGovernorateHint": "اختر محافظتك",
+  "setupAreaLabel": "المنطقة",
+  "setupAreaHint": "المنطقة أو الحي",
+  "bindMerchantTitle": "أدخل كود التاجر",
+  "bindMerchantSubtitle": "أدخل كود التاجر الذي تعمل معه. يمكنك تغييره لاحقاً من حسابك.",
+  "bindMerchantCodeLabel": "كود التاجر",
+  "bindMerchantCodeHint": "أدخل كود التاجر",
+  "bindMerchantSubmit": "تأكيد",
+  "bindMerchantCodeRequired": "أدخل كود التاجر.",
+  "merchantChangeTitle": "تغيير التاجر",
+  "merchantChangeSubtitle": "أدخل كود التاجر الجديد. سيتم مراجعة طلبك من الإدارة.",
+  "merchantChangeSubmit": "إرسال الطلب",
+  "merchantChangeCodeRequired": "أدخل كود التاجر الجديد.",
+  "merchantChangePending": "طلب تغيير التاجر قيد المراجعة.",
+  "merchantChangeApproved": "تمت الموافقة على طلب تغيير التاجر.",
+  "merchantChangeRejected": "تم رفض طلب تغيير التاجر.",
+  "merchantChangeRequestSent": "تم إرسال طلبك وهو قيد المراجعة.",
+  "setupSave": "حفظ ومتابعة",
+  "setupLater": "لاحقاً",
+  "setupNote": "الدخول بكود واتساب يبقى متاحاً دائماً إذا نسيت كلمة المرور.",
+  "resetTitle": "كلمة مرور جديدة",
+  "resetSubtitle": "تم التحقق من رقمك. اختر كلمة مرور جديدة لحسابك.",
+  "productInStock": "متوفر",
+  "productColor": "اللون: ",
+  "productDescription": "الوصف",
+  "productQrNote": "داخل العبوة كود QR: امسحه بعد الاستلام لتكسب نقاطاً.",
+  "productAddToCart": "أضف إلى السلة",
+  "productAdded": "تمت إضافة المنتج إلى السلة.",
+  "productViewCart": "عرض السلة",
+  "productLoadFailed": "تعذر تحميل المنتج",
+  "productSignInToBuy": "سجّل الدخول لإضافة المنتجات إلى سلتك.",
+  "quantityIncrease": "زيادة الكمية",
+  "quantityDecrease": "تقليل الكمية",
+  "cartTitle": "السلة",
+  "cartItemsCount": "{count, plural, =0{فارغة} =1{منتج واحد} =2{منتجان} few{{count} منتجات} many{{count} منتجاً} other{{count} منتج}}",
+  "cartEmpty": "سلتك فارغة",
+  "cartEmptyBody": "أضف منتجات من المتجر لتظهر هنا.",
+  "cartBrowse": "تصفّح المتجر",
+  "cartGuest": "سجّل الدخول لعرض سلتك وإتمام طلبك.",
+  "cartLoadFailed": "تعذر تحميل السلة",
+  "cartCouponLabel": "كود خصم أو مكافأة",
+  "cartCouponHint": "أدخل الكود",
+  "cartCouponApply": "تطبيق",
+  "cartCouponRemove": "إزالة",
+  "cartCouponApplied": "تم تطبيق الكود.",
+  "summarySubtotal": "المجموع",
+  "summaryDiscount": "الخصم",
+  "summaryShipping": "الشحن",
+  "summaryTotal": "الإجمالي",
+  "cartCheckout": "متابعة لإتمام الطلب",
+  "checkoutTitle": "إتمام الطلب",
+  "checkoutAddress": "عنوان التوصيل",
+  "checkoutChange": "تغيير",
+  "checkoutUseSaved": "استخدام العنوان المحفوظ",
+  "addressName": "اسم المستلم",
+  "addressPhone": "رقم الجوال",
+  "addressGovernorate": "المحافظة",
+  "addressCity": "المدينة",
+  "addressStreet": "العنوان بالتفصيل",
+  "addressStreetHint": "الشارع، رقم العمارة، الشقة",
+  "fieldRequired": "هذا الحقل مطلوب.",
+  "checkoutPayment": "طريقة الدفع",
+  "paymentCod": "الدفع عند الاستلام",
+  "paymentOnline": "بطاقة أو محفظة إلكترونية",
+  "paymentOnlineBody": "فيزا، ماستركارد، ميزة، فودافون كاش",
+  "paymentPoints": "نقاط الولاء",
+  "paymentPointsBalance": "رصيدك {points} نقطة",
+  "checkoutNotes": "ملاحظات للمندوب",
+  "checkoutOptional": " (اختياري)",
+  "checkoutNotesHint": "مثال: الاتصال قبل الوصول",
+  "checkoutConfirm": "تأكيد الطلب",
+  "checkoutPaymentOpenFailed": "تم إنشاء الطلب، لكن تعذر فتح صفحة الدفع. يمكنك الدفع لاحقاً من طلباتك.",
+  "orderPlacedTitle": "تم استلام طلبك",
+  "orderPlacedBody": "سنبدأ تجهيزه الآن، وتصلك إشعارات بكل تحديث.",
+  "orderPlacedPointsTitle": "لا تنسَ نقاطك",
+  "orderPlacedPointsBody": "عند الاستلام، امسح كود QR داخل كل عبوة لتكسب نقاط الولاء.",
+  "orderPlacedTrack": "متابعة الطلب",
+  "orderPlacedHome": "العودة للرئيسية",
+  "@cartItemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@paymentPointsBalance": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "close": "إغلاق",
+  "scanTitle": "مسح كود QR",
+  "scanTorchOn": "تشغيل الفلاش",
+  "scanTorchOff": "إطفاء الفلاش",
+  "scanHint": "اقشط طبقة الحماية داخل العبوة\nووجّه الكاميرا إلى الكود",
+  "scanCameraUnavailable": "تعذر تشغيل الكاميرا. اسمح للتطبيق باستخدامها من إعدادات الجهاز، أو أدخل الكود يدوياً.",
+  "scanMerchantQuestion": "من أي تاجر اشتريت؟",
+  "scanOptional": "اختياري",
+  "scanNoMerchant": "بدون تاجر",
+  "scanMerchantCodeHint": "كود تاجر جديد، مثال M-AB12CD34",
+  "scanMerchantAdd": "إضافة",
+  "scanManualEntry": "إدخال يدوي",
+  "scanManualHint": "الكود المطبوع داخل العبوة",
+  "scanManualSubmit": "تأكيد",
+  "scanResultAdded": "تمت إضافة",
+  "scanResultBalance": "رصيدك الآن",
+  "scanResultMerchant": "التاجر",
+  "scanResultToRank": "باقي لرتبة {rank}",
+  "scanAnother": "مسح كود آخر",
+  "scanOpenWallet": "عرض المحفظة",
+  "@scanResultToRank": {
+    "placeholders": {
+      "rank": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentTitle": "دفع آمن",
+  "paymentChecking": "جارٍ التأكد من الدفع...",
+  "paymentLeaveTitle": "إغلاق صفحة الدفع؟",
+  "paymentLeaveBody": "طلبك محفوظ. إذا لم تكمل الدفع فلن يبدأ تجهيزه.",
+  "paymentLeaveStay": "متابعة الدفع",
+  "paymentLeaveConfirm": "إغلاق",
+  "orderPaidTitle": "تم الدفع واستلام طلبك",
+  "orderPaymentPendingBody": "لم نتأكد من الدفع بعد. سنبدأ تجهيز الطلب فور تأكيده.",
+  "orderPaymentFailedTitle": "لم يكتمل الدفع",
+  "orderPaymentFailedBody": "لم يُخصم أي مبلغ. يمكنك إعادة الطلب واختيار طريقة دفع أخرى.",
+  "productLowStock": "باقي {count} فقط",
+  "productPerkDelivery": "توصيل للمنزل",
+  "productPerkCod": "الدفع عند الاستلام",
+  "productPerkPoints": "نقاط مع كل عبوة",
+  "productSpecs": "المواصفات",
+  "productSpecSku": "كود المنتج",
+  "productSpecCategory": "القسم",
+  "productSpecWeight": "الوزن",
+  "productSpecDimensions": "الأبعاد",
+  "productWeightKg": "{weight} كجم",
+  "productReadMore": "عرض المزيد",
+  "productReadLess": "عرض أقل",
+  "productSimilar": "منتجات مشابهة",
+  "productGallery": "صورة {current} من {total}",
+  "productZoom": "تكبير الصورة",
+  "productAddWithTotal": "أضف إلى السلة · {total}",
+  "@productLowStock": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@productWeightKg": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      }
+    }
+  },
+  "@productGallery": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@productAddWithTotal": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "lockPinOfferTitle": "احمِ تطبيقك برمز PIN",
+  "lockPinOfferBody": "أنشئ رمزاً من 4 أرقام يُطلب عند فتح التطبيق، حتى لا يفتحه غيرك.",
+  "lockPinPoint1": "الرمز يبقى على جهازك فقط، ولا يُرسل إلينا",
+  "lockPinCreate": "إنشاء رمز PIN",
+  "lockUsePinInstead": "استخدام رمز PIN بدلاً من ذلك",
+  "pinSetupTitle": "أنشئ رمز PIN",
+  "pinSetupBody": "اختر 4 أرقام تتذكرها بسهولة.",
+  "pinConfirmTitle": "أعد إدخال الرمز",
+  "pinConfirmBody": "للتأكد من أنك كتبته صحيحاً.",
+  "pinMismatch": "الرمزان غير متطابقين. ابدأ من جديد.",
+  "pinUnlockHint": "أدخل رمز PIN",
+  "pinWrong": "الرمز غير صحيح. المحاولات المتبقية: {count}",
+  "pinBlocked": "تم إيقاف الرمز بعد محاولات خاطئة كثيرة. ادخل بكود واتساب.",
+  "pinDelete": "حذف رقم",
+  "pinProgress": "{entered} من {total} أرقام",
+  "accountAppLock": "قفل التطبيق",
+  "accountLockBiometrics": "بصمة أو وجه",
+  "accountLockPin": "رمز PIN",
+  "@pinWrong": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@pinProgress": {
+    "placeholders": {
+      "entered": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "orderStatusReceived": "تم الاستلام",
+  "orderStatusPreparing": "جارٍ التجهيز",
+  "orderStatusShipped": "تم الشحن",
+  "orderStatusDelivered": "تم التسليم",
+  "orderStatusCancelled": "ملغي",
+  "orderAwaitingPayment": "بانتظار الدفع",
+  "orderAwaitingPaymentNote": "لم يكتمل دفع هذا الطلب، ولن يبدأ تجهيزه قبل الدفع. إن لم تعد تريده يمكنك إلغاؤه.",
+  "orderStepReceived": "الاستلام",
+  "orderStepPreparing": "التجهيز",
+  "orderStepShipping": "الشحن",
+  "orderStepDelivery": "التسليم",
+  "orderPaymentCod": "عند الاستلام",
+  "orderPaymentCard": "بطاقة",
+  "orderPaymentPoints": "نقاط",
+  "ordersLoadFailed": "تعذر تحميل الطلبات",
+  "ordersEmpty": "لا توجد طلبات بعد",
+  "ordersEmptyBody": "طلباتك ستظهر هنا بعد أول عملية شراء.",
+  "ordersFilterActive": "جارية",
+  "ordersFilterCompleted": "مكتملة",
+  "ordersNoneInFilter": "لا توجد طلبات في هذا التصنيف.",
+  "orderDetailsTitle": "تفاصيل الطلب",
+  "orderItemQuantity": "الكمية {count}",
+  "orderItemFree": "مجاناً",
+  "orderCancel": "إلغاء الطلب",
+  "orderCancelNote": "متاح قبل الشحن، وترجع نقاطك ومكافأتك تلقائياً.",
+  "orderCancelConfirmTitle": "إلغاء هذا الطلب؟",
+  "orderCancelKeep": "الإبقاء على الطلب",
+  "@orderItemQuantity": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeNow": "الآن",
+  "timeMinutesAgo": "منذ {count} د",
+  "timeHoursAgo": "منذ {count} س",
+  "notificationsMarkAllRead": "تعليم الكل كمقروء",
+  "notificationsLoadFailed": "تعذر تحميل الإشعارات",
+  "notificationsEmpty": "لا توجد إشعارات",
+  "notificationsEmptyBody": "تحديثات طلباتك ونقاطك وعروضنا ستظهر هنا.",
+  "notificationUnread": "غير مقروء",
+  "accountNewCount": "{count} جديدة",
+  "@timeMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@timeHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@accountNewCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "view": "عرض",
+  "legalTerms": "الشروط والأحكام",
+  "legalPrivacy": "سياسة الخصوصية",
+  "legalLoadFailed": "تعذر تحميل الصفحة",
+  "updateTitle": "يوجد إصدار جديد",
+  "updateBody": "هذا الإصدار لم يعد مدعوماً. حدّث التطبيق لتكمل استخدام محفظتك وطلباتك.",
+  "updateVersions": "إصدارك {current} · المطلوب {minimum}",
+  "@updateVersions": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "minimum": {
+        "type": "String"
+      }
+    }
+  },
+  "updateNow": "تحديث الآن",
+  "updateStoreFailed": "تعذر فتح المتجر. حدّث التطبيق من Google Play أو App Store.",
+  "assistantTitle": "مساعد MAQAM",
+  "assistantSubtitle": "مساعد آلي للأسئلة العامة",
+  "assistantGreeting": "أهلاً بك! كيف أقدر أساعدك؟",
+  "assistantTyping": "المساعد يكتب",
+  "assistantHint": "اكتب سؤالك...",
+  "assistantSend": "إرسال",
+  "assistantSuggestPoints": "إزاي أكسب نقاط؟",
+  "assistantSuggestCancel": "إلغاء طلب",
+  "assistantSuggestReturns": "سياسة الاسترجاع",
+  "assistantMessagesLeft": "متبقي {count} رسالة اليوم",
+  "@assistantMessagesLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "save": "حفظ",
+  "accountEditName": "تعديل الاسم",
+  "accountNameLabel": "الاسم الكامل",
+  "accountNameRequired": "اكتب اسمك (حرفان على الأقل).",
+  "accountNameSaved": "تم حفظ الاسم.",
+  "deleteTitle": "هل أنت متأكد؟",
+  "deleteSubtitle": "الحذف نهائي ولا يمكن التراجع عنه.",
+  "deleteLostTitle": "سيُحذف نهائياً",
+  "deleteLostIdentity": "اسمك ورقم جوالك وبريدك",
+  "deleteLostPoints": "رصيد نقاطك ورتبتك",
+  "deleteLostPointsCount": "رصيد نقاطك ({points} نقطة) ورتبتك",
+  "@deleteLostPointsCount": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteLostRewards": "مكافآتك غير المستخدمة",
+  "deleteLostAddresses": "عناوينك وإشعاراتك وسلة مشترياتك",
+  "deleteKeptTitle": "يبقى بدون بياناتك الشخصية",
+  "deleteKeptOrders": "سجل الطلبات السابقة، لأغراض محاسبية فقط.",
+  "deleteConfirmPrefix": "للتأكيد اكتب كلمة ",
+  "deleteSubmit": "حذف حسابي نهائياً",
+  "deleteKeep": "تراجع",
+  "deleteDone": "تم حذف حسابك.",
+  "suspendedTitle": "الحساب موقوف مؤقتاً",
+  "suspendedBody": "رصدنا نشاطاً غير معتاد في عمليات المسح، فأوقفنا الحساب للمراجعة حمايةً لنقاطك. تواصل مع الدعم لإعادة تفعيله.",
+  "suspendedContact": "التواصل مع الدعم",
+  "suspendedSupportMessage": "مرحباً، حسابي في تطبيق MAQAM موقوف وأريد مراجعته.",
+  "suspendedSupportFailed": "تعذر فتح واتساب. راسلنا على support@maqam-eg.com.",
+  "changePhoneTitle": "تغيير رقم الجوال",
+  "changePhoneSubtitle": "اكتب رقمك الجديد. سنطلب منك إرسال كود من الرقم الجديد على واتساب لإثبات ملكيته.",
+  "changePhoneLabel": "رقم الجوال الجديد",
+  "changePhoneDone": "تم تغيير رقم الجوال.",
+  "listSeparator": "، ",
+  "addressesLoadFailed": "تعذر تحميل العناوين",
+  "addressesEmpty": "لا توجد عناوين محفوظة بعد. أضف عنواناً ليظهر عند إتمام الطلب.",
+  "addressDefault": "الافتراضي",
+  "addressEdit": "تعديل",
+  "addressMakeDefault": "تعيين كافتراضي",
+  "addressDelete": "حذف",
+  "addressDeleteTitle": "حذف العنوان؟",
+  "addressDeleteBody": "لن يظهر في عناوينك بعد الآن. الطلبات السابقة تحتفظ بعنوانها.",
+  "addressDeleted": "تم حذف العنوان.",
+  "addressSaved": "تم حفظ العنوان.",
+  "addressDefaultSet": "أصبح هذا عنوانك الافتراضي.",
+  "addressNewTitle": "عنوان جديد",
+  "addressEditTitle": "تعديل العنوان",
+  "addressRecipient": "اسم المستلم",
+  "addressPhoneInvalid": "رقم غير صحيح",
+  "addressSave": "حفظ العنوان",
+  "addressSaveChanges": "حفظ التعديلات",
+  "pointsAmount": "{points} نقطة",
+  "@pointsAmount": {
+    "placeholders": {
+      "points": {
+        "type": "String"
+      }
+    }
+  },
+  "rewardsAvailable": "متاحة",
+  "rewardsUsed": "مستخدمة",
+  "rewardsExpired": "منتهية",
+  "rewardsLoadFailed": "تعذر تحميل المكافآت",
+  "rewardsEmpty": "لا توجد مكافآت هنا",
+  "rewardsEmptyBody": "جوائز عجلة الحظ والكوبونات الخاصة بك تظهر هنا.",
+  "rewardsNote": "كود واحد لكل طلب. إذا ألغيت الطلب ترجع المكافأة إلى هنا تلقائياً.",
+  "rewardsTryWheel": "جرّب حظك في العجلة",
+  "rewardDiscount": "خصم {amount} على طلبك",
+  "@rewardDiscount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "rewardProduct": "منتج هدية: {name}",
+  "@rewardProduct": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "rewardProductFallback": "منتج",
+  "rewardFromWheel": "من عجلة الحظ",
+  "rewardFromMaqam": "من MAQAM",
+  "rewardShipsFree": "يُشحن مجاناً مع أي طلب",
+  "rewardNoExpiry": "بدون تاريخ انتهاء",
+  "rewardExpiresIn": "ينتهي خلال {days} يوماً",
+  "@rewardExpiresIn": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "rewardUsedOn": "استُخدم {date}",
+  "@rewardUsedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "rewardExpiredOn": "انتهى {date}",
+  "@rewardExpiredOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "rewardUseInCart": "استخدم في السلة",
+  "wheelLoadFailed": "تعذر تحميل العجلة",
+  "wheelDisabled": "عجلة الحظ متوقفة حالياً. جرّب لاحقاً.",
+  "wheelSemantics": "عجلة الحظ: {slices}",
+  "@wheelSemantics": {
+    "placeholders": {
+      "slices": {
+        "type": "String"
+      }
+    }
+  },
+  "wheelCost": "تكلفة اللفة",
+  "wheelBalanceAfter": "رصيدك بعد اللفة",
+  "wheelSpin": "لفّ العجلة",
+  "wheelSpinning": "العجلة تدور…",
+  "wheelNotEnough": "تحتاج {points} نقطة على الأقل للّفة.",
+  "@wheelNotEnough": {
+    "placeholders": {
+      "points": {
+        "type": "String"
+      }
+    }
+  },
+  "wheelFooterPrefix": "الجوائز تُضاف إلى ",
+  "wheelFooterSuffix": " وتُستخدم بكودها في السلة.",
+  "wheelWonTitle": "مبروك!",
+  "wheelWonBody": "ربحت {prize}.",
+  "@wheelWonBody": {
+    "placeholders": {
+      "prize": {
+        "type": "String"
+      }
+    }
+  },
+  "wheelLostTitle": "حظ أوفر",
+  "wheelLostBody": "لم تربح هذه المرة. جرّب مرة أخرى.",
+  "wheelOk": "حسناً",
+  "merchantDashboardTitle": "لوحة التاجر",
+  "merchantLoadFailed": "تعذر تحميل بيانات التاجر",
+  "merchantBenefitCode": "تحصل على كود تاجر خاص بك",
+  "merchantBenefitPoints": "تكسب نقاطاً كل مرة يمسح عميل كوداً ويختارك",
+  "merchantBenefitReview": "يراجع فريق MAQAM طلبك ويصلك إشعار بالنتيجة",
+  "merchantNameLabel": "اسم النشاط التجاري",
+  "merchantNameHint": "مثال: معرض النور",
+  "merchantAddressLabel": "عنوان المحل",
+  "merchantAddressHint": "المحافظة، المدينة، الشارع",
+  "merchantLogoLabel": "شعار المحل",
+  "merchantLogoPick": "رفع صورة",
+  "merchantLogoChosen": "تم اختيار الصورة",
+  "merchantLogoHint": "JPG أو PNG حتى 2MB",
+  "merchantSubmit": "إرسال الطلب",
+  "merchantSubmitNote": "الكود لا يعمل في المسح قبل موافقة الإدارة.",
+  "merchantApplied": "تم إرسال طلبك. سيصلك إشعار بعد المراجعة.",
+  "merchantApproved": "تاجر معتمد",
+  "merchantPending": "قيد المراجعة",
+  "merchantCodeLabel": "كود التاجر",
+  "merchantShare": "مشاركة",
+  "merchantShareText": "اشتريت من {name}؟ أدخل كود التاجر {code} عند مسح عبوة MAQAM.",
+  "@merchantShareText": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "merchantCodeCopied": "تم نسخ كود التاجر.",
+  "merchantCodeHint": "اطلب من العميل إدخال هذا الكود عند مسح أي عبوة اشتراها منك.",
+  "merchantPendingHint": "طلبك قيد المراجعة. سيعمل الكود بعد موافقة الإدارة ويصلك إشعار بذلك.",
+  "merchantLogoPlaceholder": "الشعار",
+  "merchantChangeLogo": "تغيير شعار المحل",
+  "merchantStatPoints": "إجمالي نقاطك",
+  "merchantStatScans": "عدد المسحات",
+  "merchantStatMonth": "مسحات هذا الشهر",
+  "merchantStatCustomers": "عملاء مختلفون",
+  "merchantPointsNote": "نقاط التاجر رصيد تراكمي للعرض حالياً، ولا يمكن استخدام كودك في مسحك أنت.",
+  "scanOfflineBanner": "لا يوجد اتصال: المسح يُحفظ على هاتفك الآن",
+  "scanOfflineSaved": "تم حفظ المسح",
+  "scanOfflineExplain": "نقاطك لم تُضف بعد. سنرفع المسحات تلقائياً ونضيف النقاط أول ما يرجع الإنترنت، حتى لو كان التطبيق مغلقاً.",
+  "scanCodeTail": "الكود {tail} ••••",
+  "@scanCodeTail": {
+    "placeholders": {
+      "tail": {
+        "type": "String"
+      }
+    }
+  },
+  "scanPendingBadge": "في الانتظار",
+  "scanPendingCount": "في الانتظار ({count})",
+  "@scanPendingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pendingTitle": "مسحات بدون إنترنت",
+  "pendingEmpty": "لا توجد مسحات في الانتظار",
+  "pendingEmptyBody": "المسحات التي تتم بدون إنترنت تُحفظ هنا حتى تُرفع.",
+  "pendingCount": "{count, plural, =1{مسحة واحدة في انتظار الرفع} =2{مسحتان في انتظار الرفع} few{{count} مسحات في انتظار الرفع} other{{count} مسحة في انتظار الرفع}}",
+  "@pendingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pendingAuto": "تُرفع تلقائياً عند رجوع الاتصال",
+  "pendingUploadNow": "رفع الآن",
+  "pendingStillOffline": "لا يوجد اتصال بعد. سنحاول مرة أخرى تلقائياً.",
+  "pendingWaiting": "في الانتظار",
+  "pendingLastUpload": "آخر عملية رفع",
+  "pendingRejected": "لم يُقبل: {reason}",
+  "@pendingRejected": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "pendingAlreadyCredited": "أُضيف",
+  "pendingHide": "إخفاء",
+  "pendingFooter": "المسحات محفوظة على هذا الهاتف فقط. لا تحذف التطبيق قبل رفعها.",
+  "addressStreetDetail": "الشارع، رقم العمارة، الدور",
+  "wheelLocked": "عجلة الحظ مقفلة",
+  "seminarTitle": "السيمينار",
+  "seminarLoadFailed": "تعذر تحميل السيمينار",
+  "seminarLive": "جارٍ الآن",
+  "seminarEnded": "انتهى",
+  "seminarEndsIn": "ينتهي خلال {time}",
+  "@seminarEndsIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "seminarDays": "{count, plural, =1{يوم} =2{يومين} few{{count} أيام} other{{count} يوماً}}",
+  "@seminarDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "seminarHours": "{count, plural, =1{ساعة} =2{ساعتين} few{{count} ساعات} other{{count} ساعة}}",
+  "@seminarHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "seminarMinutes": "{count, plural, =1{دقيقة} =2{دقيقتين} few{{count} دقائق} other{{count} دقيقة}}",
+  "@seminarMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "seminarPromoBody": "{count, plural, =1{سحب على جائزة} =2{سحب على جائزتين} few{سحب على {count} جوائز} other{سحب على {count} جائزة}}",
+  "@seminarPromoBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "seminarRegisteredCount": "{count, plural, =0{كن أول المسجلين} =1{مسجل واحد} =2{مسجلان} few{{count} مسجلين} other{{count} مسجل}}",
+  "@seminarRegisteredCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "seminarJoin": "سجّل في السحب",
+  "seminarYouAreIn": "أنت مسجّل",
+  "seminarRegisteredDone": "تم تسجيلك في السحب. بالتوفيق!",
+  "seminarRegisteredLive": "أنت مسجّل في السحب. تابع النتائج هنا.",
+  "seminarRegisteredEnded": "كنت مسجّلاً في هذا السحب.",
+  "seminarClosed": "انتهى التسجيل في هذا السيمينار.",
+  "seminarHowItWorks": "سجّل أثناء السيمينار، ويُسحب الفائزون عشوائياً. كل شخص يفوز بجائزة واحدة على الأكثر.",
+  "seminarPrizes": "الجوائز والفائزون",
+  "seminarNotDrawn": "لم تُسحب بعد",
+  "seminarWinner": "الفائز: {name}",
+  "@seminarWinner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "seminarWinnerYou": "الفائز: أنت!",
+  "seminarYouWon": "مبروك! فزت بـ {prize}",
+  "@seminarYouWon": {
+    "placeholders": {
+      "prize": {
+        "type": "String"
+      }
+    }
+  },
+  "seminarCollect": "تواصل مع فريق MAQAM لاستلام جائزتك.",
+  "lockWithFaceId": "بـ Face ID",
+  "lockWithFace": "ببصمة الوجه",
+  "lockWithFingerprint": "ببصمة الإصبع",
+  "biometricSetupBodyWith": "ادخل {method} بدل كتابة رقمك وكلمة المرور، حتى بعد تسجيل الخروج.",
+  "@biometricSetupBodyWith": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "biometricSetupEnableWith": "تفعيل الدخول {method}",
+  "@biometricSetupEnableWith": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "unlockButtonWith": "الدخول {method}",
+  "@unlockButtonWith": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "unlockHintFace": "انظر إلى الهاتف للدخول",
+  "unlockHintFingerprint": "المس مستشعر البصمة للدخول",
+  "unlockBrowseAsGuest": "تصفّح كزائر",
+  "merchantRecentScans": "آخر من استخدم كودك",
+  "merchantViewAll": "عرض الكل",
+  "merchantNoScans": "لم يستخدم أحد كودك بعد. شاركه مع عملائك ليبدأ رصيدك.",
+  "merchantScansTitle": "المسحات بكودك",
+  "merchantScansLoadFailed": "تعذر تحميل المسحات",
+  "merchantScanPoints": "+{points} نقطة",
+  "@merchantScanPoints": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "merchantStatMonthPoints": "نقاط هذا الشهر",
+  "merchantStatTotalScans": "إجمالي المسحات",
+  "merchantStatTotalPoints": "إجمالي النقاط",
+  "merchantDashboard": "لوحة تحكم التاجر",
+  "merchantTechnicians": "الفنيين",
+  "merchantTechnicianScans": "السكانات",
+  "merchantTechnicianPoints": "النقاط",
+  "merchantTechnicianBalance": "الرصيد",
+  "merchantDeductPoints": "خصم نقاط",
+  "merchantDeductAmount": "المبلغ",
+  "merchantDeductAmountHint": "عدد النقاط المراد خصمها",
+  "merchantDeductReason": "السبب",
+  "merchantDeductReasonHint": "مثال: مرتجع منتج",
+  "merchantDeductSubmit": "خصم",
+  "merchantDeductSuccess": "تم خصم النقاط بنجاح.",
+  "merchantDeductAmountRequired": "أدخل المبلغ.",
+  "merchantDeductReasonRequired": "أدخل السبب.",
+  "merchantTransactions": "العمليات",
+  "merchantTransactionEarned": "إضافة",
+  "merchantTransactionDeducted": "خصم",
+  "merchantNoTechnicians": "لا يوجد فنيين مربوطين بتاجرك بعد.",
+  "merchantNoTransactions": "لا توجد عمليات بعد.",
+  "merchantLoadMore": "تحميل المزيد",
+  "merchantUnknownCustomer": "عميل",
+  "merchantSince": "تاجر منذ {date}",
+  "@merchantSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "merchantLastScan": "آخر مسح: {time}",
+  "@merchantLastScan": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "accountPointsBalance": "رصيد النقاط",
+  "accountRank": "المستوى",
+  "accountToNextRank": "{points} نقطة للوصول إلى {rank}",
+  "@accountToNextRank": {
+    "placeholders": {
+      "points": {
+        "type": "String"
+      },
+      "rank": {
+        "type": "String"
+      }
+    }
+  },
+  "accountTopRank": "وصلت لأعلى مستوى",
+  "accountMerchantOpen": "لوحة التاجر",
+  "accountMerchantPendingTitle": "طلب التاجر قيد المراجعة",
+  "accountCopyCode": "نسخ الكود"
+}
