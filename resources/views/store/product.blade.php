@@ -9,6 +9,9 @@
     $firstOption = $product->options->first();
     $initialPrice = ($firstOption && $firstOption->price !== null) ? (float) $firstOption->price : (float) $product->price;
     $points = (int) max(10, floor($initialPrice / 2));
+    $hasPrice = $initialPrice > 0;
+    $inStock = (int) $product->stock_quantity > 0;
+    $canBuy = $inStock && ($hasPrice || $isVariable);
     
     $mediaService = app(\App\Services\MediaService::class);
     $gallery = collect();
@@ -124,8 +127,13 @@
                 @endif
                 <h1>{{ $name }}</h1>
                 <div class="mq-product-meta">
-                    <span>{{ __('store.common.rating') }}: 4.9 / 5</span>
-                    <span>{{ __('store.common.available') }}: {{ $product->stock_quantity }} {{ __('store.product.pieces') }}</span>
+                    @if (! $inStock)
+                        <span style="color:#e57373;font-weight:600;">{{ $locale === 'ar' ? 'غير متوفر حالياً' : 'Out of stock' }}</span>
+                    @elseif ($product->stock_quantity <= 5)
+                        <span style="color:var(--mq-gold);font-weight:600;">{{ $locale === 'ar' ? 'متبقي ' . $product->stock_quantity . ' قطع فقط' : 'Only ' . $product->stock_quantity . ' left' }}</span>
+                    @else
+                        <span style="color:#6fcf97;font-weight:600;">{{ $locale === 'ar' ? 'متوفر' : 'In stock' }}</span>
+                    @endif
                     <span>{{ __('store.product.sku') }}: #{{ $product->sku ?: $product->id }}</span>
                 </div>
                 <div class="mq-product-price-box" style="display:flex;align-items:baseline;gap:.5rem;margin:.75rem 0 1rem;">
@@ -133,15 +141,15 @@
                         <span class="mq-price-from-badge" id="mqPriceSublabel" style="font-size:.85rem;color:var(--mq-muted);font-weight:600;">{{ __('store.common.from') }}</span>
                     @endif
                     <div class="mq-product-price" id="mqProductPriceDisplay" style="margin:0;font-size:1.85rem;font-weight:700;color:var(--mq-gold);transition:transform .2s ease;">
-                        <span id="mqPriceValue">{{ number_format($initialPrice, 2) }}</span>
-                        <span style="font-size:1rem;font-weight:500;color:inherit;">{{ __('store.common.egp') }}</span>
+                        @if ($hasPrice)
+                            <span id="mqPriceValue">{{ number_format($initialPrice, 2) }}</span>
+                            <span style="font-size:1rem;font-weight:500;color:inherit;">{{ __('store.common.egp') }}</span>
+                        @else
+                            <span id="mqPriceValue" style="font-size:1.25rem;">{{ $locale === 'ar' ? 'السعر عند الطلب' : 'Price on request' }}</span>
+                        @endif
                     </div>
                 </div>
                 
-                @if ($desc)
-                    <p style="color:var(--mq-muted);margin:0 0 1rem;line-height:1.6;">{{ $desc }}</p>
-                @endif
-
                 <div class="mq-loyalty-inline">
                     <strong>{{ __('store.product.loyalty_badge') }}</strong>
                     <span><span id="mqPointsValue">+{{ $points }}</span> {{ __('store.common.points') }} — {{ __('store.product.loyalty_hint') }}</span>
@@ -214,14 +222,27 @@
                     </div>
 
                     <div class="mq-product-actions">
-                        @if ($product->stock_quantity > 0)
-                            <button type="submit" class="mq-btn mq-btn-primary">{{ __('store.product.add_cart') }}</button>
+                        @if ($canBuy)
+                            <button type="submit" class="mq-btn mq-btn-primary" id="mqMainAddBtn">{{ __('store.product.add_cart') }}</button>
                             <button type="submit" formaction="{{ route('store.cart.add') }}" name="buy_now" value="1" class="mq-btn mq-btn-ghost">{{ __('store.product.buy_now') }}</button>
                         @else
-                            <button type="button" class="mq-btn mq-btn-ghost" disabled style="opacity:.6;">{{ __('store.shop.out_of_stock') ?? 'المنتج غير متوفر حالياً' }}</button>
+                            <button type="button" class="mq-btn mq-btn-ghost" disabled style="opacity:.6;">{{ $inStock ? ($locale === 'ar' ? 'السعر عند الطلب' : 'Price on request') : ($locale === 'ar' ? 'المنتج غير متوفر حالياً' : 'Out of stock') }}</button>
                         @endif
                     </div>
                 </form>
+
+                <ul class="mq-product-assurance">
+                    <li><a href="{{ route('store.shipping') }}">{{ $locale === 'ar' ? 'سياسة الشحن والتوصيل' : 'Shipping & delivery policy' }}</a></li>
+                    <li><a href="{{ route('store.returns') }}">{{ $locale === 'ar' ? 'الاستبدال والاسترجاع' : 'Exchange & returns' }}</a></li>
+                    <li><a href="{{ route('store.contact') }}">{{ $locale === 'ar' ? 'اسأل عن المنتج' : 'Ask about this product' }}</a></li>
+                </ul>
+
+                @if ($canBuy)
+                    <div class="mq-sticky-buy" id="mqStickyBuy">
+                        <div class="mq-sticky-price">{{ $hasPrice ? number_format($initialPrice, 2) . ' ' . __('store.common.egp') : ($locale === 'ar' ? 'يبدأ من سعر الخيار' : 'See options') }}</div>
+                        <button type="submit" form="mqProductForm" class="mq-btn mq-btn-primary">{{ __('store.product.add_cart') }}</button>
+                    </div>
+                @endif
 
                 <script>
                 function updateProductOptionPrice(radio) {

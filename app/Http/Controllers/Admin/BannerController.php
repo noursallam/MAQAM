@@ -15,18 +15,22 @@ class BannerController extends Controller
 
     public function index(): View
     {
-        $banners = Banner::query()
-            ->mobile()
+        $all = Banner::query()
+            ->whereIn('slot', Banner::SLOTS)
             ->orderBy('sort_order')
             ->orderByDesc('id')
             ->get();
 
-        return view('admin.banners.index', compact('banners'));
+        $mobileBanners = $all->where('slot', Banner::PLATFORM_MOBILE)->values();
+        $heroBanners = $all->where('slot', Banner::SLOT_WEBSITE_HERO)->values();
+
+        return view('admin.banners.index', compact('mobileBanners', 'heroBanners'));
     }
 
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
+            'slot' => ['required', 'in:'.implode(',', Banner::SLOTS)],
             'title_ar' => ['nullable', 'string', 'max:255'],
             'title_en' => ['nullable', 'string', 'max:255'],
             'link_url' => ['nullable', 'string', 'max:500'],
@@ -40,7 +44,7 @@ class BannerController extends Controller
         }
 
         Banner::create([
-            'slot' => Banner::PLATFORM_MOBILE,
+            'slot' => $data['slot'],
             'title_ar' => $data['title_ar'] ?? null,
             'title_en' => $data['title_en'] ?? null,
             'link_url' => $data['link_url'] ?? null,
@@ -54,7 +58,7 @@ class BannerController extends Controller
 
     public function destroy(Banner $banner): RedirectResponse
     {
-        if ($banner->slot !== Banner::PLATFORM_MOBILE) {
+        if (! in_array($banner->slot, Banner::SLOTS, true)) {
             abort(404);
         }
 
@@ -69,7 +73,7 @@ class BannerController extends Controller
 
     public function toggle(Banner $banner): RedirectResponse
     {
-        if ($banner->slot !== Banner::PLATFORM_MOBILE) {
+        if (! in_array($banner->slot, Banner::SLOTS, true)) {
             abort(404);
         }
 

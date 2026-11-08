@@ -9,7 +9,9 @@
         $catName = $p->category ? ($locale === 'ar' ? $p->category->name_ar : $p->category->name_en) : __('store.categories.all');
         $isVariable = $p->isPriceVariable();
         $displayPrice = $isVariable ? $p->minPrice() : (float) $p->price;
-        $price = number_format($displayPrice, 2) . ' ' . __('store.common.egp');
+        $hasPrice = $displayPrice > 0;
+        $inStock = (int) $p->stock_quantity > 0;
+        $price = $hasPrice ? number_format($displayPrice, 2) . ' ' . __('store.common.egp') : ($locale === 'ar' ? 'السعر عند الطلب' : 'Price on request');
         
         $points = (int) max(10, floor($displayPrice / 2));
         $imgUrl = null;
@@ -48,22 +50,10 @@
         <div class="mq-card-body">
             <div class="mq-card-top">
                 <span class="mq-card-cat">{{ $catName }}</span>
-                @if ($enhanced)
-                    <button type="button" class="mq-card-wish" aria-label="{{ __('store.common.add_to_wishlist') }}" onclick="this.classList.toggle('is-active')">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-                    </button>
-                @endif
             </div>
             <h3 class="mq-card-title">
                 <a href="{{ route('store.product', $p->id) }}">{{ $name }}</a>
             </h3>
-            @if ($enhanced)
-                <div class="mq-card-rating">
-                    <span class="stars" aria-hidden="true">★★★★★</span>
-                    <span>4.9</span>
-                    <span class="reviews">({{ $p->stock_quantity }} {{ __('store.common.available') }})</span>
-                </div>
-            @endif
             <div class="mq-card-foot">
                 <div class="mq-card-price">
                     @if ($isVariable)
@@ -71,7 +61,9 @@
                     @endif
                     <span>{{ $price }}</span>
                 </div>
-                @if ($isVariable)
+                @if (! $inStock || ! $hasPrice)
+                    {{-- unavailable: no purchase action --}}
+                @elseif ($isVariable)
                     <a href="{{ route('store.product', $p->id) }}" class="mq-card-cart mq-card-options-link" aria-label="{{ __('store.common.view_options') }}" title="{{ __('store.common.view_options') }}">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                     </a>

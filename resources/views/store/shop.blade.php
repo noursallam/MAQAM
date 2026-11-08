@@ -141,6 +141,16 @@
                         </label>
                     </div>
 
+                    <div class="mq-filter-group mq-filter-price-custom">
+                        <strong>{{ $locale === 'ar' ? 'نطاق سعر مخصص (ج.م)' : 'Custom price (EGP)' }}</strong>
+                        <div class="mq-price-inputs">
+                            <input type="number" name="min_price" min="0" step="1" inputmode="numeric" value="{{ request('min_price') }}" placeholder="{{ $locale === 'ar' ? 'من' : 'Min' }}" aria-label="{{ $locale === 'ar' ? 'أقل سعر' : 'Min price' }}">
+                            <span aria-hidden="true">–</span>
+                            <input type="number" name="max_price" min="0" step="1" inputmode="numeric" value="{{ request('max_price') }}" placeholder="{{ $locale === 'ar' ? 'إلى' : 'Max' }}" aria-label="{{ $locale === 'ar' ? 'أعلى سعر' : 'Max price' }}">
+                        </div>
+                        <button type="submit" class="mq-btn mq-btn-primary mq-btn-block">{{ $locale === 'ar' ? 'تطبيق' : 'Apply' }}</button>
+                    </div>
+
                     <div class="mq-filter-group">
                         <strong>{{ __('store.shop.availability') }}</strong>
                         <label>
@@ -188,13 +198,13 @@
                                 <option value="newest" {{ request('sort') === 'newest' ? 'selected' : '' }}>{{ __('store.shop.sort_newest') }}</option>
                                 <option value="price_asc" {{ request('sort') === 'price_asc' ? 'selected' : '' }}>{{ __('store.shop.sort_price_asc') }}</option>
                                 <option value="price_desc" {{ request('sort') === 'price_desc' ? 'selected' : '' }}>{{ __('store.shop.sort_price_desc') }}</option>
-                                <option value="name_asc" {{ request('sort') === 'name_asc' ? 'selected' : '' }}>{{ __('store.shop.sort_best') }}</option>
+                                <option value="name_asc" {{ request('sort') === 'name_asc' ? 'selected' : '' }}>{{ $locale === 'ar' ? 'الاسم (أ - ي)' : 'Name (A–Z)' }}</option>
                             </select>
                         </form>
                     </div>
                 </div>
 
-                @if (request('q') || request('category') || request('price_range') || request('in_stock'))
+                @if (request('q') || request('category') || request('price_range') || request('in_stock') || request('min_price') || request('max_price'))
                     <div class="mq-active-filters" aria-label="{{ __('store.common.filter') }}">
                         @if ($activeCategory)
                             <span class="mq-chip">{{ $locale === 'ar' ? $activeCategory->name_ar : $activeCategory->name_en }} 
@@ -204,6 +214,11 @@
                         @if (request('q'))
                             <span class="mq-chip">"{{ request('q') }}"
                                 <a href="{{ route('store.shop', request()->except('q')) }}" aria-label="{{ __('store.common.remove') }}">×</a>
+                            </span>
+                        @endif
+                        @if (request('min_price') || request('max_price') || request('price_range'))
+                            <span class="mq-chip">{{ __('store.shop.price_range') }}
+                                <a href="{{ route('store.shop', request()->except(['min_price', 'max_price', 'price_range', 'page'])) }}" aria-label="{{ __('store.common.remove') }}">×</a>
                             </span>
                         @endif
                         @if (request('in_stock'))
