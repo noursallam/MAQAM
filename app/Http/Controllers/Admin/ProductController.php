@@ -54,11 +54,12 @@ class ProductController extends Controller
         // Handle main image upload
         if ($request->hasFile('image')) {
             $imagePath = $this->mediaService->upload($request->file('image'), 'products');
-            if ($imagePath) {
-                $data['image_path'] = $imagePath;
+            if (! $imagePath) {
+                return back()->withErrors(['image' => __('admin.banners.upload_failed')])->withInput();
             }
+            $data['image_path'] = $imagePath;
         }
-        
+
         $files = $request->file('images', []);
 
         if (count($files) < 1 && empty($data['image_path'])) {
@@ -125,35 +126,33 @@ class ProductController extends Controller
     public function update(Request $request, Product $product): RedirectResponse
     {
         $data = $this->validated($request, $product);
-        
-        // Handle main image deletion
-        if ($request->boolean('delete_image')) {
-            if ($product->image_path) {
-                $this->mediaService->delete($product->image_path);
+
+        $oldMainPath = $product->image_path;
+        $deleteMain = $request->boolean('delete_image');
+        $newMainPath = null;
+
+        // Upload the replacement main image first; the old file is only removed once the save succeeds
+        if ($request->hasFile('image')) {
+            $newMainPath = $this->mediaService->upload($request->file('image'), 'products');
+            if (! $newMainPath) {
+                return back()->withErrors(['image' => __('admin.banners.upload_failed')])->withInput();
             }
+            $data['image_path'] = $newMainPath;
+        } elseif ($deleteMain) {
             $data['image_path'] = null;
         }
-        
-        // Handle main image upload
-        if ($request->hasFile('image')) {
-            // Delete old main image if exists
-            if ($product->image_path) {
-                $this->mediaService->delete($product->image_path);
-            }
-            
-            // Upload new main image
-            $imagePath = $this->mediaService->upload($request->file('image'), 'products');
-            if ($imagePath) {
-                $data['image_path'] = $imagePath;
-            }
-        }
-        
-        $newFiles = $request->file('images', []) ?? [];
+
+        $newFiles = array_values($request->file('images', []) ?? []);
         $removeIds = collect($request->input('remove_images', []))->map(fn ($id) => (int) $id)->all();
         $keepCount = $product->images()->whereNotIn('id', $removeIds)->count();
         $totalAfter = $keepCount + count($newFiles);
+        $willHaveMain = array_key_exists('image_path', $data) ? ! empty($data['image_path']) : ! empty($oldMainPath);
 
-        if ($totalAfter < 1 && empty($data['image_path'])) {
+        if ($totalAfter < 1 && ! $willHaveMain) {
+            if ($newMainPath) {
+                $this->mediaService->delete($newMainPath);
+            }
+
             return back()->withErrors(['images' => __('admin.commerce.images_required')])->withInput();
         }
 
@@ -161,13 +160,16 @@ class ProductController extends Controller
         $thumbnailExistingId = $request->integer('thumbnail_existing_id') ?: null;
         $thumbnailNewIndex = (int) $request->input('thumbnail_index', 0);
 
-        DB::transaction(function () use ($request, $product, $data, $newFiles, $removeIds, $thumbnailSource, $thumbnailExistingId, $thumbnailNewIndex) {
-            $product->update($data);
+        $filesToDelete = [];
+
+        DB::transaction(function () use ($request, $product, $data, $newFiles, $removeIds, $thumbnailSource, $thumbnailExistingId, $thumbnailNewIndex, $newMainPath, $deleteMain, &$filesToDelete, $oldMainPath) {
+            $currentThumbId = $product->images()->where('is_thumbnail', true)->value('id');
+            $removedPaths = [];
 
             if ($removeIds) {
-                $toDelete = $product->images()->whereIn('id', $removeIds)->get();
-                foreach ($toDelete as $img) {
-                    Storage::disk('public')->delete($img->path);
+                foreach ($product->images()->whereIn('id', $removeIds)->get() as $img) {
+                    $removedPaths[] = $img->path;
+                    $filesToDelete[] = $img->path;
                     $img->delete();
                 }
             }
@@ -183,26 +185,57 @@ class ProductController extends Controller
                 ]);
             }
 
-            $product->images()->update(['is_thumbnail' => false]);
-
-            $thumb = null;
+            // The gallery picture the editor chose as the cover, if any
+            $picked = null;
             if ($thumbnailSource === 'new' && isset($created[$thumbnailNewIndex])) {
-                $thumb = $created[$thumbnailNewIndex];
-            } elseif ($thumbnailExistingId) {
-                $thumb = $product->images()->where('id', $thumbnailExistingId)->first();
+                $picked = $created[$thumbnailNewIndex];
+            } elseif ($thumbnailSource === 'existing' && $thumbnailExistingId && $thumbnailExistingId !== $currentThumbId) {
+                $picked = $product->images()->where('id', $thumbnailExistingId)->first();
             }
 
-            if (! $thumb) {
-                $thumb = $product->images()->orderBy('sort_order')->orderBy('id')->first();
+            $mainPath = array_key_exists('image_path', $data) ? $data['image_path'] : $oldMainPath;
+
+            if ($newMainPath || $deleteMain) {
+                // An explicit main image upload / removal decides the cover by itself
+                if ($deleteMain && ! $newMainPath) {
+                    $mainPath = null;
+                }
+            } elseif ($picked) {
+                $mainPath = $picked->path;
             }
 
-            if ($thumb && empty($product->image_path)) {
-                $thumb->update(['is_thumbnail' => true]);
-                $product->update(['image_path' => $thumb->path]);
+            // The cover must never point at a file that was just removed
+            if ($mainPath && in_array($mainPath, $removedPaths, true)) {
+                $mainPath = null;
+            }
+
+            if (! $mainPath) {
+                $fallback = $picked ?? $product->images()->orderBy('sort_order')->orderBy('id')->first();
+                $mainPath = $fallback?->path;
+            }
+
+            $data['image_path'] = $mainPath;
+            $product->update($data);
+
+            $product->images()->update(['is_thumbnail' => false]);
+            if ($mainPath) {
+                $product->images()->where('path', $mainPath)->limit(1)->update(['is_thumbnail' => true]);
+            }
+
+            if ($oldMainPath && $oldMainPath !== $mainPath) {
+                $filesToDelete[] = $oldMainPath;
             }
 
             $this->syncColorsAndOptions($product, $request);
         });
+
+        // Delete old files only after the save, and never one that a gallery picture or the cover still uses
+        foreach (array_unique($filesToDelete) as $file) {
+            $stillUsed = $product->images()->where('path', $file)->exists() || $product->fresh()->image_path === $file;
+            if (! $stillUsed) {
+                $this->mediaService->delete($file);
+            }
+        }
 
         return redirect()->route('admin.products.index')->with('success', __('admin.commerce.product_saved'));
     }
