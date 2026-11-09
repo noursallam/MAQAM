@@ -60,11 +60,7 @@ class ProductController extends Controller
             $data['image_path'] = $imagePath;
         }
 
-        $files = $request->file('images', []);
-
-        if (count($files) < 1 && empty($data['image_path'])) {
-            return back()->withErrors(['images' => __('admin.commerce.images_required')])->withInput();
-        }
+        $files = array_values($request->file('images', []) ?? []);
 
         $thumbnailIndex = (int) $request->input('thumbnail_index', 0);
         if ($thumbnailIndex < 0 || $thumbnailIndex >= count($files)) {
@@ -144,17 +140,6 @@ class ProductController extends Controller
 
         $newFiles = array_values($request->file('images', []) ?? []);
         $removeIds = collect($request->input('remove_images', []))->map(fn ($id) => (int) $id)->all();
-        $keepCount = $product->images()->whereNotIn('id', $removeIds)->count();
-        $totalAfter = $keepCount + count($newFiles);
-        $willHaveMain = array_key_exists('image_path', $data) ? ! empty($data['image_path']) : ! empty($oldMainPath);
-
-        if ($totalAfter < 1 && ! $willHaveMain) {
-            if ($newMainPath) {
-                $this->mediaService->delete($newMainPath);
-            }
-
-            return back()->withErrors(['images' => __('admin.commerce.images_required')])->withInput();
-        }
 
         $thumbnailSource = $request->input('thumbnail_source', 'existing'); // existing|new
         $thumbnailExistingId = $request->integer('thumbnail_existing_id') ?: null;
@@ -331,7 +316,7 @@ class ProductController extends Controller
             'dimensions' => ['nullable', 'string', 'max:100'],
             'image' => ['nullable', 'image', 'max:5120'], // 5MB max
             'is_active' => ['nullable', 'boolean'],
-            'images' => [$product ? 'nullable' : 'required', 'array', $product ? 'min:0' : 'min:1'],
+            'images' => ['nullable', 'array'],
             'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'thumbnail_index' => ['nullable', 'integer', 'min:0'],
             'thumbnail_source' => ['nullable', 'in:existing,new'],

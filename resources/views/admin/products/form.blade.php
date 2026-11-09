@@ -208,7 +208,7 @@
                     <div class="grid grid-cols-[1fr_auto_auto] items-center gap-2">
                         <input type="text" :name="`colors[${index}][name]`" x-model="row.name" class="ui-input" placeholder="{{ __('admin.commerce.color_name') }}" dir="rtl">
                         <input type="color" :name="`colors[${index}][hex]`" x-model="row.hex" class="h-10 w-12 cursor-pointer rounded border border-[#E6E6EA] bg-white p-1">
-                        <button type="button" class="ui-btn ui-btn-ghost text-xs text-red-700" @click="remove(index)" x-show="rows.length > 1">{{ __('admin.delete') }}</button>
+                        <button type="button" class="ui-btn ui-btn-ghost text-xs text-red-700" @click="remove(index)">{{ __('admin.delete') }}</button>
                     </div>
                 </template>
             </div>
@@ -234,7 +234,7 @@
                         <input type="text" :name="`options[${index}][name]`" x-model="row.name" class="ui-input" placeholder="{{ __('admin.commerce.option_key') }}" dir="rtl">
                         <input type="text" :name="`options[${index}][value]`" x-model="row.value" class="ui-input" placeholder="{{ __('admin.commerce.option_value') }}" dir="rtl">
                         <input type="number" step="0.01" min="0" :name="`options[${index}][price]`" x-model="row.price" class="ui-input font-mono" placeholder="السعر ج.م" dir="ltr">
-                        <button type="button" class="ui-btn ui-btn-ghost text-xs text-red-700" @click="remove(index)" x-show="rows.length > 1">{{ __('admin.delete') }}</button>
+                        <button type="button" class="ui-btn ui-btn-ghost text-xs text-red-700" @click="remove(index)">{{ __('admin.delete') }}</button>
                     </div>
                 </template>
             </div>
@@ -296,12 +296,11 @@
         @endif
 
         <div>
-            <label class="mb-2 block text-sm font-medium">{{ $product->exists ? __('admin.commerce.add_images') : __('admin.commerce.upload_images') }} <span class="text-red-600">*</span></label>
+            <label class="mb-2 block text-sm font-medium">{{ $product->exists ? __('admin.commerce.add_images') : __('admin.commerce.upload_images') }}</label>
             <label class="ui-empty flex cursor-pointer flex-col items-center justify-center !p-8 transition hover:border-maqam-gold">
                 <span class="text-sm font-medium text-maqam-ink">{{ __('admin.commerce.click_to_select_images') }}</span>
                 <span class="ui-muted mt-1">JPG / PNG / WEBP — {{ __('admin.commerce.max_image_size') }}</span>
                 <input type="file" name="images[]" id="imagesInput" accept="image/jpeg,image/png,image/webp" multiple class="hidden"
-                       {{ $product->exists ? '' : 'required' }}
                        onchange="previewNewImages(this)">
             </label>
             <input type="hidden" name="thumbnail_index" id="thumbnail_index" value="0">
@@ -325,7 +324,12 @@ function productRows(initial) {
     return {
         rows: Array.isArray(initial) && initial.length ? initial : [{}],
         add(row) { this.rows.push(row); },
-        remove(index) { if (this.rows.length > 1) this.rows.splice(index, 1); },
+        // Removing the last row just empties it (empty rows aren't saved), so an option/color can always be deleted
+        remove(index) {
+            if (this.rows.length > 1) { this.rows.splice(index, 1); return; }
+            const row = this.rows[0] || {};
+            this.rows = [Object.fromEntries(Object.keys(row).map(k => [k, k === 'hex' ? '#C5A059' : '']))];
+        },
     };
 }
 

@@ -89,7 +89,8 @@ class CartService
         // Build descriptive option label
         $labels = [];
         if ($color) {
-            $labels[] = __('store.product.colors', [], app()->getLocale()) ?: 'اللون' . ': ' . $color;
+            $colorLabel = __('store.product.colors');
+            $labels[] = ($colorLabel ? $colorLabel . ': ' : 'اللون: ') . $color;
         }
         if ($productOption) {
             $labels[] = ($productOption->name ? $productOption->name . ': ' : '') . $productOption->value;

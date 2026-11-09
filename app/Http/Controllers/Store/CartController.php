@@ -30,7 +30,7 @@ class CartController extends Controller
             'product_id' => ['required', 'integer', 'exists:products,id'],
             'quantity' => ['nullable', 'integer', 'min:1', 'max:500'],
             'color' => ['nullable', 'string', 'max:50'],
-            'option' => ['nullable', 'string', 'max:50'],
+            'option' => ['nullable', 'string', 'max:255'],
             'option_id' => ['nullable', 'integer'],
         ]);
 
