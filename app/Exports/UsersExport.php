@@ -3,6 +3,9 @@
 namespace App\Exports;
 
 use App\Models\Customer;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -15,13 +18,14 @@ class UsersExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSiz
         private ?int $merchantId = null,
     ) {}
 
-    public function query()
+    public function query(): Builder|EloquentBuilder|Relation
     {
         return Customer::query()
             ->with(['user.boundMerchant', 'rank'])
             ->when($this->governorate, fn ($q) => $q->whereHas('user', fn ($u) => $u->where('governorate', $this->governorate)))
             ->when($this->merchantId, fn ($q) => $q->whereHas('user', fn ($u) => $u->where('bound_merchant_id', $this->merchantId)))
-            ->latest();
+            ->latest()
+            ->orderBy('id');
     }
 
     public function headings(): array

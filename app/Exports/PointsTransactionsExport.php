@@ -3,6 +3,9 @@
 namespace App\Exports;
 
 use App\Models\PointsTransaction;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -16,14 +19,15 @@ class PointsTransactionsExport implements FromQuery, WithHeadings, WithMapping, 
         private ?string $to = null,
     ) {}
 
-    public function query()
+    public function query(): Builder|EloquentBuilder|Relation
     {
         return PointsTransaction::query()
             ->with(['customer.user', 'merchant'])
             ->when($this->type, fn ($q) => $q->where('type', $this->type))
             ->when($this->from, fn ($q) => $q->where('transaction_date', '>=', $this->from))
             ->when($this->to, fn ($q) => $q->where('transaction_date', '<=', $this->to))
-            ->latest('transaction_date');
+            ->latest('transaction_date')
+            ->orderBy('id');
     }
 
     public function headings(): array

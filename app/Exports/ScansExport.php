@@ -3,6 +3,9 @@
 namespace App\Exports;
 
 use App\Models\QrScan;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -16,14 +19,15 @@ class ScansExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSiz
         private ?int $merchantId = null,
     ) {}
 
-    public function query()
+    public function query(): Builder|EloquentBuilder|Relation
     {
         return QrScan::query()
             ->with(['customer.user', 'merchant', 'qrCode'])
             ->when($this->from, fn ($q) => $q->where('scanned_at', '>=', $this->from))
             ->when($this->to, fn ($q) => $q->where('scanned_at', '<=', $this->to))
             ->when($this->merchantId, fn ($q) => $q->where('merchant_id', $this->merchantId))
-            ->latest('scanned_at');
+            ->latest('scanned_at')
+            ->orderBy('id');
     }
 
     public function headings(): array

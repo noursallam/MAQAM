@@ -4,6 +4,9 @@ namespace App\Exports;
 
 use App\Models\Merchant;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -11,9 +14,9 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 
 class MerchantsExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize
 {
-    public function query()
+    public function query(): Builder|EloquentBuilder|Relation
     {
-        return Merchant::query()->with('user')->latest();
+        return Merchant::query()->with('user')->latest()->orderBy('id');
     }
 
     public function headings(): array
