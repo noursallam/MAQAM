@@ -332,7 +332,8 @@ class ProductController extends Controller
             'options.*.price' => ['nullable', 'numeric', 'min:0'],
         ]);
 
-        $data['is_active'] = $request->boolean('is_active', true);
+        // Checkbox not present in the request means unchecked, so boolean() must not fall back to true here
+        $data['is_active'] = $request->boolean('is_active');
         unset(
             $data['image'],
             $data['images'],
