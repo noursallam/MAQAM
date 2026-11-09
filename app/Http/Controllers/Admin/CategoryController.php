@@ -121,7 +121,7 @@ class CategoryController extends Controller
         ]);
 
         $data['slug'] = $data['slug'] ?: Str::slug($data['name_en']);
-        $data['is_active'] = $request->boolean('is_active', true);
+        $data['is_active'] = $request->boolean('is_active');
 
         return $data;
     }

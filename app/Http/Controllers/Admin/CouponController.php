@@ -79,8 +79,8 @@ class CouponController extends Controller
             'is_public' => ['nullable', 'boolean'],
         ]);
 
-        $data['is_active'] = $request->boolean('is_active', true);
-        $data['is_public'] = $request->boolean('is_public', true);
+        $data['is_active'] = $request->boolean('is_active');
+        $data['is_public'] = $request->boolean('is_public');
         $data['min_order_amount'] = $data['min_order_amount'] ?? 0;
 
         return $data;

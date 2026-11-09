@@ -83,7 +83,7 @@ class CustomerController extends Controller
             'is_active' => ['nullable', 'boolean'],
         ]);
 
-        $isActive = $request->boolean('is_active', true);
+        $isActive = $request->boolean('is_active');
 
         DB::transaction(function () use ($data, $isActive) {
             $user = User::create([
@@ -131,7 +131,7 @@ class CustomerController extends Controller
             'full_name' => $data['full_name'],
             'phone_number' => $data['phone_number'],
             'email' => $data['email'] ?? null,
-            'is_active' => $request->boolean('is_active', true),
+            'is_active' => $request->boolean('is_active'),
             ...($data['password'] ?? null ? ['password' => $data['password']] : []),
         ]);
 

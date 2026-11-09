@@ -216,7 +216,7 @@ class LoyaltyController extends Controller
             'discount_value' => $type === 'discount' ? $data['discount_value'] : null,
             'stock_limit' => isset($data['stock_limit']) ? (int) $data['stock_limit'] : null,
             'sort_order' => isset($data['sort_order']) ? (int) $data['sort_order'] : 0,
-            'is_active' => $request->boolean('is_active', true),
+            'is_active' => $request->boolean('is_active'),
         ];
     }
 
