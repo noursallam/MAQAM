@@ -314,6 +314,15 @@ html[data-theme="dark"] .mq-theme-toggle .icon-sun { display: none; }
   object-position: center 35%;
 }
 
+.mq-hero-media .mq-hero-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+.mq-hero-media .mq-hero-slide.is-active { opacity: 1; }
+
 .mq-hero-glow {
   background: var(--mq-hero-scrim);
   pointer-events: none;

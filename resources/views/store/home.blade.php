@@ -6,25 +6,31 @@
 @section('content')
 @php
     $locale = app()->getLocale();
-    $primaryBanner = $banners->first();
+    $heroSlides = $banners->filter(fn ($b) => $b->imageUrl())->values();
+    $primaryBanner = $heroSlides->first() ?? $banners->first();
+    $slideTitle = fn ($b) => ($b ? ($locale === 'ar' ? $b->title_ar : $b->title_en) : null) ?: __('store.home.hero_title');
+    $slideLink = fn ($b) => $b && $b->link_url ? $b->link_url : route('store.shop');
 @endphp
 
-<section class="mq-hero mq-hero-calm" aria-label="{{ __('store.home.title') }}">
+<section class="mq-hero mq-hero-calm" aria-label="{{ __('store.home.title') }}" data-hero-slider>
     <div class="mq-hero-media">
-        @if ($primaryBanner && $primaryBanner->imageUrl())
-            <img src="{{ $primaryBanner->imageUrl() }}" alt="{{ $primaryBanner->title_ar ?: __('store.brand') }}">
-        @else
-            <img src="{{ asset('store/img/hero-switches.jpg') }}" alt="{{ __('store.brand') }}">
-        @endif
+        @forelse ($heroSlides as $i => $slide)
+            <img src="{{ $slide->imageUrl() }}" alt="{{ $slide->title_ar ?: __('store.brand') }}"
+                 class="mq-hero-slide{{ $i === 0 ? ' is-active' : '' }}"
+                 data-title="{{ $slideTitle($slide) }}" data-link="{{ $slideLink($slide) }}"
+                 @if ($i > 0) loading="lazy" @endif>
+        @empty
+            <img src="{{ asset('store/img/hero-switches.jpg') }}" alt="{{ __('store.brand') }}" class="mq-hero-slide is-active">
+        @endforelse
     </div>
     <div class="mq-hero-glow" aria-hidden="true"></div>
 
     <div class="mq-container mq-hero-content">
-        <h1>{{ ($primaryBanner ? ($locale === 'ar' ? $primaryBanner->title_ar : $primaryBanner->title_en) : null) ?: __('store.home.hero_title') }}</h1>
+        <h1 data-hero-title>{{ $slideTitle($primaryBanner) }}</h1>
         <p class="mq-hero-slogan-en">{{ __('store.home.hero_slogan_en') }}</p>
         <p>{{ __('store.home.hero_text') }}</p>
         <div class="mq-hero-actions">
-            <a href="{{ $primaryBanner && $primaryBanner->link_url ? $primaryBanner->link_url : route('store.shop') }}" class="mq-btn mq-btn-primary">{{ __('store.home.shop_now') }}</a>
+            <a href="{{ $slideLink($primaryBanner) }}" class="mq-btn mq-btn-primary" data-hero-link>{{ __('store.home.shop_now') }}</a>
             <a href="{{ route('store.loyalty') }}" class="mq-btn mq-btn-ghost">{{ __('store.home.loyalty_cta') }}</a>
         </div>
     </div>
@@ -159,3 +165,31 @@
     </div>
 </section>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    var hero = document.querySelector('[data-hero-slider]');
+    if (!hero) return;
+    var slides = hero.querySelectorAll('.mq-hero-slide');
+    if (slides.length < 2) return;
+    var title = hero.querySelector('[data-hero-title]');
+    var link = hero.querySelector('[data-hero-link]');
+    var current = 0;
+
+    function show(i) {
+        slides[current].classList.remove('is-active');
+        current = i;
+        var s = slides[current];
+        s.loading = 'eager';
+        s.classList.add('is-active');
+        if (title && s.dataset.title) title.textContent = s.dataset.title;
+        if (link && s.dataset.link) link.href = s.dataset.link;
+    }
+
+    setInterval(function () {
+        if (!document.hidden) show((current + 1) % slides.length);
+    }, 5000);
+})();
+</script>
+@endpush
